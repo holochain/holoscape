@@ -1,0 +1,16 @@
+{
+  "name": "holoscape",
+  "version": "0.0.1",
+  "description": "A complete end-user deployment of a Holochain conductor with UI for administration and a run-time for hApp UIs.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Holochain Core Dev Team <devcore@holochain.org>",
+  "license": "GPLv3",
+  "devDependencies": {
+    "electron": "^6.0.0",
+    "menubar": "^6.0.7"
+  }
+}
