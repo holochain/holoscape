@@ -12,5 +12,8 @@
   "devDependencies": {
     "electron": "^6.0.0",
     "menubar": "^6.0.7"
+  },
+  "dependencies": {
+    "mustache": "^3.0.1"
   }
 }

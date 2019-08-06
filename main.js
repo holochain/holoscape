@@ -1,8 +1,23 @@
 const { menubar } = require('menubar');
 const { app, Menu } = require('electron')
+const conductor = require('./conductor.js')
 const mb = menubar();
 
 mb.on('ready', () => {
+  if(!conductor.hasConfig()) {
+    console.log("No conductor config found. Initializing...")
+    conductor.initConfig()
+  }
+
+  if(!conductor.hasConfig()) {
+    console.error("Could not initialize conductor config in", conductor.configPath)
+    app.quit()
+    return
+  }
+
+  conductor.start()
+
+
   const happMenu = Menu.buildFromTemplate([
     { label: 'Chat'  },
     { label: 'DeepKey'},
