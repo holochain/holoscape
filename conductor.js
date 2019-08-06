@@ -38,7 +38,7 @@ module.exports = {
     fs.writeFileSync(configPath, config)
   },
 
-  start: () => {
+  start: (onExit) => {
       if (process.platform === "win32") {
         run = spawn(path.join(__dirname, "./holochain.exe"), ["-c", "./conductor-config.toml"])
       } else if (process.platform === "darwin") {
@@ -63,8 +63,7 @@ module.exports = {
         } else {
           log('info', `holochain process terminated with exit code ${code}`)
         }
-        quit = true
-        app.quit()
+        onExit()
       })
       return run
   }
