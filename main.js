@@ -15,7 +15,10 @@ mb.on('ready', () => {
     return
   }
 
-  conductor.start()
+  let process = conductor.start()
+  app.on('before-quit', () => {
+    process.kill('SIGINT');
+  })
 
 
   const happMenu = Menu.buildFromTemplate([

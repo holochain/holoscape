@@ -44,7 +44,7 @@ module.exports = {
       } else if (process.platform === "darwin") {
         run = spawn(path.join(__dirname, "./run-darwin.sh"), [configPath])
       } else if (process.platform === "linux") {
-        run = spawn(path.join(__dirname, "./run-conductor-linux.sh"), [configPath])
+        run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath])
       }
       else {
           log('error', "unsupported platform: "+process.platform)
@@ -66,5 +66,6 @@ module.exports = {
         quit = true
         app.quit()
       })
+      return run
   }
 }
