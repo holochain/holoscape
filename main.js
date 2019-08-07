@@ -26,6 +26,7 @@ class Holoscape {
       },
       minimizable: false,
       alwaysOnTop: true,
+      show: false,
     })
     window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
     //window.webContents.openDevTools()
@@ -64,6 +65,7 @@ class Holoscape {
     if(this.conductorProcess) this.shutdownConductor()
 
     const log = (level, message) => {
+      if(global.holoscape.quitting) return
       if(level == 'error') console.error(message)
       else console.log(message)
       global.holoscape.logMessages.push({level, message})
@@ -105,7 +107,9 @@ class Holoscape {
 }
 
 
-app.on('window-all-closed', e => e.preventDefault() )
+app.on('window-all-closed', e => {
+  if(!global.holoscape.quitting) e.preventDefault()
+})
 
 mb.on('ready', () => {
   mb.tray.setImage('images/HoloScape-system-tray.png')
