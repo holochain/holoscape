@@ -4,11 +4,6 @@ const fs = require('fs')
 const Mustache = require('mustache')
 const spawn = require('child_process').spawn
 
-const log = (level, message) => {
-  if(level == 'error') console.error(message)
-  else console.log(message)
-}
-
 const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape')
 const configPath = path.join(rootConfigPath, 'conductor_config.toml')
 module.exports = {
@@ -38,7 +33,7 @@ module.exports = {
     fs.writeFileSync(configPath, config)
   },
 
-  start: (onExit) => {
+  start: (log, onExit) => {
       if (process.platform === "win32") {
         run = spawn(path.join(__dirname, "./holochain.exe"), ["-c", "./conductor-config.toml"])
       } else if (process.platform === "darwin") {

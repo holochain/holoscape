@@ -1,14 +1,26 @@
 const { menubar } = require('menubar');
-const { app, Menu } = require('electron')
+const { app, Menu, BrowserWindow } = require('electron')
 const conductor = require('./conductor.js')
+const path = require('path');
 const mb = menubar();
 
 let holoscape = {}
 
+global.logMessages = []
+
+const log = (level, message) => {
+  if(level == 'error') console.error(message)
+  else console.log(message)
+  global.logMessages.push({level, message})
+  if(holoscape.logWindow && holoscape.logWindow.webContents) {
+    holoscape.logWindow.webContents.send('log', {level,message})
+  }
+}
+
 const bootConductor = () => {
   if(holoscape.conductorProcess) shutdownConductor()
 
-  let process = conductor.start(()=>{
+  let process = conductor.start(log, ()=>{
     //onExit:
     holoscape.conductorProcess = null
     updateTrayMenu()
@@ -48,6 +60,8 @@ const updateTrayMenu = (opt) => {
 
 }
 
+app.on('window-all-closed', e => e.preventDefault() )
+
 mb.on('ready', () => {
   mb.tray.setImage('images/HoloScape-system-tray.png')
 
@@ -66,4 +80,20 @@ mb.on('ready', () => {
   updateTrayMenu()
 
 
+  let window = new BrowserWindow({
+    width:800,
+    height:600,
+    webPreferences: {
+      nodeIntegration: true
+    },
+    minimizable: false,
+    alwaysOnTop: true,
+  })
+  window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
+  //window.webContents.openDevTools()
+  window.on('close', (event) => {
+    event.preventDefault();
+    window.hide();
+  })
+  holoscape.logWindow = window
 });

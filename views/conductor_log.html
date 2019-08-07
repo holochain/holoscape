@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>Holoscape conductor log</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <ul id="example-1">
+        <li v-for="log in logs">
+          <span :class="log.level">
+            [{{ log.level }}] {{ log.message }}
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <script type="text/javascript" src="conductor_log.js"></script>
+    <script>
+      var ipcRenderer = require('electron').ipcRenderer;
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          logs: require('electron').remote.getGlobal('logMessages')
+        }
+      })
+
+      ipcRenderer.on('log', (event,store) => {
+          let {level, message} = store
+          app.logs.push({level, message})
+      });
+
+    </script>
+  </body>
+</html>
