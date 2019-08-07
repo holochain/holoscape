@@ -5,7 +5,7 @@ const Mustache = require('mustache')
 const spawn = require('child_process').spawn
 
 const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape')
-const configPath = path.join(rootConfigPath, 'conductor_config.toml')
+const configPath = path.join(rootConfigPath, 'conductor-config.toml')
 module.exports = {
   configPath,
 
@@ -15,9 +15,9 @@ module.exports = {
 
   initConfig: () => {
     const initialConfigTemplate = fs.readFileSync('initial_conductor_config.toml', 'utf8')
-    const persistenceDir = path.join(rootConfigPath, 'persistence')
+    const persistenceDir = rootConfigPath
     const n3hPath = path.join(rootConfigPath, 'n3h')
-    const adminPort = 33445
+    const adminPort = 3000
     const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,n3hPath})
 
     if(!fs.existsSync(rootConfigPath)) {
