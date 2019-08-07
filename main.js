@@ -40,6 +40,14 @@ const shutdownConductor = () => {
   }
 }
 
+const showHideLogs = () => {
+  if(holoscape.logWindow.isVisible()) {
+    holoscape.logWindow.hide()
+  } else {
+    holoscape.logWindow.show()
+  }
+}
+
 const updateTrayMenu = (opt) => {
     const happMenu = Menu.buildFromTemplate([
       { label: 'Chat'  },
@@ -49,6 +57,7 @@ const updateTrayMenu = (opt) => {
       { label: 'Install hApp' },
       { label: 'hApps', type: 'submenu', submenu: happMenu },
       { type: 'separator' },
+      { label: 'Show log window', type: 'checkbox', checked: holoscape.logWindow.isVisible(), click: ()=>showHideLogs() },
       { label: 'HC admin (Settings)' },
       { type: 'separator' },
       { label: 'Shutdown conductor', visible: holoscape.conductorProcess!=null, click: ()=>shutdownConductor() },
@@ -76,9 +85,6 @@ mb.on('ready', () => {
     return
   }
 
-  bootConductor()
-  updateTrayMenu()
-
 
   let window = new BrowserWindow({
     width:800,
@@ -94,6 +100,10 @@ mb.on('ready', () => {
   window.on('close', (event) => {
     event.preventDefault();
     window.hide();
+    updateTrayMenu()
   })
   holoscape.logWindow = window
+
+  bootConductor()
+  updateTrayMenu()
 });
