@@ -18,7 +18,6 @@ Copy an `hc` binary into the holoscape directory, e.g.:
 ``` shell
 $ cp `which hc` holochain-linux
 ```
-```
 
 ``` shell
 npm install
