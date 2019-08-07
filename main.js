@@ -5,69 +5,105 @@ const path = require('path');
 const mb = menubar();
 
 let holoscape = {}
+class Holoscape {
+  conductorProcess;
+  logWindow;
+  logMessages = [];
+  quitting = false;
 
-global.logMessages = []
-
-const log = (level, message) => {
-  if(level == 'error') console.error(message)
-  else console.log(message)
-  global.logMessages.push({level, message})
-  if(holoscape.logWindow && holoscape.logWindow.webContents) {
-    holoscape.logWindow.webContents.send('log', {level,message})
+  init() {
+    this.createLogWindow()
+    this.bootConductor()
+    this.updateTrayMenu()
   }
-}
 
-const bootConductor = () => {
-  if(holoscape.conductorProcess) shutdownConductor()
+  createLogWindow() {
+    let window = new BrowserWindow({
+      width:800,
+      height:600,
+      webPreferences: {
+        nodeIntegration: true
+      },
+      minimizable: false,
+      alwaysOnTop: true,
+    })
+    window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
+    //window.webContents.openDevTools()
 
-  let process = conductor.start(log, ()=>{
-    //onExit:
-    holoscape.conductorProcess = null
-    updateTrayMenu()
-  })
-  app.on('before-quit', () => {
-    process.kill('SIGINT');
-  })
-  holoscape.conductorProcess = process
-  updateTrayMenu()
-}
+    let holoscape = this
+    window.on('close', (event) => {
+      if(!holoscape.quitting) event.preventDefault();
+      window.hide();
+      holoscape.updateTrayMenu()
+    })
 
-const shutdownConductor = () => {
-  if(holoscape.conductorProcess) {
-    holoscape.conductorProcess.kill('SIGINT')
-    holoscape.conductorProcess = null
-    updateTrayMenu()
+    this.logWindow = window
   }
-}
 
-const showHideLogs = () => {
-  if(holoscape.logWindow.isVisible()) {
-    holoscape.logWindow.hide()
-  } else {
-    holoscape.logWindow.show()
+  updateTrayMenu(opt) {
+      const happMenu = Menu.buildFromTemplate([
+        { label: 'Chat'  },
+        { label: 'DeepKey'},
+      ])
+      const contextMenu = Menu.buildFromTemplate([
+        { label: 'Install hApp' },
+        { label: 'hApps', type: 'submenu', submenu: happMenu },
+        { type: 'separator' },
+        { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
+        { label: 'HC admin (Settings)' },
+        { type: 'separator' },
+        { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
+        { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
+        { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
+      ])
+      mb.tray.setToolTip('HoloScape')
+      mb.tray.setContextMenu(contextMenu)
   }
+
+  bootConductor() {
+    if(this.conductorProcess) this.shutdownConductor()
+
+    const log = (level, message) => {
+      if(level == 'error') console.error(message)
+      else console.log(message)
+      global.holoscape.logMessages.push({level, message})
+      if(global.holoscape.logWindow && global.holoscape.logWindow.webContents) {
+        global.holoscape.logWindow.webContents.send('log', {level,message})
+      }
+    }
+
+    const onExit = () => {
+      this.conductorProcess = null
+      this.updateTrayMenu()
+    }
+
+    let process = conductor.start(log, onExit)
+
+    app.on('before-quit', () => {
+      process.kill('SIGINT');
+    })
+    this.conductorProcess = process
+    this.updateTrayMenu()
+  }
+
+  shutdownConductor() {
+    if(this.conductorProcess) {
+      this.conductorProcess.kill('SIGINT')
+      this.conductorProcess = null
+      this.updateTrayMenu()
+    }
+  }
+
+  showHideLogs() {
+    if(this.logWindow.isVisible()) {
+      this.logWindow.hide()
+    } else {
+      this.logWindow.show()
+    }
+  }
+
 }
 
-const updateTrayMenu = (opt) => {
-    const happMenu = Menu.buildFromTemplate([
-      { label: 'Chat'  },
-      { label: 'DeepKey'},
-    ])
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'Install hApp' },
-      { label: 'hApps', type: 'submenu', submenu: happMenu },
-      { type: 'separator' },
-      { label: 'Show log window', type: 'checkbox', checked: holoscape.logWindow.isVisible(), click: ()=>showHideLogs() },
-      { label: 'HC admin (Settings)' },
-      { type: 'separator' },
-      { label: 'Shutdown conductor', visible: holoscape.conductorProcess!=null, click: ()=>shutdownConductor() },
-      { label: 'Boot conductor', visible: holoscape.conductorProcess==null, click: ()=>bootConductor() },
-      { label: 'Quit', click: ()=>{app.quit()} }
-    ])
-    mb.tray.setToolTip('HoloScape')
-    mb.tray.setContextMenu(contextMenu)
-
-}
 
 app.on('window-all-closed', e => e.preventDefault() )
 
@@ -85,25 +121,9 @@ mb.on('ready', () => {
     return
   }
 
+  global.logMessages = []
+  global.holoscape = new Holoscape()
+  global.holoscape.init()
 
-  let window = new BrowserWindow({
-    width:800,
-    height:600,
-    webPreferences: {
-      nodeIntegration: true
-    },
-    minimizable: false,
-    alwaysOnTop: true,
-  })
-  window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
-  //window.webContents.openDevTools()
-  window.on('close', (event) => {
-    event.preventDefault();
-    window.hide();
-    updateTrayMenu()
-  })
-  holoscape.logWindow = window
 
-  bootConductor()
-  updateTrayMenu()
 });
