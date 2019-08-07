@@ -10,9 +10,11 @@ class Holoscape {
   logWindow;
   logMessages = [];
   quitting = false;
+  configWindow;
 
   init() {
     this.createLogWindow()
+    this.createConfigWindow()
     this.bootConductor()
     this.updateTrayMenu()
   }
@@ -39,6 +41,30 @@ class Holoscape {
     })
 
     this.logWindow = window
+  }
+
+  createConfigWindow() {
+    let window = new BrowserWindow({
+      width:1200,
+      height:800,
+      webPreferences: {
+        nodeIntegration: true
+      },
+      minimizable: false,
+      alwaysOnTop: true,
+      //show: false,
+    })
+    window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
+    //window.webContents.openDevTools()
+
+    let holoscape = this
+    window.on('close', (event) => {
+      if(!holoscape.quitting) event.preventDefault();
+      window.hide();
+      holoscape.updateTrayMenu()
+    })
+
+    this.configWindow = window
   }
 
   updateTrayMenu(opt) {

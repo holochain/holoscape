@@ -1,0 +1,293 @@
+<html>
+  <head>
+    <title>Holoscape conductor config</title>
+    <script> window.$ = window.jQuery = require('jquery'); </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app" class="container">
+      <h1> Holchain Conductor Config</h1>
+      <!--
+      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
+      <div><span>Instances:</span><span>{{ instances }}</span></div>
+      <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
+      <div><span>agents:</span><span>{{ agents }}</span></div>
+      -->
+      <ul class="list-group">
+      <li class="list-group-item">
+        <h2>Agents</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Keystore file</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="agent in agents">
+                <td>{{ agent.id }}</td>
+                <td>{{ agent.name }}</td>
+                <td>{{ agent.address }}</td>
+                <td>{{ agent.keystore_file }}</td>
+                <td>@mdo</td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-agent" type="button" class="btn btn-primary" data-toggle="modal" data-target="#agent-modal">Add Agent</button>
+        <!-- Modal -->
+        <div class="modal fade" id="agent-modal" tabindex="-1" role="dialog" aria-labelledby="agent-modal" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Adding an agent...</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label for="agent-id">ID</label>
+                    <input type="text" class="form-control" id="agent-id" aria-describedby="agent-id-help" placeholder="Enter new agent's ID">
+                    <small id="agent-id-help" class="form-text text-muted">This is the ID by which the agent is referenced when used to create an instance.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="agent-name">Name</label>
+                    <input type="text" class="form-control" id="agent-name" aria-describedby="agent-name-help" placeholder="Enter new agent's nick name">
+                    <small id="agent-name-help" class="form-text text-muted">This is an arbitrary nick name that can be used to attach a specific meaning to this agent.</small>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="add-agent-button" type="button" class="btn btn-primary">Create agent</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="list-group-item">
+        <h2>DNAs</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Hash</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="dna in dnas">
+                <td>{{ dna.id }}</td>
+                <td>{{ dna.hash }}</td>
+                <td><button type="button" class="btn btn-danger" :data-id="dna.id">Uninstall</button></td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-dna" type="button" class="btn btn-primary" data-toggle="modal" data-target="#dna-modal">Add DNA</button>
+        <!-- Modal -->
+        <div class="modal fade" id="dna-modal" tabindex="-1" role="dialog" aria-labelledby="dna-modal" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Install DNA from file...</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label for="agent-id">ID</label>
+                    <input type="text" class="form-control" id="dna-id" aria-describedby="dna-id-help" placeholder="Enter new DNA's ID">
+                    <small id="dna-id-help" class="form-text text-muted">This is the ID by which the DNA is referenced when used to create an instance.</small>
+                  </div>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" id="inputGroupFileAddon01">DNA file</span>
+                    </div>
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="dna-file" aria-describedby="inputGroupFileAddon01">
+                      <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="install-dna-button" type="button" class="btn btn-primary">Install DNA</button>
+              </div>
+              <div class="alert alert-danger error" v-if="error">{{error}}</div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="list-group-item">
+        <h2>Instances</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">DNA ID</th>
+                <th scope="col">Agent ID</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="instance in instances">
+                <td>{{ instance.id }}</td>
+                <td>{{ instance.dna }}</td>
+                <td>{{ instance.agent }}</td>
+                <td>@mdo</td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-agent" type="button" class="btn btn-primary" data-toggle="modal" data-target="#instance-modal">Add Instance</button>
+        <!-- Modal -->
+        <div class="modal fade" id="instance-modal" tabindex="-1" role="dialog" aria-labelledby="instance-modal" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Adding an instance...</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label for="instance-id">ID</label>
+                    <input type="text" class="form-control" id="instance-id" aria-describedby="agent-id-help" placeholder="Enter new instance's ID">
+                    <small id="instance-id-help" class="form-text text-muted">This is the ID by which the instance is referenced when used in an interface.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="instance-dna-id">DNA ID</label>
+                    <select class="form-control form-control-lg" id="instance-dna-id">
+                      <option v-for="dna in dnas">{{dna.id}}</option>
+                    </select>
+                    <small id="instance-dna-id-help" class="form-text text-muted">Please select one of the existing DNAs.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="instance-agent-id">Agent ID</label>
+                    <select class="form-control form-control-lg" id="instance-agent-id">
+                      <option v-for="agent in agents">{{agent.id}}</option>
+                    </select>
+                    <small id="instance-agent-id-help" class="form-text text-muted">Please select one of the existing agents.</small>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="add-instance-button" type="button" class="btn btn-primary">Create instance</button>
+              </div>
+              <div class="alert alert-danger error" v-if="error">{{error}}</div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="list-group-item">
+        <h2>Interfaces</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Driver</th>
+                <th scope="col">admin</th>
+                <th scope="col">instances</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="interface in interfaces">
+                <td>{{ interface.id }}</td>
+                <td>{{ interface.driver }}</td>
+                <td>{{ interface.admin }}</td>
+                <td>{{ interface.instances }}</td>
+                <td>
+                  <button type="button" class="btn btn-success" :data-id="interface.id">Add instance</button>
+                  <button type="button" class="btn btn-danger" :data-id="interface.id">Remove interface</button>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-interface" type="button" class="btn btn-primary" data-toggle="modal" data-target="#interface-modal">Add Interface</button>
+        <!-- Modal -->
+        <div class="modal fade" id="interface-modal" tabindex="-1" role="dialog" aria-labelledby="interface-modal" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Adding an interface...</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label for="instance-id">ID</label>
+                    <input type="text" class="form-control" id="interface-id" aria-describedby="agent-id-help" placeholder="Enter new interface's ID">
+                    <small id="instance-id-help" class="form-text text-muted">This is the ID by which the interface is referenced when connected to a UI.</small>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="interface-admin">
+                    <label class="form-check-label" for="defaultCheck1">
+                      Admin Interface
+                    </label>
+                    <small id="instance-dna-id-help" class="form-text text-muted">If checked, the conductor can be administered through this interface (i.e. all the settings in this window can be changed through that interface).</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="instance-agent-id">Connection Type</label>
+                    <select class="form-control form-control-lg" id="interface-type">
+                      <option>http</option>
+                      <option>websocket</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="interface-port">Port</label>
+                    <input type="text" class="form-control" id="interface-port" aria-describedby="agent-id-help" placeholder="Enter a network port">
+                    <small id="interface-port-help" class="form-text text-muted">This must be a number.</small>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="add-interface-button" type="button" class="btn btn-primary">Create interface</button>
+              </div>
+              <div class="alert alert-danger error" v-if="error">{{error}}</div>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+    </div>
+
+    <script type="text/javascript" src="conductor_config.js"></script>
+    <script>
+
+
+    </script>
+
+
+
+
+  </body>
+</html>
