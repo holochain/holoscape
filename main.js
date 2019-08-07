@@ -52,7 +52,7 @@ class Holoscape {
       },
       minimizable: false,
       alwaysOnTop: true,
-      //show: false,
+      show: false,
     })
     window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
     //window.webContents.openDevTools()
@@ -68,23 +68,23 @@ class Holoscape {
   }
 
   updateTrayMenu(opt) {
-      const happMenu = Menu.buildFromTemplate([
-        { label: 'Chat'  },
-        { label: 'DeepKey'},
-      ])
-      const contextMenu = Menu.buildFromTemplate([
-        { label: 'Install hApp' },
-        { label: 'hApps', type: 'submenu', submenu: happMenu },
-        { type: 'separator' },
-        { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
-        { label: 'HC admin (Settings)' },
-        { type: 'separator' },
-        { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
-        { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
-        { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
-      ])
-      mb.tray.setToolTip('HoloScape')
-      mb.tray.setContextMenu(contextMenu)
+    const happMenu = Menu.buildFromTemplate([
+      { label: 'Chat'  },
+      { label: 'DeepKey'},
+    ])
+    const contextMenu = Menu.buildFromTemplate([
+      { label: 'Install hApp' },
+      { label: 'hApps', type: 'submenu', submenu: happMenu },
+      { type: 'separator' },
+      { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
+      { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), click: ()=>this.showHideConfig() },
+      { type: 'separator' },
+      { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
+      { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
+      { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
+    ])
+    mb.tray.setToolTip('HoloScape')
+    mb.tray.setContextMenu(contextMenu)
   }
 
   bootConductor() {
@@ -130,6 +130,13 @@ class Holoscape {
     }
   }
 
+  showHideConfig() {
+    if(this.configWindow.isVisible()) {
+      this.configWindow.hide()
+    } else {
+      this.configWindow.show()
+    }
+  }
 }
 
 
