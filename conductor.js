@@ -19,7 +19,7 @@ module.exports = {
     const initialConfigTemplate = fs.readFileSync('initial_conductor_config.toml', 'utf8')
     const persistenceDir = rootConfigPath
     const n3hPath = path.join(rootConfigPath, 'n3h')
-    const adminPort = 3000
+    const adminPort = 33444
     const passphraseSocket = passphraseSocketPath
     const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,n3hPath,passphraseSocket})
 

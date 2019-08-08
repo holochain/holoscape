@@ -224,7 +224,7 @@ class Holoscape {
   }
 
   connectConductor() {
-    connect({url:"ws://localhost:3000"}).then(({call, callZome, close}) => {
+    connect({url:"ws://localhost:33444"}).then(({call, callZome, close}) => {
       global.conductor_call = call
       mb.tray.setImage('images/HoloScape-system-tray.png')
       this.updateTrayMenu()
