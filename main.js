@@ -16,7 +16,8 @@ class Holoscape {
     this.createLogWindow()
     this.createConfigWindow()
     this.bootConductor()
-    this.updateTrayMenu()
+    this.connectConductor()
+
   }
 
   createLogWindow() {
@@ -77,7 +78,7 @@ class Holoscape {
       { label: 'hApps', type: 'submenu', submenu: happMenu },
       { type: 'separator' },
       { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
-      { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), click: ()=>this.showHideConfig() },
+      { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
       { type: 'separator' },
       { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
       { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
@@ -111,14 +112,16 @@ class Holoscape {
       process.kill('SIGINT');
     })
     this.conductorProcess = process
-    this.updateTrayMenu()
+    this.connectConductor()
   }
 
   shutdownConductor() {
     if(this.conductorProcess) {
       this.conductorProcess.kill('SIGINT')
       this.conductorProcess = null
+      global.conductor_call = null
       this.updateTrayMenu()
+      mb.tray.setImage('images/Holochain50+alpha.png')
     }
   }
 
@@ -137,6 +140,16 @@ class Holoscape {
       this.configWindow.show()
     }
   }
+
+  connectConductor() {
+    connect({url:"ws://localhost:3000"}).then(({call, callZome, close}) => {
+      global.conductor_call = call
+      mb.tray.setImage('images/HoloScape-system-tray.png')
+      this.updateTrayMenu()
+    }).catch((error)=> {
+      dialog.showErrorBox('Holoscape could not connect to conductor', error)
+    })
+  }
 }
 
 
@@ -145,7 +158,7 @@ app.on('window-all-closed', e => {
 })
 
 mb.on('ready', () => {
-  mb.tray.setImage('images/HoloScape-system-tray.png')
+  mb.tray.setImage('images/Holochain50+alpha.png')
 
   if(!conductor.hasConfig()) {
     console.log("No conductor config found. Initializing...")
@@ -161,6 +174,4 @@ mb.on('ready', () => {
   global.logMessages = []
   global.holoscape = new Holoscape()
   global.holoscape.init()
-
-
 });
