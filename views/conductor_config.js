@@ -2,7 +2,7 @@ var ipcRenderer = require('electron').ipcRenderer;
 const { connect } = require('@holochain/hc-web-client')
 const $ = require('jquery')
 
-connect({url:"ws://localhost:3000"}).then(({call, callZome, close}) => {
+connect({url:"ws://localhost:33444"}).then(({call, callZome, close}) => {
 
     var app = new Vue({
       el: '#app',
