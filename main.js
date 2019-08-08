@@ -79,7 +79,11 @@ class Holoscape {
     })
 
     client.on("data", async (data) => {
-      that.splash.show()
+      let splashWasVisible = that.splash.isVisible()
+      if(!splashWasVisible) {
+        that.splash.show()
+      }
+
       that.splash.webContents.send('request-passphrase', "Booting conductor...")
       that.splash.webContents.send('splash-status', "Prompting for passphrase...")
       let passphrase = await new Promise((resolve)=>{
@@ -91,6 +95,9 @@ class Holoscape {
       client.write(""+passphrase+"\n")
 
       that.splash.webContents.send('splash-status', "Unlocking keystore...")
+      if(!splashWasVisible) {
+        that.splash.hide()
+      }
     });
   }
 
