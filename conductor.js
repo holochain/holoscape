@@ -6,8 +6,10 @@ const spawn = require('child_process').spawn
 
 const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape')
 const configPath = path.join(rootConfigPath, 'conductor-config.toml')
+const passphraseSocketPath = path.join(rootConfigPath, 'conductor_login.socket')
 module.exports = {
   configPath,
+  passphraseSocketPath,
 
   hasConfig: () => {
     return fs.existsSync(configPath)

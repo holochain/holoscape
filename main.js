@@ -17,7 +17,13 @@ class Holoscape {
     this.createLogWindow()
     this.createConfigWindow()
     this.bootConductor()
-    this.connectConductor()
+  }
+
+  checkConductorConnection() {
+    if(this.conductorProcess && !global.conductor_call) {
+      this.connectConductor()
+    }
+  }
 
   }
 
@@ -149,10 +155,20 @@ class Holoscape {
       this.updateTrayMenu()
     }).catch((error)=> {
       dialog.showErrorBox('Holoscape could not connect to conductor', error)
+      global.holoscape.checkConductorConnection()
     })
   }
 }
 
+setInterval(()=>{
+  console.log('interval')
+  try {
+    global.holoscape.checkConductorConnection()
+  } catch(e) {
+    console.log('Error during connection check:', e)
+  }
+
+}, 3000)
 
 app.on('window-all-closed', e => {
   if(!global.holoscape.quitting) e.preventDefault()
