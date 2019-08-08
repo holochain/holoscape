@@ -2,6 +2,7 @@ const { menubar } = require('menubar');
 const { app, Menu, BrowserWindow } = require('electron')
 const conductor = require('./conductor.js')
 const path = require('path');
+const { connect } = require('@holochain/hc-web-client')
 const mb = menubar();
 
 let holoscape = {}
