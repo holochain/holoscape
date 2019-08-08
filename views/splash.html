@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>Holoscape conductor log</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+      .background {
+        background: linear-gradient(45deg, #1a0231f2, #00017f);
+      }
+
+      .header {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 255px;
+        color: white;
+        z-index: 1;
+        font-family: sans-serif;
+        font-size: 95px;
+        text-shadow: 4px 5px 5px steelblue;
+      }
+
+      .status {
+        position: absolute;
+        left: 30px;
+        bottom: 20px;
+        color: white;
+        z-index: 1;
+        font-family: sans-serif;
+        font-size: 45px;
+      }
+
+      .logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body class="background">
+    <div id="app">
+      <h1 class="header">Holoscape</h1>
+      <img class="logo" src="../images/HoloScape-mdpi.png"></img>
+      <div class="status">{{status}}</div>
+    </div>
+
+    <script>
+      var ipcRenderer = require('electron').ipcRenderer;
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          status: "Initializing..."
+        }
+      })
+
+      console.log('asdfsadfds')
+      ipcRenderer.on('splash-status', (event, message) => {
+        console.log(message)
+        app.status = message
+      });
+
+    </script>
+  </body>
+</html>

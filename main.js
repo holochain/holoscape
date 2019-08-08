@@ -15,11 +15,37 @@ class Holoscape {
   logMessages = [];
   quitting = false;
   configWindow;
+  splash;
 
-  init() {
+  async init() {
+    await this.showSplashScreen()
     this.createLogWindow()
     this.createConfigWindow()
+    this.splash.webContents.send('splash-status', "Booting conductor...")
     this.bootConductor()
+  }
+
+  showSplashScreen() {
+    let window = new BrowserWindow({
+      width:890,
+      height:535,
+      webPreferences: {
+        nodeIntegration: true
+      },
+      minimizable: false,
+      alwaysOnTop: true,
+      frame: false,
+      transparent: true,
+    })
+    window.loadURL(path.join('file://', __dirname, 'views/splash.html'))
+    //window.webContents.openDevTools()
+    this.splash = window
+
+    return new Promise((resolve) => {
+      window.webContents.on('did-finish-load', ()=>{
+          resolve()
+      })
+    })
   }
 
   checkConductorConnection() {
@@ -54,6 +80,7 @@ class Holoscape {
     })
 
     client.on("data", function(data) {
+      global.holoscape.splash.webContents.send('status', "Prompting for passphrase...")
       prompt({
           title: 'Holoscape',
           label: 'Enter passphrase to unlock agent keystores:',
@@ -66,6 +93,7 @@ class Holoscape {
               console.log('user cancelled');
           } else {
               client.write(""+r+"\n")
+              global.holoscape.splash.webContents.send('status', "Unlocking keystores...")
           }
       })
       .catch(console.error);
@@ -199,6 +227,7 @@ class Holoscape {
       global.conductor_call = call
       mb.tray.setImage('images/HoloScape-system-tray.png')
       this.updateTrayMenu()
+      this.splash.hide()
     }).catch((error)=> {
       dialog.showErrorBox('Holoscape could not connect to conductor', error)
       global.holoscape.checkConductorConnection()
