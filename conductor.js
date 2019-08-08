@@ -37,6 +37,10 @@ module.exports = {
   },
 
   start: (log, onExit) => {
+      if(fs.existsSync(passphraseSocketPath)){
+        fs.unlinkSync(passphraseSocketPath)
+      }
+
       if (process.platform === "win32") {
         run = spawn(path.join(__dirname, "./holochain.exe"), ["-c", "./conductor-config.toml"])
       } else if (process.platform === "darwin") {
