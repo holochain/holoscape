@@ -184,6 +184,7 @@ class Holoscape {
     const onExit = () => {
       this.conductorProcess = null
       this.updateTrayMenu()
+      mb.tray.setImage('images/Holochain50+alpha.png')
     }
 
     let process = conductor.start(log, onExit)
