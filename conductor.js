@@ -20,7 +20,8 @@ module.exports = {
     const persistenceDir = rootConfigPath
     const n3hPath = path.join(rootConfigPath, 'n3h')
     const adminPort = 3000
-    const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,n3hPath})
+    const passphraseSocket = passphraseSocketPath
+    const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,n3hPath,passphraseSocket})
 
     if(!fs.existsSync(rootConfigPath)) {
         fs.mkdirSync(rootConfigPath)
