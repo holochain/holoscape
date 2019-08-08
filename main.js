@@ -1,13 +1,16 @@
 const { menubar } = require('menubar');
 const { app, Menu, BrowserWindow } = require('electron')
 const conductor = require('./conductor.js')
+const fs = require('fs')
 const path = require('path');
 const { connect } = require('@holochain/hc-web-client')
+var net = require('net');
+const prompt = require('electron-prompt');
 const mb = menubar();
 
-let holoscape = {}
 class Holoscape {
   conductorProcess;
+  conductorPassphraseClient;
   logWindow;
   logMessages = [];
   quitting = false;
@@ -25,6 +28,48 @@ class Holoscape {
     }
   }
 
+  checkConductorPassphraseSocket() {
+    if(this.conductorProcess && !this.conductorPassphraseClient) {
+      this.connectPassphraseSocket()
+    }
+  }
+
+  connectPassphraseSocket() {
+    if(!fs.existsSync(conductor.passphraseSocketPath)) {
+      console.log('Passphrase socket not found (yet)')
+      return
+    }
+
+    let client
+    try{
+      client = net.createConnection(conductor.passphraseSocketPath)
+    } catch(e) {
+      console.log('Error trying to connect to passphrase socket:', e)
+    }
+
+
+    const that = this
+    client.on("connect", () => {
+      that.conductorPassphraseClient = client
+    })
+
+    client.on("data", function(data) {
+      prompt({
+          title: 'Holoscape',
+          label: 'Enter passphrase to unlock agent keystores:',
+          inputAttrs: {
+              type: 'password'
+          }
+      })
+      .then((r) => {
+          if(r === null) {
+              console.log('user cancelled');
+          } else {
+              client.write(""+r+"\n")
+          }
+      })
+      .catch(console.error);
+    });
   }
 
   createLogWindow() {
@@ -126,6 +171,7 @@ class Holoscape {
     if(this.conductorProcess) {
       this.conductorProcess.kill('SIGINT')
       this.conductorProcess = null
+      this.conductorPassphraseClient = null
       global.conductor_call = null
       this.updateTrayMenu()
       mb.tray.setImage('images/Holochain50+alpha.png')
@@ -164,6 +210,7 @@ setInterval(()=>{
   console.log('interval')
   try {
     global.holoscape.checkConductorConnection()
+    global.holoscape.checkConductorPassphraseSocket()
   } catch(e) {
     console.log('Error during connection check:', e)
   }
