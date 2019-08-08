@@ -1,7 +1,12 @@
 <html>
   <head>
     <title>Holoscape conductor log</title>
+    <script> window.$ = window.jQuery = require('jquery'); </script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
       .background {
         background: linear-gradient(45deg, #1a0231f2, #00017f);
@@ -47,6 +52,31 @@
       <h1 class="header">Holoscape</h1>
       <img class="logo" src="../images/HoloScape-mdpi.png"></img>
       <div class="status">{{status}}</div>
+      <div class="modal fade" id="passphrase-modal" tabindex="-1" role="dialog" aria-labelledby="passphrase-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Unlock keystore...</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <label for="passphrase">Please enter your passphrase to unlock keystores</label>
+                  <input type="text" class="form-control" id="passphrase" aria-describedby="agent-id-help" placeholder="Passphrase">
+                  <small id="passphrase-help" class="form-text text-muted"></small>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button id="quit-button" type="button" class="btn btn-secondary" data-dismiss="modal">Quit</button>
+              <button id="unlock-button" type="button" class="btn btn-primary">Unlock keystores</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -64,6 +94,22 @@
         console.log(message)
         app.status = message
       });
+
+      ipcRenderer.on('request-passphrase', (event, message) => {
+        $('#passphrase-modal').modal()
+      })
+
+      $('#unlock-button').click(()=>{
+          //console.log(require('electron').remote.getGlobal('passphraseInput'))
+          //require('electron').remote.getGlobal('passphraseInput') = $('#passphrase').val()
+          //console.log(require('electron').remote.getGlobal('passphraseInput'))
+          ipcRenderer.send('passphrase-set', $('#passphrase').val())
+          $('#passphrase-modal').modal('hide')
+      })
+
+      $('#quit-button').click(()=>{
+        ipcRenderer.send('quit')
+      })
 
     </script>
   </body>

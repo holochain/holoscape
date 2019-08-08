@@ -1,11 +1,10 @@
 const { menubar } = require('menubar');
-const { app, Menu, BrowserWindow } = require('electron')
+const { app, Menu, BrowserWindow, ipcMain } = require('electron')
 const conductor = require('./conductor.js')
 const fs = require('fs')
 const path = require('path');
 const { connect } = require('@holochain/hc-web-client')
 var net = require('net');
-const prompt = require('electron-prompt');
 const mb = menubar();
 
 class Holoscape {
@@ -79,24 +78,19 @@ class Holoscape {
       that.conductorPassphraseClient = client
     })
 
-    client.on("data", function(data) {
-      global.holoscape.splash.webContents.send('status', "Prompting for passphrase...")
-      prompt({
-          title: 'Holoscape',
-          label: 'Enter passphrase to unlock agent keystores:',
-          inputAttrs: {
-              type: 'password'
-          }
+    client.on("data", async (data) => {
+      that.splash.show()
+      that.splash.webContents.send('request-passphrase', "Booting conductor...")
+      that.splash.webContents.send('splash-status', "Prompting for passphrase...")
+      let passphrase = await new Promise((resolve)=>{
+        ipcMain.on('passphrase-set', (event, message)=>{
+          resolve(message)
+        })
       })
-      .then((r) => {
-          if(r === null) {
-              console.log('user cancelled');
-          } else {
-              client.write(""+r+"\n")
-              global.holoscape.splash.webContents.send('status', "Unlocking keystores...")
-          }
-      })
-      .catch(console.error);
+
+      client.write(""+passphrase+"\n")
+
+      that.splash.webContents.send('splash-status', "Unlocking keystore...")
     });
   }
 
