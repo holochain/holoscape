@@ -237,7 +237,6 @@ class Holoscape {
 }
 
 setInterval(()=>{
-  console.log('interval')
   try {
     global.holoscape.checkConductorConnection()
     global.holoscape.checkConductorPassphraseSocket()
