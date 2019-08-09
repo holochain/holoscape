@@ -16,6 +16,7 @@
   "dependencies": {
     "@holochain/hc-web-client": "^0.5.0",
     "mustache": "^3.0.1",
+    "ncp": "^2.0.0",
     "vue": "^2.6.10"
   }
 }

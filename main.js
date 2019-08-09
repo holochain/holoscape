@@ -1,11 +1,15 @@
-const { menubar } = require('menubar');
-const { app, Menu, BrowserWindow, ipcMain } = require('electron')
+const { menubar } = require('menubar')
+const { app, Menu, BrowserWindow, ipcMain, dialog } = require('electron')
 const conductor = require('./conductor.js')
 const fs = require('fs')
-const path = require('path');
+const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
-var net = require('net');
+const net = require('net')
+const { ncp } = require('ncp')
+
+
 const mb = menubar();
+const UIinfoFile = path.join(conductor.rootConfigPath(), 'UIs.json')
 
 class Holoscape {
   conductorProcess;
@@ -15,13 +19,115 @@ class Holoscape {
   quitting = false;
   configWindow;
   splash;
+  installedUIs = {};
+  runningUIs = {};
 
   async init() {
+    this.installedUIs = this.loadUIinfo()
     this.createLogWindow()
     this.createConfigWindow()
     await this.showSplashScreen()
     this.splash.webContents.send('splash-status', "Booting conductor...")
     this.bootConductor()
+  }
+
+  loadUIinfo() {
+    if(!fs.existsSync(UIinfoFile)) {
+      return {}
+    } else {
+      return JSON.parse(fs.readFileSync(UIinfoFile))
+    }
+  }
+
+  saveUIinfo() {
+    fs.writeFileSync(UIinfoFile, JSON.stringify(this.installedUIs))
+  }
+
+  installUI() {
+    let sourcePath = dialog.showOpenDialogSync({
+      title: 'Holoscape',
+      message: 'Install a web UI directory as hApp',
+      properties: ['openDirectory'],
+    })
+
+    if(!sourcePath) return
+    sourcePath = sourcePath[0]
+
+    let name = path.basename(sourcePath)
+    let UIsDir = path.join(conductor.rootConfigPath(), 'UIs')
+    let installDir = path.join(UIsDir, name)
+
+    if(fs.existsSync(installDir)) {
+      dialog.showErrorBox('Holoscape', 'UI with name '+name+' already installed!')
+      return
+    }
+
+    if(!fs.existsSync(UIsDir)) {
+      fs.mkdirSync(UIsDir)
+    }
+
+    const that = this
+
+    new Promise((resolve, reject) => {
+      ncp(sourcePath, installDir, (err) => {
+        //if(err) reject(err)
+        //else 
+        resolve()
+      })
+    })
+    .then(() => {
+      that.installedUIs[name] = {installDir}
+      that.saveUIinfo()
+      that.updateTrayMenu()
+    })
+    .catch((err) => {
+      dialog.showErrorBox('Holoscape', JSON.stringify(err))
+    })
+  }
+
+  createUI(name) {
+    if(!this.installedUIs[name]){
+      console.error('Tried to open unknown UI', name)
+      return
+    }
+
+    if(this.runningUIs[name]) {
+      this.runningUIs[name].show()
+      return
+    }
+
+    let window = new BrowserWindow({
+      width:890,
+      height:535,
+      webPreferences: {
+        nodeIntegration: true
+      },
+    })
+
+    window.loadURL(`file://${this.installedUIs[name].installDir}/index.html`)
+    window.webContents.openDevTools()
+    let holoscape = this
+    window.on('close', (event) => {
+      if(!holoscape.quitting) event.preventDefault();
+      window.hide();
+      holoscape.updateTrayMenu()
+    })
+
+    this.runningUIs[name] = window
+  }
+
+  showHideUI(name) {
+    let window = this.runningUIs[name]
+    if(!window) {
+      this.createUI(name)
+      window = this.runningUIs[name]
+    }
+
+    if(window.isVisible()) {
+      window.hide()
+    } else {
+      window.show()
+    }
   }
 
   showSplashScreen() {
@@ -148,13 +254,26 @@ class Holoscape {
   }
 
   updateTrayMenu(opt) {
-    const happMenu = Menu.buildFromTemplate([
-      { label: 'Chat'  },
-      { label: 'DeepKey'},
-    ])
+    let menuTemplate = []
+    
+    for(let uiName in this.installedUIs) {
+      let visible = false
+      if(this.runningUIs[uiName] && this.runningUIs[uiName].isVisible()) {
+        visible = true
+      }
+
+      menuTemplate.push({
+        label: uiName,
+        click: ()=>this.showHideUI(uiName),
+        type: 'checkbox', 
+        checked: visible
+      })
+    }
+    
+    const happMenu = Menu.buildFromTemplate(menuTemplate)
     const contextMenu = Menu.buildFromTemplate([
-      { label: 'Install hApp' },
-      { label: 'hApps', type: 'submenu', submenu: happMenu },
+      { label: 'Install UI', click: ()=>this.installUI() },
+      { label: 'UIs', type: 'submenu', submenu: happMenu },
       { type: 'separator' },
       { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
       { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },

@@ -11,6 +11,10 @@ module.exports = {
   configPath,
   passphraseSocketPath,
 
+  rootConfigPath: () => {
+    return rootConfigPath
+  },
+
   hasConfig: () => {
     return fs.existsSync(configPath)
   },
