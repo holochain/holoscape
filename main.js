@@ -269,3 +269,7 @@ mb.on('ready', () => {
   global.holoscape = new Holoscape()
   global.holoscape.init()
 });
+
+ipcMain.on('quit', () => {
+  process.exit()
+})
