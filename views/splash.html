@@ -62,13 +62,11 @@
               </button>
             </div>
             <div class="modal-body">
-              <form>
-                <div class="form-group">
-                  <label for="passphrase">Please enter your passphrase to unlock keystores</label>
-                  <input type="password" class="form-control" id="passphrase" aria-describedby="agent-id-help" placeholder="Passphrase">
-                  <small id="passphrase-help" class="form-text text-muted"></small>
-                </div>
-              </form>
+              <div class="form-group">
+                <label for="passphrase">Please enter your passphrase to unlock keystores</label>
+                <input type="password" class="form-control" id="passphrase" aria-describedby="agent-id-help" placeholder="Passphrase">
+                <small id="passphrase-help" class="form-text text-muted"></small>
+              </div>
             </div>
             <div class="modal-footer">
               <button id="quit-button" type="button" class="btn btn-secondary" data-dismiss="modal">Quit</button>
@@ -99,16 +97,26 @@
         $('#passphrase-modal').modal()
       })
 
-      $('#unlock-button').click(()=>{
-          //console.log(require('electron').remote.getGlobal('passphraseInput'))
-          //require('electron').remote.getGlobal('passphraseInput') = $('#passphrase').val()
-          //console.log(require('electron').remote.getGlobal('passphraseInput'))
-          ipcRenderer.send('passphrase-set', $('#passphrase').val())
-          $('#passphrase-modal').modal('hide')
-      })
+      const submit = () => {
+        ipcRenderer.send('passphrase-set', $('#passphrase').val())
+        $('#passphrase-modal').modal('hide')
+      }
 
-      $('#quit-button').click(()=>{
+      const cancel = () => {
         ipcRenderer.send('quit')
+      }
+
+      $('#unlock-button').click(submit)
+      $('#quit-button').click(cancel)
+
+      $('#passphrase').on('keyup', (event) => {
+        if (event.keyCode === 13) {
+          submit()
+        }
+
+        if (event.keyCode === 27) {
+          cancel()
+        }
       })
 
     </script>
