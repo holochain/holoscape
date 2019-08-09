@@ -17,9 +17,9 @@ class Holoscape {
   splash;
 
   async init() {
-    await this.showSplashScreen()
     this.createLogWindow()
     this.createConfigWindow()
+    await this.showSplashScreen()
     this.splash.webContents.send('splash-status', "Booting conductor...")
     this.bootConductor()
   }
@@ -132,8 +132,6 @@ class Holoscape {
       webPreferences: {
         nodeIntegration: true
       },
-      minimizable: false,
-      alwaysOnTop: true,
       show: false,
     })
     window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
@@ -230,8 +228,9 @@ class Holoscape {
       mb.tray.setImage('images/HoloScape-system-tray.png')
       this.updateTrayMenu()
       this.splash.hide()
+      this.configWindow.webContents.send('conductor-call-set')
     }).catch((error)=> {
-      dialog.showErrorBox('Holoscape could not connect to conductor', error)
+      console.error('Holoscape could not connect to conductor', error)
       global.holoscape.checkConductorConnection()
     })
   }
