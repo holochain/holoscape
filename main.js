@@ -147,7 +147,11 @@ class Holoscape {
         if(url.startsWith(__dirname)) {
           absoluteFilePath = url
         } else {
-          absoluteFilePath = path.join(uiRootDir, path.normalize(url))
+          if(url.endsWith('_dna_connections.json')) {
+            absoluteFilePath = path.join(conductor.rootConfigPath(), 'UIs', `${name}-interface.json`)
+          } else {
+            absoluteFilePath = path.join(uiRootDir, path.normalize(url))
+          }
         }
         
       } else {
