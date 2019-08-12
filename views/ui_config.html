@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <title>Holoscape UI config</title>
+    <script> window.$ = window.jQuery = require('jquery'); </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app" class="container">
+      <h1> Holscape UI Config</h1>
+      <!--
+      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
+      <div><span>Instances:</span><span>{{ instances }}</span></div>
+      <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
+      <div><span>agents:</span><span>{{ agents }}</span></div>
+      -->
+      <ul class="list-group">
+      <li class="list-group-item">
+        <h2>UIs</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Install path</th>
+                <th scope="col">Interface</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="ui in uis">
+                <td>{{ ui.name }}</td>
+                <td>{{ ui.installDir }}</td>
+                <td>
+                    <div class="form-group">
+                        <select class="form-control form-control-lg" v-bind:id="'interface-for-'+ui.name">
+                            <option v-for="interface in interfaces" :value="interface.id" :selected="ui.interface === interface.id">{{interface.id}}</option>
+                            <option disabled v-if="!ui.interface" selected="selected">Not set yet</option>
+                            <option disabled v-if="ui.interface">Not set yet</option>
+                        </select>
+                      </div>
+                </td>
+                <td><button type="button" class="btn btn-primary update-interface" :data-name="ui.name">Update interface</button></td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-agent" type="button" class="btn btn-success" data-toggle="modal" data-target="#agent-modal">Add UI</button>
+      </li>
+    </ul>
+    </div>
+
+    <script>
+
+        let configured = false
+        require('electron').ipcRenderer.on('conductor-call-set', () => {
+            if(configured) return
+
+            const remote = require('electron').remote
+            const holoscape = remote.getGlobal('holoscape')
+            const call = remote.getGlobal('conductor_call')
+
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    interfaces: [],
+                    uis: []
+                }
+            })
+
+            const refresh = () => {
+                call('admin/interface/list')().then((interfaces)=>app.interfaces = interfaces)
+                
+                app.uis = Object.keys(holoscape.getInstalledUIs()).map((name) => {
+                    let UI = holoscape.installedUIs[name]
+                    return {
+                        name,
+                        installDir: UI.installDir,
+                        interface: UI.interface,
+                    }
+                })
+            }
+
+            $(".update-interface").click((event) => {
+                let uiName = $(event.target).attr('data-name')
+                let interfaceId = $(`#interface-for-${uiName}`).val()
+                holoscape.setUiInterface(uiName, interfaceId)
+            })
+
+            refresh()
+        })
+    </script>
+
+
+
+
+  </body>
+</html>

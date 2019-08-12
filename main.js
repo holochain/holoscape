@@ -46,6 +46,7 @@ class Holoscape {
     this.installedUIs = loadUIinfo()
     this.createLogWindow()
     this.createConfigWindow()
+    this.createUiConfigWindow()
     await this.showSplashScreen()
     this.splash.webContents.send('splash-status', "Booting conductor...")
     this.bootConductor()
@@ -97,6 +98,24 @@ class Holoscape {
     .catch((err) => {
       dialog.showErrorBox('Holoscape', JSON.stringify(err))
     })
+  }
+
+  getInstalledUIs() {
+    return this.installedUIs
+  }
+
+  async setUiInterface(uiName, interfaceId) {
+    this.installedUIs[uiName].interface = interfaceId
+    this.saveUIinfo()
+    let interfaces = await global.conductor_call('admin/interface/list')()
+    let interfaceConfig = interfaces.find((i) => i.id == interfaceId)
+    const dnaInterfaceConfig = {dna_interface: interfaceConfig}
+    const filePath = path.join(conductor.rootConfigPath(), 'UIs', `${uiName}-interface.json`)
+    fs.writeFileSync(filePath, JSON.stringify(dnaInterfaceConfig))
+    const window = this.runningUIs[uiName]
+    if(window) {
+      window.reload()
+    }
   }
 
   async createUI(name) {
@@ -328,6 +347,28 @@ class Holoscape {
     this.configWindow = window
   }
 
+  createUiConfigWindow() {
+    let window = new BrowserWindow({
+      width:1200,
+      height:800,
+      webPreferences: {
+        nodeIntegration: true
+      },
+      show: false,
+    })
+    window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
+    //window.webContents.openDevTools()
+
+    let holoscape = this
+    window.on('close', (event) => {
+      if(!holoscape.quitting) event.preventDefault();
+      window.hide();
+      holoscape.updateTrayMenu()
+    })
+
+    this.uiConfigWindow = window
+  }
+
   updateTrayMenu(opt) {
     let menuTemplate = []
     
@@ -349,6 +390,7 @@ class Holoscape {
     const contextMenu = Menu.buildFromTemplate([
       { label: 'Install UI', click: ()=>this.installUI() },
       { label: 'UIs', type: 'submenu', submenu: happMenu },
+      { label: 'Edit UI config', type: 'checkbox', checked: this.uiConfigWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideUiConfig() },
       { type: 'separator' },
       { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
       { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
@@ -416,6 +458,14 @@ class Holoscape {
     }
   }
 
+  showHideUiConfig() {
+    if(this.uiConfigWindow.isVisible()) {
+      this.uiConfigWindow.hide()
+    } else {
+      this.uiConfigWindow.show()
+    }
+  }
+
   connectConductor() {
     connect({url:"ws://localhost:33444"}).then(({call, callZome, close}) => {
       global.conductor_call = call
@@ -423,6 +473,7 @@ class Holoscape {
       this.updateTrayMenu()
       this.splash.hide()
       this.configWindow.webContents.send('conductor-call-set')
+      this.uiConfigWindow.webContents.send('conductor-call-set')
     }).catch((error)=> {
       console.error('Holoscape could not connect to conductor', error)
       global.holoscape.checkConductorConnection()
