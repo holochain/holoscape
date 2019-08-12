@@ -98,6 +98,12 @@ class Holoscape {
       return
     }
 
+    const partition = `persist:${name}`
+    const ses = session.fromPartition(partition)
+    const scheme = `happ-${name.split('_').join('-')}`
+    console.log('Registering protocol scheme', scheme)
+    const uiRootDir = this.installedUIs[name].installDir
+
     const protocolCallback = (request, callback) => {
       console.log(`Inside [${name}], got request for file ${request.url}`)
       const url = request.url.substr(scheme.length+1)
@@ -120,11 +126,6 @@ class Holoscape {
     }
 
     
-    const partition = `persist:${name}`
-    const ses = session.fromPartition(partition)
-    const scheme = `happ-${name.split('_').join('-')}`
-    console.log('Registering protocol scheme', scheme)
-    const uiRootDir = this.installedUIs[name].installDir
     let protocolError = await new Promise((resolve, reject) => {
       protocol.registerFileProtocol(scheme, protocolCallback, (error) => {
         if (error) reject('Failed to register protocol '+error)
