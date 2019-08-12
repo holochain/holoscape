@@ -48,7 +48,7 @@ module.exports = {
       if (process.platform === "win32") {
         run = spawn(path.join(__dirname, "./holochain.exe"), ["-c", "./conductor-config.toml"], {env:{...process.env, RUST_BACKTRACE: 1}})
       } else if (process.platform === "darwin") {
-        run = spawn(path.join(__dirname, "./run-darwin.sh"), [configPath], {env:{...process.env, RUST_BACKTRACE: 1}})
+        run = spawn(path.join(__dirname, "./holochain-darwin"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 1}})
       } else if (process.platform === "linux") {
         run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 1}})
       }
