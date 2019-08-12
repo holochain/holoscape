@@ -75,5 +75,21 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     })
   })
 
+  $('.add-instance-to-interface-button').click((event) => {
+    const interfaceId = $(event.target).data('id')
+    $('#interface-instance-add-title').text(`Adding an instance to interface ${interfaceId}`)
+    $('#add-interface-instance-button').data('interface-id', interfaceId)
+  })
+
+  $('#add-interface-instance-button').click(()=>{
+    const interface_id = $('#add-interface-instance-button').data('interface-id')
+    const instance_id = $('#interface-instance-id').val()
+    call('admin/interface/add_instance')({interface_id, instance_id}).then(()=> {
+      refresh()
+    }).catch((error) => {
+      app.error = error
+    })
+  })
+
   configured = true
 })
