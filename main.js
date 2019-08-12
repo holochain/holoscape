@@ -109,7 +109,7 @@ class Holoscape {
       const url = request.url.substr(scheme.length+1)
       let absoluteFilePath
       const base = scheme+'://index.html'
-      if(request.url.startsWith(base) && request.url.length > base.length){
+      if(request.url.startsWith(base) && request.url.length > base.length+1){
         const url = request.url.substr(base.length)
         if(url.startsWith(__dirname)) {
           absoluteFilePath = url
