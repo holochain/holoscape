@@ -11,6 +11,26 @@ const { ncp } = require('ncp')
 const mb = menubar();
 const UIinfoFile = path.join(conductor.rootConfigPath(), 'UIs.json')
 
+const loadUIinfo = () => {
+  if(!fs.existsSync(UIinfoFile)) {
+    return {}
+  } else {
+    return JSON.parse(fs.readFileSync(UIinfoFile))
+  }
+}
+
+const sanitizeUINameForScheme = (name) => {
+  return name.split('_').join('-')
+}
+
+protocol.registerSchemesAsPrivileged(
+  Object.keys(loadUIinfo()).map( (uiName) => {
+    const scheme = `happ-${sanitizeUINameForScheme(uiName)}`
+    console.log('Privileging scheme:', scheme)
+    return { scheme, privileges: { standard: true, supportFetchAPI: true, secure: true } }
+  })
+)
+
 class Holoscape {
   conductorProcess;
   conductorPassphraseClient;
@@ -23,7 +43,7 @@ class Holoscape {
   runningUIs = {};
 
   async init() {
-    this.installedUIs = this.loadUIinfo()
+    this.installedUIs = loadUIinfo()
     this.createLogWindow()
     this.createConfigWindow()
     await this.showSplashScreen()
@@ -31,13 +51,7 @@ class Holoscape {
     this.bootConductor()
   }
 
-  loadUIinfo() {
-    if(!fs.existsSync(UIinfoFile)) {
-      return {}
-    } else {
-      return JSON.parse(fs.readFileSync(UIinfoFile))
-    }
-  }
+
 
   saveUIinfo() {
     fs.writeFileSync(UIinfoFile, JSON.stringify(this.installedUIs))
@@ -100,7 +114,7 @@ class Holoscape {
 
     const partition = `persist:${name}`
     const ses = session.fromPartition(partition)
-    const scheme = `happ-${name.split('_').join('-')}`
+    const scheme = `happ-${sanitizeUINameForScheme(name)}`
     console.log('Registering protocol scheme', scheme)
     const uiRootDir = this.installedUIs[name].installDir
 
