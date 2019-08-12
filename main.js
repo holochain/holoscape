@@ -1,5 +1,5 @@
 const { menubar } = require('menubar')
-const { app, Menu, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, Menu, BrowserWindow, ipcMain, dialog, protocol, session } = require('electron')
 const conductor = require('./conductor.js')
 const fs = require('fs')
 const path = require('path')
@@ -85,26 +85,80 @@ class Holoscape {
     })
   }
 
-  createUI(name) {
+  async createUI(name) {
+    console.log('Creating UI for', name)
     if(!this.installedUIs[name]){
       console.error('Tried to open unknown UI', name)
       return
     }
 
     if(this.runningUIs[name]) {
+      console.log('Already have UI for', name, '. Showing...')
       this.runningUIs[name].show()
       return
+    }
+
+    const protocolCallback = (request, callback) => {
+      console.log(`Inside [${name}], got request for file ${request.url}`)
+      const url = request.url.substr(scheme.length+1)
+      let absoluteFilePath
+      const base = scheme+'://index.html'
+      if(request.url.startsWith(base) && request.url.length > base.length){
+        const url = request.url.substr(base.length)
+        if(url.startsWith(__dirname)) {
+          absoluteFilePath = url
+        } else {
+          absoluteFilePath = path.join(uiRootDir, path.normalize(url))
+        }
+        
+      } else {
+        absoluteFilePath = path.join(uiRootDir, 'index.html')
+      }
+
+      console.log('Redirecting to:', absoluteFilePath)
+      callback({ path: absoluteFilePath })
+    }
+
+    
+    const partition = `persist:${name}`
+    const ses = session.fromPartition(partition)
+    const scheme = `happ-${name.split('_').join('-')}`
+    console.log('Registering protocol scheme', scheme)
+    const uiRootDir = this.installedUIs[name].installDir
+    let protocolError = await new Promise((resolve, reject) => {
+      protocol.registerFileProtocol(scheme, protocolCallback, (error) => {
+        if (error) reject('Failed to register protocol '+error)
+        else resolve()
+      })
+    })
+    if(protocolError) {
+      console.error('Could not register custom hApp protocol globally: ', protocolError)
+    }
+
+    protocolError = await new Promise((resolve, reject) => {
+      ses.protocol.registerFileProtocol(scheme, protocolCallback, (error) => {
+        if (error) reject('Failed to register protocol '+error)
+        else resolve()
+      })
+    })
+    if(protocolError) {
+      console.error('Could not register custom hApp protocol in session: ', protocolError)
     }
 
     let window = new BrowserWindow({
       width:890,
       height:535,
       webPreferences: {
-        nodeIntegration: true
+        nodeIntegration: true,
+        title: name,
+        partition
       },
     })
 
-    window.loadURL(`file://${this.installedUIs[name].installDir}/index.html`)
+    const windowURL = `${scheme}://index.html`
+    console.log('Created window. Loading', windowURL)
+
+    window.loadURL(windowURL)
     window.webContents.openDevTools()
     let holoscape = this
     window.on('close', (event) => {
@@ -119,8 +173,11 @@ class Holoscape {
   showHideUI(name) {
     let window = this.runningUIs[name]
     if(!window) {
-      this.createUI(name)
-      window = this.runningUIs[name]
+      this.createUI(name).then(() => {
+        window = this.runningUIs[name]
+        window.show()
+      })
+      return
     }
 
     if(window.isVisible()) {
@@ -128,6 +185,7 @@ class Holoscape {
     } else {
       window.show()
     }
+    this.updateTrayMenu()
   }
 
   showSplashScreen() {
