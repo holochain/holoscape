@@ -148,6 +148,7 @@ class Holoscape {
     })
     if(protocolError) {
       console.error('Could not register custom hApp protocol globally: ', protocolError)
+      return
     }
 
     protocolError = await new Promise((resolve, reject) => {
@@ -158,6 +159,7 @@ class Holoscape {
     })
     if(protocolError) {
       console.error('Could not register custom hApp protocol in session: ', protocolError)
+      return
     }
 
     let window = new BrowserWindow({
