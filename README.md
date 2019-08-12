@@ -13,7 +13,7 @@ A complete end-user deployment of a Holochain conductor with UI for administrati
 ```
 npm install
 ```
-Copy an `holochain` binary into the holoscape directory, e.g.:
+Copy an `holochain` binary into the holoscape directory as `holochain-linux` or `holochain-darwin`, depending on your OS, e.g.:
 
 ``` shell
 $ nix-shell https://holochain.love
