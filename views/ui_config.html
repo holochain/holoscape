@@ -19,12 +19,10 @@
   <body>
 
     <div id="app" class="container">
-      <h1> Holscape UI Config</h1>
+      <h1> Holoscape UI Config</h1>
       <!--
-      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
-      <div><span>Instances:</span><span>{{ instances }}</span></div>
       <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
-      <div><span>agents:</span><span>{{ agents }}</span></div>
+      <div><span>UIs:</span><span>{{ uis }}</span></div>
       -->
       <ul class="list-group">
       <li class="list-group-item">
@@ -51,7 +49,7 @@
                         </select>
                       </div>
                 </td>
-                <td><button type="button" class="btn btn-primary update-interface" :data-name="ui.name">Update interface</button></td>
+                <td><button type="button" class="btn btn-primary update-interface" :data-name="ui.name" v-on:click="updateInterface">Update interface</button></td>
               </tr>
             </tbody>
         </table>
@@ -67,6 +65,7 @@
         let configured = false
         require('electron').ipcRenderer.on('conductor-call-set', () => {
             if(configured) return
+            configured = true
 
             const remote = require('electron').remote
             const happUiController = remote.getGlobal('holoscape').happUiController
@@ -76,32 +75,36 @@
             var app = new Vue({
                 el: '#app',
                 data: {
-                    interfaces: [],
-                    uis: []
+                  interfaces: [],
+                  uis: [],
+                  updateInterface: (event) => {
+                    let uiName = $(event.target).attr('data-name')
+                    let interfaceId = $(`#interface-for-${uiName}`).val()
+                    happUiController.setUiInterface(uiName, interfaceId)
+                  },
                 }
             })
 
             const refresh = () => {
-                call('admin/interface/list')().then((interfaces)=>app.interfaces = interfaces)
-                
+              call('admin/interface/list')().then((interfaces)=>{
+                app.interfaces = interfaces
+                console.log('Interfaces:', app.interfaces)
                 app.uis = Object.keys(happUiController.getInstalledUIs()).map((name) => {
-                    let UI = happUiController.installedUIs[name]
-                    if(UI.interface){
-                      $(`#interface-for-${name}` ).val(UI.interface)
-                    }
-                    return {
-                        name,
-                        installDir: UI.installDir,
-                        interface: UI.interface,
-                    }
+                  let UI = happUiController.installedUIs[name]
+                  if(UI.interface){
+                    $(`#interface-for-${name}` ).val(UI.interface)
+                  }
+                  return {
+                      name,
+                      installDir: UI.installDir,
+                      interface: UI.interface,
+                  }
                 })
+              })
+              
             }
 
-            $(".update-interface").click((event) => {
-                let uiName = $(event.target).attr('data-name')
-                let interfaceId = $(`#interface-for-${uiName}`).val()
-                happUiController.setUiInterface(uiName, interfaceId)
-            })
+            
 
             refresh()
         })
