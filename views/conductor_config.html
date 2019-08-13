@@ -230,7 +230,7 @@
                 <td>{{ interface.admin }}</td>
                 <td>{{ interface.instances }}</td>
                 <td>
-                  <button type="button" class="btn btn-success add-instance-to-interface-button" :data-id="interface.id" data-toggle="modal" data-target="#interface-add-instance-modal">Add instance</button>
+                  <button type="button" class="btn btn-success add-instance-to-interface-button" :data-id="interface.id" v-on:click="addInstanceToInterfaceClick">Add instance</button>
                   <button type="button" class="btn btn-danger" :data-id="interface.id">Remove interface</button>
                 </td>
               </tr>
