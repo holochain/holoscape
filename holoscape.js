@@ -29,7 +29,7 @@ class Holoscape {
     quitting = false;
       
     async init() {
-      this.happUiController = new HappUiController()
+      this.happUiController = new HappUiController(this)
       this.createLogWindow()
       this.createConfigWindow()
       this.createUiConfigWindow()

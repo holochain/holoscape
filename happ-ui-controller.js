@@ -220,7 +220,7 @@ class HappUiController {
 
         window.loadURL(windowURL)
         window.webContents.openDevTools()
-        let holoscape = this
+        let holoscape = this.holoscape
         window.on('close', (event) => {
             if(!holoscape.quitting) event.preventDefault();
             window.hide();
