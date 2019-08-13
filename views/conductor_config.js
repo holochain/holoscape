@@ -15,6 +15,7 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
       instances: [],
       interfaces: [],
       agents: [],
+      bridges: [],
       error: undefined,
       loading: false,
       addInstanceToInterfaceClick: (event) => {
@@ -32,6 +33,7 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     call('admin/instance/list')().then((instances)=>app.instances = instances)
     call('admin/interface/list')().then((interfaces)=>app.interfaces = interfaces)
     call('admin/agent/list')().then((agents)=>app.agents = agents)
+    call('adming/bridges/list')().then((bridges)=>app.bridges = bridges)
   }
 
   refresh()
@@ -115,6 +117,21 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     })
   })
 
+  $('#add-bridge-button').click(()=>{
+    const handle = $('#bridge-handle').val()
+    const caller_id = $('#bridge-caller-id').val()
+    const callee_id = $('#bridge-callee-id').val()
+    app.loading = true
+    call('admin/bridge/add')({handle, caller_id, callee_id}).then(()=> {
+      app.loading = false
+      refresh()
+      $('.modal').modal('hide')
+    }).catch((error)=>{
+      app.error = error
+      app.loading = false
+    })
+  })
+  
   configured = true
 })
 

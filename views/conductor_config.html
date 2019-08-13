@@ -315,6 +315,75 @@
             </div>
           </div>
       </li>
+
+
+      <li class="list-group-item">
+        <h2>Bridges</h2>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Handle</th>
+                <th scope="col">Caller ID</th>
+                <th scope="col">Callee ID</th>
+                <th scope="col">actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="bridge in bridges">
+                <td>{{ bridge.handle }}</td>
+                <td>{{ bridge.caller }}</td>
+                <td>{{ bridge.callee }}</td>
+                <td>
+                  <button type="button" class="btn btn-success add-instance-to-interface-button" :data-id="interface.id" v-on:click="addInstanceToInterfaceClick">Add instance</button>
+                  <button type="button" class="btn btn-danger" :data-id="interface.id">Remove interface</button>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+        <button id="add-bridge" type="button" class="btn btn-primary" data-toggle="modal" data-target="#bridge-modal">Add Bridge</button>
+        <!-- Modal -->
+        <div class="modal fade" id="bridge-modal" tabindex="-1" role="dialog" aria-labelledby="bridge-modal" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Adding a bridge...</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                      <label for="instance-id">Handle</label>
+                      <input type="text" class="form-control" id="bridge-handle" aria-describedby="agent-id-help" placeholder="Enter bridge handle">
+                      <small id="instance-id-help" class="form-text text-muted">The.</small>
+                    </div>
+                  <div class="form-group">
+                    <label for="caller-id">Caller ID</label>
+                    <select class="form-control form-control-lg" id="bridge-caller-id">
+                      <option v-for="instance in instances">{{instance.id}}</option>
+                    </select>
+                    <small id="caller-id-help" class="form-text text-muted">Please select one of the existing instances as caller for this bridge.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="callee-id">Callee ID</label>
+                    <select class="form-control form-control-lg" id="bridge-callee-id">
+                      <option v-for="instance in instances">{{instance.id}}</option>
+                    </select>
+                    <small id="callee-id-help" class="form-text text-muted">Please select one of the existing instances as callee for this bridge.</small>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" :disabled="loading">Close</button>
+                <button id="add-bridge-button" type="button" class="btn btn-primary" :disabled="loading">Add bridge</button>
+              </div>
+              <div v-if="loading"><img class="modal-spinner" src="../images/ajax-loader.gif"></image></div>
+              <div class="alert alert-danger error" v-if="error">{{error}}</div>
+            </div>
+          </div>
+        </div>
+      </li>
     </ul>
     </div>
 
