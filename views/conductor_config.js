@@ -16,6 +16,7 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
       interfaces: [],
       agents: [],
       error: undefined,
+      loading: false,
     }
   })
 
@@ -33,8 +34,14 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
   $('#add-agent-button').click(()=>{
     const id = $('#agent-id').val()
     const name = $('#agent-name').val()
+    app.loading = true
     call('admin/agent/add')({id,name}).then(()=> {
       refresh()
+      app.loading = false
+      $('.modal').modal('hide')
+    }).catch((error)=>{
+      app.error = error
+      app.loading = false
     })
   })
 
@@ -43,12 +50,16 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     const path = document.getElementById("dna-file").files[0].path//$('#dna-file').val()
 
     const copy = true
+    app.loading = true
     call('admin/dna/install_from_file')({id,path,copy})
       .then(() => {
+        app.loading = false
         refresh()
+        $('.modal').modal('hide')
       })
-      .catch((error) => {
+      .catch((error)=>{
         app.error = error
+        app.loading = false
       })
   })
 
@@ -56,10 +67,14 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     const id = $('#instance-id').val()
     const dna_id = $('#instance-dna-id').val()
     const agent_id = $('#instance-agent-id').val()
+    app.loading = true
     call('admin/instance/add')({id,dna_id,agent_id}).then(()=> {
+      app.loading = false
       refresh()
-    }).catch((error) => {
+      $('.modal').modal('hide')
+    }).catch((error)=>{
       app.error = error
+      app.loading = false
     })
   })
 
@@ -68,10 +83,14 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     const admin = $('#interface-admin').is(':checked')
     const type = $('#interface-type').val()
     const port = parseInt($('#interface-port').val())
+    app.loading = true
     call('admin/interface/add')({id,admin,type,port}).then(()=> {
+      app.loading = false
       refresh()
-    }).catch((error) => {
+      $('.modal').modal('hide')
+    }).catch((error)=>{
       app.error = error
+      app.loading = false
     })
   })
 
@@ -84,10 +103,14 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
   $('#add-interface-instance-button').click(()=>{
     const interface_id = $('#add-interface-instance-button').data('interface-id')
     const instance_id = $('#interface-instance-id').val()
+    app.loading = true
     call('admin/interface/add_instance')({interface_id, instance_id}).then(()=> {
+      app.loading = false
       refresh()
-    }).catch((error) => {
+      $('.modal').modal('hide')
+    }).catch((error)=>{
       app.error = error
+      app.loading = false
     })
   })
 
