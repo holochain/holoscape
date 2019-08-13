@@ -44,7 +44,7 @@
                 <td>{{ ui.installDir }}</td>
                 <td>
                     <div class="form-group">
-                        <select class="form-control form-control-lg" v-bind:id="'interface-for-'+ui.name">
+                        <select class="form-control form-control-lg" v-bind:id="'interface-for-'+ui.name" v-model="ui.interface">
                             <option v-for="interface in interfaces" :value="interface.id" :selected="ui.interface === interface.id">{{interface.id}}</option>
                             <option disabled v-if="!ui.interface" selected="selected">Not set yet</option>
                             <option disabled v-if="ui.interface">Not set yet</option>
@@ -86,6 +86,9 @@
                 
                 app.uis = Object.keys(happUiController.getInstalledUIs()).map((name) => {
                     let UI = happUiController.installedUIs[name]
+                    if(UI.interface){
+                      $(`#interface-for-${name}` ).val(UI.interface)
+                    }
                     return {
                         name,
                         installDir: UI.installDir,
