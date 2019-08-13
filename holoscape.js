@@ -195,16 +195,22 @@ class Holoscape {
   
     updateTrayMenu(opt) {
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
-      const contextMenu = Menu.buildFromTemplate([
-        { label: 'Install UI', click: ()=>this.installUI() },
-        { label: 'UIs', type: 'submenu', submenu: happMenu },
-        { label: 'Edit UI config', type: 'checkbox', checked: this.uiConfigWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideUiConfig() },
-        { type: 'separator' },
-        { label: 'Show log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
-        { label: 'Edit conductor config', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
-        { type: 'separator' },
+      const settingsMenu = Menu.buildFromTemplate([
+        { label: 'Install UI...', click: ()=>this.happUiController.installUI() },
+        { label: 'UI <> interface connections...', type: 'checkbox', checked: this.uiConfigWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideUiConfig() },
+        { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
+      ])
+      const conductorMenu = Menu.buildFromTemplate([
+        { label: 'Show conductor log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
         { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
         { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
+      ])
+      const contextMenu = Menu.buildFromTemplate([
+        { label: 'UIs', type: 'submenu', submenu: happMenu },
+        { type: 'separator' },
+        { label: 'Settings', type: 'submenu', submenu: settingsMenu },
+        { label: 'Conductor', type: 'submenu', submenu: conductorMenu },
+        { type: 'separator' },
         { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
       ])
       mb.tray.setToolTip('HoloScape')
