@@ -69,7 +69,7 @@
             if(configured) return
 
             const remote = require('electron').remote
-            const holoscape = remote.getGlobal('holoscape')
+            const happUiController = remote.getGlobal('holoscape').happUiController
             const call = remote.getGlobal('conductor_call')
 
 
@@ -84,8 +84,8 @@
             const refresh = () => {
                 call('admin/interface/list')().then((interfaces)=>app.interfaces = interfaces)
                 
-                app.uis = Object.keys(holoscape.getInstalledUIs()).map((name) => {
-                    let UI = holoscape.installedUIs[name]
+                app.uis = Object.keys(happUiController.getInstalledUIs()).map((name) => {
+                    let UI = happUiController.installedUIs[name]
                     return {
                         name,
                         installDir: UI.installDir,
@@ -97,7 +97,7 @@
             $(".update-interface").click((event) => {
                 let uiName = $(event.target).attr('data-name')
                 let interfaceId = $(`#interface-for-${uiName}`).val()
-                holoscape.setUiInterface(uiName, interfaceId)
+                happUiController.setUiInterface(uiName, interfaceId)
             })
 
             refresh()

@@ -2,7 +2,8 @@ const { menubar } = require('menubar')
 const { app, ipcMain, protocol } = require('electron')
 const conductor = require('./conductor.js')
 
-const { loadUIinfo, Holoscape, sanitizeUINameForScheme } = require('./holoscape')
+const { Holoscape } = require('./holoscape')
+const { loadUIinfo, sanitizeUINameForScheme } = require('./happ-ui-controller')
 
 const mb = menubar();
 global.mb = mb
