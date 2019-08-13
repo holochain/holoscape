@@ -6,16 +6,28 @@ const net = require('net')
 const conductor = require('./conductor.js')
 const { HappUiController, sanitizeUINameForScheme } = require('./happ-ui-controller')
 
+/// This is the main controller of the whole application.
+/// There is one instance of Holoscape that gets created in main.
+/// All build-in UIs get created from here and references to the window
+/// objects are kept here as well (logWindow, confingWindow)
 class Holoscape {
-    conductorProcess;
-    conductorPassphraseClient;
+    /// Sub-controllors:
+    happUiController;
+
+    /// Window references for built-in views:
+    splash;
     logWindow;
+    configWindow;
+    uiConfigWindow;
+
+    /// Conductor references (mabe move to conductor.js?)
+    conductorProcess; // Handle to the return value of spawn
+    conductorPassphraseClient; // Handle to the socket through which the conductor requests passphrases
+    
+    /// Misc.:
     logMessages = [];
     quitting = false;
-    configWindow;
-    splash;
-    happUiController;
-  
+      
     async init() {
       this.happUiController = new HappUiController()
       this.createLogWindow()
@@ -80,6 +92,13 @@ class Holoscape {
         that.conductorPassphraseClient = client
       })
   
+      /// The conductor requests a passphrase by sending something over the socket.
+      /// We are not yet caring about what it sends, but we might want to add different
+      /// styles of passphrase requests: setting a new one or unlocking a keystore that
+      /// has already a passphrase set (should be different UI).
+      /// That is not yet implement in the conductor.
+      /// Also, there is currently no way to retry entering the passphrase if it is wrong.
+      /// Conductor will just exit...
       client.on("data", async (data) => {
         let splashWasVisible = that.splash.isVisible()
         if(!splashWasVisible) {
@@ -94,6 +113,9 @@ class Holoscape {
           })
         })
   
+        /// Ok, when we're here, we got the passphrase from the splash-screen dialog.
+        /// We need to append a new-line so the conductor knows where the passphrase ends.
+        /// (the channel is kept open as long as Holoscape and conductor live...)
         client.write(""+passphrase+"\n")
   
         that.splash.webContents.send('splash-status', "Unlocking keystore...")

@@ -20,6 +20,29 @@ function sanitizeUINameForScheme(name) {
     return name.split('_').join('-')
 }
 
+/// This controller is managing all the custom hApp UIs that can be installed.
+/// It stores a list of all installed UIs with their installation directory and
+/// potentially set zome interface in `installedUIs`, which gets persisted
+/// to UIInfoFile().
+///
+/// It looks like this:
+/// ```js
+/// installedUIs = {
+///   'basic-chat': {
+///      installDir: '/home/lucksus/.config/Holoscape/UIs/basic-chat',
+///      interface: 'basic-chat-interface'
+///   }   
+/// }
+/// ```
+///
+/// When a hApp UI is shown for the first time, `showHideUi(name)` calls  `createUI(name)`
+/// which creates a separate BrowserWindow for that UI. All existing BrowserWindows are
+/// stored in `runningUIs`.
+///
+/// In order to make a web UI that was build to be hosted by an HTTP server work inside
+/// these browser windows served from file-system, we are registering a custom URI scheme per UI
+/// in the format of 'happ-<name>' where any URL 'happ-<name>://<resource>` will be redirected
+/// to the `installDir` of that hApp UI.
 class HappUiController {
     installedUIs = {};
     runningUIs = {};
