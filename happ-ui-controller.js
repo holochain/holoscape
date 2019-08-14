@@ -1,4 +1,4 @@
-const { BrowserWindow, dialog, protocol, session } = require('electron')
+const { BrowserWindow, dialog, protocol, session, ipcMain } = require('electron')
 const { ncp } = require('ncp')
 const fs = require('fs')
 const path = require('path')
@@ -51,6 +51,10 @@ class HappUiController {
     constructor(hs) {
         this.holoscape = hs
         this.installedUIs = loadUIinfo()
+        ipcMain.on('request-activate-happ-window', (event, args) => {
+            console.log(`${args.requester} requested to show another UI: ${args.uiToActivate}`)
+            this.showAndRiseUI(args.uiToActivate, args.location)
+        })
     }
 
     createUiMenuTemplate() {
@@ -211,9 +215,11 @@ class HappUiController {
             webPreferences: {
                 nodeIntegration: true,
                 title: name,
-                partition
+                partition,
+                preload: path.join(__dirname, 'happ-ui-preload.js')
             },
         })
+        window.uiName = name
 
         const windowURL = `${scheme}://index.html`
         console.log('Created window. Loading', windowURL)
@@ -248,6 +254,23 @@ class HappUiController {
         this.holoscape.updateTrayMenu()
     }
 
+    async ensureWindowFor(name) {
+        if(!this.runningUIs[name]) {
+            await this.createUI(name)
+        }
+        return this.runningUIs[name]
+    }
+
+
+    async showAndRiseUI(name, location) {
+        this.ensureWindowFor(name).then((window)=>{
+            window.show()
+            window.focus()
+            if(location){
+                window.location.assign(location)
+            }
+        })
+    }
 }
 
 module.exports = {
