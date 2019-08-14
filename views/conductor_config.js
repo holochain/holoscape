@@ -1,9 +1,9 @@
-var ipcRenderer = require('electron').ipcRenderer;
+const ipcRenderer = require('electron').ipcRenderer;
 const { connect } = require('@holochain/hc-web-client')
 const $ = require('jquery')
 
 let configured = false
-require('electron').ipcRenderer.on('conductor-call-set', () => {
+ipcRenderer.on('conductor-call-set', () => {
   if(configured) return
 
   const call = require('electron').remote.getGlobal('conductor_call')
@@ -33,8 +33,10 @@ require('electron').ipcRenderer.on('conductor-call-set', () => {
     call('admin/instance/list')().then((instances)=>app.instances = instances)
     call('admin/interface/list')().then((interfaces)=>app.interfaces = interfaces)
     call('admin/agent/list')().then((agents)=>app.agents = agents)
-    call('adming/bridges/list')().then((bridges)=>app.bridges = bridges)
+    call('admin/bridge/list')().then((bridges)=>app.bridges = bridges)
   }
+
+  ipcRenderer.on('refresh', refresh)
 
   refresh()
 

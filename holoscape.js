@@ -268,6 +268,7 @@ class Holoscape {
       if(this.configWindow.isVisible()) {
         this.configWindow.hide()
       } else {
+        this.configWindow.webContents.send('refresh')
         this.configWindow.show()
       }
     }

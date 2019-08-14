@@ -331,11 +331,9 @@
             <tbody>
               <tr v-for="bridge in bridges">
                 <td>{{ bridge.handle }}</td>
-                <td>{{ bridge.caller }}</td>
-                <td>{{ bridge.callee }}</td>
+                <td>{{ bridge.caller_id }}</td>
+                <td>{{ bridge.callee_id }}</td>
                 <td>
-                  <button type="button" class="btn btn-success add-instance-to-interface-button" :data-id="interface.id" v-on:click="addInstanceToInterfaceClick">Add instance</button>
-                  <button type="button" class="btn btn-danger" :data-id="interface.id">Remove interface</button>
                 </td>
               </tr>
             </tbody>
