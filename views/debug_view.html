@@ -1,0 +1,201 @@
+<html>
+  <head>
+    <title>Holoscape instance debug view</title>
+    <script> window.$ = window.jQuery = require('jquery'); </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+      .modal-spinner {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app" class="container">
+      <h1> Holoscape instance debug view</h1>
+      <!--
+      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
+      <div><span>Instances:</span><span>{{ instances }}</span></div>
+      <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
+      <div><span>agents:</span><span>{{ agents }}</span></div>
+      -->
+      <ul class="list-group">
+      <li class="list-group-item" v-for="(dump, instance_id, index) in stateDumps">
+        <h2>
+            <a data-toggle="collapse" v-bind:href="'#'+instance_id" role="button" aria-expanded="false" v-bind:aria-controls="instance_id">
+                {{ instance_id }}
+            </a>
+        </h2>
+
+        <ul class="list-group collapse" v-bind:id="instance_id">
+            <li class="list-group-item">
+                <h3>
+                    <a data-toggle="collapse" v-bind:href="'#'+instance_id+'-source-chain'" role="button" aria-expanded="false" v-bind:aria-controls="instance_id+'-source-chain'">
+                        Source Chain
+                    </a>
+                </h3>
+                <div v-bind:id="instance_id+'-source-chain'" class="card collapse" v-for="header in dump.source_chain">
+                    <div class="card-body">
+                        <h5 class="card-title">{{header.entry_type}} - {{header.entry_address}}</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr><td>Timestamp:</td><td>{{ header.timestamp }}</td></tr>
+                                <tr><td>Sources:</td><td>{{ header.provenances.map((p)=>p[0]).join(", ") }}</td></tr>
+                                <tr><td>Header address:</td><td>{{ header.address }}</td></tr>
+                                <tr><td>Prev. header:</td><td>{{ header.link }}</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="alert alert-dark" role="alert">{{ contents[header.entry_address] ? contents[header.entry_address].content : 'fetching...' }}</div>
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <h3>
+                    <a data-toggle="collapse" v-bind:href="'#'+instance_id+'-dht'" role="button" aria-expanded="false" v-bind:aria-controls="instance_id+'-dht'">
+                        DHT
+                    </a>
+                </h3>
+                <div class="collapse" v-bind:id="instance_id+'-dht'">
+                        <span>Held entries:</span>
+                        <ul>
+                            <li v-for="address in dump.held_entries">
+                                    <table class="table">
+                                        <tbody>
+                                            <tr><td>Type:</td><td>{{ contents[address] ? contents[address].type : 'fetching...' }}</td></tr>
+                                            <tr><td>Address:</td><td>{{ address }}</td></tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="alert alert-dark" role="alert">{{ contents[address] ? contents[address].content : 'fetching...' }}</div>
+                            </li>
+                        </ul>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <h3>
+                    <a data-toggle="collapse" v-bind:href="'#'+instance_id+'nucleus'" role="button" aria-expanded="false" v-bind:aria-controls="instance_id+'nucleus'">
+                        Nucleus
+                    </a>
+                </h3>
+                <table v-bind:id="instance_id+'nucleus'" class="table collapse">
+                    <tbody>
+                        <tr><td>Running zome calls:</td><td>{{ dump.running_calls }}</td></tr>
+                        <tr><td>Pending validations:</td><td>{{ dump.pending_validations }}</td></tr>
+                    </tbody>
+                </table>
+            </li>
+            <li class="list-group-item">
+                <h3>
+                    <a data-toggle="collapse" v-bind:href="'#'+instance_id+'network'" role="button" aria-expanded="false" v-bind:aria-controls="instance_id+'network'">
+                        Network
+                    </a>
+                </h3>
+                <table v-bind:id="instance_id+'network'" class="table collapse">
+                    <tbody>
+                        <tr><td>Queries:</td><td>{{ dump.query_flows }}</td></tr>
+                        <tr><td>Validation Package Requests:</td><td>{{ dump.validation_package_flows }}</td></tr>
+                        <tr><td>Direct message sessions:</td><td>{{ dump.direct_message_flows }}</td></tr>
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+      </li>  
+      </ul>
+      <button type="button" class="btn btn-primary" v-on:click="refresh()">Refresh instances</button>
+    </div>
+
+    <script>
+        let configured = false
+        require('electron').ipcRenderer.on('conductor-call-set', () => {
+            if(configured) return
+            configured = true
+
+            const remote = require('electron').remote
+            const happUiController = remote.getGlobal('holoscape').happUiController
+            const call = remote.getGlobal('conductor_call')
+
+
+            const refresh = () => {
+              call('debug/running_instances')().then((instances)=>{
+                  instances.map((instance_id) => app.updateStateDump(instance_id))
+                })
+            }
+
+            const fetch_cas = async (address, instance_id) => {
+                return await call('debug/fetch_cas')({instance_id, address})
+            }
+
+            const updateContent = async (address, instance_id) => {
+                Vue.set(app.contents, address, await fetch_cas(address, instance_id))
+            }
+
+            const syntaxHighlight = (json) => {
+                if (typeof json != 'string') {
+                    json = JSON.stringify(json, undefined, 2);
+                }
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    var cls = 'number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'key';
+                        } else {
+                            cls = 'string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+            }
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                  stateDumps: {},
+                  contents:{},
+                  updateStateDump: (instance_id) => {
+                      call('debug/state_dump')({instance_id})
+                        .then((dump) => {
+                            console.log("Got state dump: ", dump)
+                            
+                            dump.held_entries.map(async (address)=>{
+                                await updateContent(address, instance_id)
+                            })
+                            dump.source_chain.map(async (header)=>{
+                                await updateContent(header.entry_address, instance_id)
+                            })
+                            Vue.set(app.stateDumps, instance_id, dump)
+                        })
+                        .catch((error) => {
+                            console.log("Error getting dump:", error)
+                        })
+                  },
+                  refresh: refresh,
+                  fetch_cas,
+                  updateContent,
+                  syntaxHighlight,
+                }
+            })
+
+            refresh()
+            window.app = app
+        })
+    </script>
+
+
+
+
+  </body>
+</html>

@@ -19,6 +19,7 @@ class Holoscape {
     logWindow;
     configWindow;
     uiConfigWindow;
+    debuggerWindow;
 
     /// Conductor references (mabe move to conductor.js?)
     conductorProcess; // Handle to the return value of spawn
@@ -33,6 +34,7 @@ class Holoscape {
       this.createLogWindow()
       this.createConfigWindow()
       this.createUiConfigWindow()
+      this.createDebuggerWindow()
       await this.showSplashScreen()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
@@ -192,6 +194,28 @@ class Holoscape {
   
       this.uiConfigWindow = window
     }
+
+    createDebuggerWindow() {
+      let window = new BrowserWindow({
+        width:1200,
+        height:800,
+        webPreferences: {
+          nodeIntegration: true
+        },
+        show: false,
+      })
+      window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
+      window.webContents.openDevTools()
+  
+      let holoscape = this
+      window.on('close', (event) => {
+        if(!holoscape.quitting) event.preventDefault();
+        window.hide();
+        holoscape.updateTrayMenu()
+      })
+  
+      this.debuggerWindow = window
+    }
   
     updateTrayMenu(opt) {
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
@@ -201,6 +225,7 @@ class Holoscape {
         { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
       ])
       const conductorMenu = Menu.buildFromTemplate([
+        { label: 'Debug view', type: 'checkbox', checked: this.debuggerWindow.isVisible(), click: ()=>this.showHideDebuggerWindow() },
         { label: 'Show conductor log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
         { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
         { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
@@ -209,7 +234,7 @@ class Holoscape {
         { label: 'UIs', type: 'submenu', submenu: happMenu },
         { type: 'separator' },
         { label: 'Settings', type: 'submenu', submenu: settingsMenu },
-        { label: 'Conductor', type: 'submenu', submenu: conductorMenu },
+        { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
         { type: 'separator' },
         { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
       ])
@@ -280,6 +305,14 @@ class Holoscape {
         this.uiConfigWindow.show()
       }
     }
+
+    showHideDebuggerWindow() {
+      if(this.debuggerWindow.isVisible()) {
+        this.debuggerindow.hide()
+      } else {
+        this.debuggerWindow.show()
+      }
+    }
   
     connectConductor() {
       connect({url:"ws://localhost:33444"}).then(({call, callZome, close}) => {
@@ -289,6 +322,7 @@ class Holoscape {
         this.splash.hide()
         this.configWindow.webContents.send('conductor-call-set')
         this.uiConfigWindow.webContents.send('conductor-call-set')
+        this.debuggerWindow.webContents.send('conductor-call-set')
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()
