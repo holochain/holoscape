@@ -20,6 +20,7 @@ class Holoscape {
     configWindow;
     uiConfigWindow;
     debuggerWindow;
+    installBundleWindow;
 
     /// Conductor references (mabe move to conductor.js?)
     conductorProcess; // Handle to the return value of spawn
@@ -35,6 +36,7 @@ class Holoscape {
       this.createConfigWindow()
       this.createUiConfigWindow()
       this.createDebuggerWindow()
+      this.createInstallBundleWindow()
       await this.showSplashScreen()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
@@ -216,6 +218,28 @@ class Holoscape {
   
       this.debuggerWindow = window
     }
+
+    createInstallBundleWindow() {
+      let window = new BrowserWindow({
+        width:1200,
+        height:800,
+        webPreferences: {
+          nodeIntegration: true
+        },
+        show: false,
+      })
+      window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
+      window.webContents.openDevTools()
+  
+      let holoscape = this
+      window.on('close', (event) => {
+        if(!holoscape.quitting) event.preventDefault();
+        window.hide();
+        holoscape.updateTrayMenu()
+      })
+  
+      this.installBundleWindow = window
+    }
   
     updateTrayMenu(opt) {
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
@@ -235,6 +259,8 @@ class Holoscape {
         { type: 'separator' },
         { label: 'Settings', type: 'submenu', submenu: settingsMenu },
         { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
+        { type: 'separator' },
+        { label: 'Install hApp...', click: ()=>this.installBundleWindow.show() },
         { type: 'separator' },
         { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
       ])
@@ -326,6 +352,7 @@ class Holoscape {
         this.configWindow.webContents.send('conductor-call-set')
         this.uiConfigWindow.webContents.send('conductor-call-set')
         this.debuggerWindow.webContents.send('conductor-call-set')
+        this.installBundleWindow.webContents.send('conductor-call-set')
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()

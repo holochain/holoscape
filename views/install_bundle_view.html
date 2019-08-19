@@ -1,0 +1,191 @@
+<html>
+  <head>
+    <title>Holoscape - Install hApp</title>
+    <script> window.$ = window.jQuery = require('jquery'); </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+      .modal-spinner {
+        margin: 20px;
+      }
+      .actions {
+        max-height:420px;
+        overflow:auto;
+        background:#bbb;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app" class="container">
+      <h1> Holoscape - Install hApp</h1>
+      <!--
+      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
+      <div><span>Instances:</span><span>{{ instances }}</span></div>
+      <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
+      <div><span>agents:</span><span>{{ agents }}</span></div>
+      -->
+      <ul class="list-group">
+      <li class="list-group-item">
+          <h3>Please select a bundle file to install</h3>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Bundle file</span>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="bundle-file" 
+                            aria-describedby="inputGroupFileAddon01" ref="bundleFile" @change="loadBundle">
+                        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                    </div>
+                </div>
+                <div v-if="fileError" class="alert alert-danger">{{ fileError }}</div>
+      </li>
+      <li v-if="bundle" class="list-group-item">
+          <h3>DNAs in this bundle</h3>
+          <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">DNA Hash</th>
+                        <th scope="col">URI</th>
+                        <th scope="col">status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="instance in bundle.instances">
+                        <td>{{ instance.name }}</td>
+                        <td>{{ instance.dna_hash }}</td>
+                        <td>{{ instance.uri }}</td>
+                        <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
+                            <span class="badge badge-success">Already installed</span>
+                        </td>
+                        <td v-if="instanceStatus[instance.id] != 'installed'">
+                            -->
+                        <td>
+                            <span class="badge badge-info">To be installed...</span>
+                        </td>
+                    </tr>
+                </tbody>
+          </table>
+      </li>
+      <li v-if="bundle" class="list-group-item">
+            <h3>Bridges to setup</h3>
+            <table>
+                  <thead>
+                      <tr>
+                          <th scope="col">From (caller)</th>
+                          <th scope="col">Handle</th>
+                          <th scope="col">To (callee)</th>
+                          <th scope="col">status</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr v-for="(bridge, index) in bundle.bridges">
+                          <td>{{ bridge.caller_id }}</td>
+                          <td>{{ bridge.handle }}</td>
+                          <td>{{ bridge.callee_id }}</td>
+                          <!--<td v-if="bridgeStatus[index] == 'installed'">
+                              <span class="badge badge-success">Already installed</span>
+                          </td>
+                          <td v-if="bridgeStatus[index] != 'installed'">-->
+                          <td>
+                              <span class="badge badge-info">To be installed...</span>
+                          </td>
+                      </tr>
+                  </tbody>
+            </table>
+        </li>
+        <li v-if="bundle" class="list-group-item">
+                <h3>UIs to install</h3>
+
+                <ul>
+                    <li v-for="ui in bundle.UIs">
+                        <h4>{{ ui.name }}</h4>
+                        <span>Needs access to the following instances</span>
+                        <ul>
+                            <li v-for="ref in ui.instance_references">
+                                {{ ref.instance_id }}
+                            </li>
+                        </ul>
+
+                        <div v-if="ui.ui_references && ui.ui_references.length > 0">
+                            <span>Needs access to the following UIs</span>
+                            <ul>
+                                <li v-for="ref in ui.ui_references">
+                                    {{ ref.ui_id }}
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+      </ul>
+      <button type="button" class="btn btn-secondary" :disabled="!canInstall">Install</button>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron')
+        const toml = require('toml')
+        const fs = require('fs')
+
+        let configured = false
+
+        ipcRenderer.on('conductor-call-set', () => {
+            if(configured) return
+            configured = true
+
+            const remote = require('electron').remote
+            const happUiController = remote.getGlobal('holoscape').happUiController
+            const call = remote.getGlobal('conductor_call')
+
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                  canInstall: false,
+                  file: undefined,
+                  fileError: undefined,
+                  bundle: undefined,
+                },
+                methods: {
+                  loadBundle() {
+                    if(this.$refs.bundleFile.files.length > 0) {
+                        app.file = this.$refs.bundleFile.files[0]
+                        const contents = fs.readFileSync(app.file.path)
+                        app.fileError = undefined
+                        app.bundle = undefined
+                        try{
+                            app.bundle = toml.parse(contents)
+                        }catch(e){
+                            app.fileError = e
+                        }
+                        
+                    }
+                  },
+                  processBundle() {
+
+                  },
+                  instanceStatus(instanceId) {
+
+                  }  
+                }
+            })
+
+            window.app = app
+        })
+    </script>
+
+
+
+
+  </body>
+</html>
