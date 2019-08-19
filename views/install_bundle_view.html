@@ -103,9 +103,9 @@
                   </thead>
                   <tbody>
                       <tr v-for="(bridge, index) in bundle.bridges">
-                          <td>{{ bridge.caller_id }}</td>
+                          <td>{{ instanceById(bridge.caller_id).name }}</td>
                           <td>{{ bridge.handle }}</td>
-                          <td>{{ bridge.callee_id }}</td>
+                          <td>{{ instanceById(bridge.callee_id).name }}</td>
                           <!--<td v-if="bridgeStatus[index] == 'installed'">
                               <span class="badge badge-success">Already installed</span>
                           </td>
@@ -273,8 +273,8 @@
                         })
                       })
                   },
-                  instanceStatus(instanceId) {
-
+                  instanceById(instanceId) {
+                    return app.bundle.instances.find((instance) => instance.id == instanceId)
                   }  
                 }
             })
