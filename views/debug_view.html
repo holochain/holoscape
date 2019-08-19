@@ -17,6 +17,11 @@
       .modal-spinner {
         margin: 20px;
       }
+      .actions {
+        max-height:420px;
+        overflow:auto;
+        background:#bbb;
+      }
     </style>
   </head>
   <body>
@@ -38,6 +43,24 @@
         </h2>
 
         <ul class="list-group collapse" v-bind:id="instance_id">
+            <li class="list-group-item">
+                <h3>Core Actions</h3>
+                <ul class="actions">
+                    <li class="action" v-for="(action, index) in reduxActions[instance_id]">
+                        <div>
+                            <a data-toggle="collapse" 
+                                v-bind:href="'#'+instance_id+'-action-'+index" 
+                                role="button" aria-expanded="false" 
+                                v-bind:aria-controls="instance_id+'-action-'+index"
+                                :class="'bade badge-pill badge-' + actionTypeToBadge(action.action_type)"
+                            >
+                                {{ action.action_type }}
+                            </a>
+                        </div>
+                        <div v-bind:id="instance_id+'-action-'+index" class="collapse">{{ action.data }}</div>
+                    </li>
+                </ul>
+            </li>
             <li class="list-group-item">
                 <h3>
                     <a data-toggle="collapse" v-bind:href="'#'+instance_id+'-source-chain'" role="button" aria-expanded="false" v-bind:aria-controls="instance_id+'-source-chain'">
@@ -114,8 +137,10 @@
     </div>
 
     <script>
+        const { ipcRenderer } = require('electron')
         let configured = false
-        require('electron').ipcRenderer.on('conductor-call-set', () => {
+
+        ipcRenderer.on('conductor-call-set', () => {
             if(configured) return
             configured = true
 
@@ -163,6 +188,7 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                  reduxActions: {},  
                   stateDumps: {},
                   contents:{},
                   updateStateDump: (instance_id) => {
@@ -186,7 +212,51 @@
                   fetch_cas,
                   updateContent,
                   syntaxHighlight,
+                  actionTypeToBadge: (actionType) => {
+                      switch(actionType) {
+                          case "SignalZomeFunctionCall": return "info"
+                          case "ReturnZomeFunctionResult": return "info"
+                          case "ReturnValidationPackage": return "secondary"
+                          case "ReturnValidationResult": return "secondary"
+                          case "Commit": return "success"
+                          case "Publish": return "success"
+                          case "Hold": return "danger"
+                          case "Query": return "light"
+                          case "RespondQuery": return "dark"
+                          case "HandleQuery": return "light"
+                          case "QueryTimeout": return "warning"
+                          default: return "primary"
+                      }
+                  }
                 }
+            })
+
+            ipcRenderer.on('hc-signal', (event, params) => {
+                let { signal, instance_id } = params
+                if(!signal) {
+                    console.log("Got strange signal without 'signal' property:", params)
+                    return
+                }
+                if(!instance_id) {
+                    console.log("Got strange signal without 'instance_id' property:", params)
+                    return
+                }
+
+                if(signal.signal_type != "Trace") {
+                    // Ignoring non-trace signals
+                    return
+                }
+                if(!signal.action) {
+                    console.log("Got strange trace signal without 'action' property:", params)
+                    return
+                }
+
+                if(!app.reduxActions[instance_id]) {
+                    Vue.set(app.reduxActions, instance_id, [])
+                }
+
+                app.reduxActions[instance_id].push(signal.action)
+                app.updateStateDump(instance_id)
             })
 
             refresh()
