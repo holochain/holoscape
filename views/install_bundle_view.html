@@ -22,6 +22,9 @@
         overflow:auto;
         background:#bbb;
       }
+      .name {
+          font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -51,21 +54,21 @@
       </li>
       <li v-if="bundle" class="list-group-item">
           <h3>DNAs in this bundle</h3>
-          <table>
-                <thead>
+          <table class="table">
+                <thead class="thead-light">
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">DNA Hash</th>
-                        <th scope="col">URI</th>
+                        <!--<th scope="col">URI</th>-->
                         <th scope="col">file status</th>
                         <th scope="col">installation status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="instance in bundle.instances">
-                        <td>{{ instance.name }}</td>
+                        <td class="name">{{ instance.name }}</td>
                         <td>{{ instance.dna_hash }}</td>
-                        <td>{{ instance.uri }}</td>
+                        <!--<td>{{ instance.uri }}</td>-->
                         <td>
                             <div class="spinner-border" role="status" v-if="instance.downloadStatus == 'pending'">
                                 <span class="sr-only">Loading...</span>
@@ -89,8 +92,8 @@
       </li>
       <li v-if="bundle" class="list-group-item">
             <h3>Bridges to setup</h3>
-            <table>
-                  <thead>
+            <table class="table">
+                  <thead class="thead-light">
                       <tr>
                           <th scope="col">From (caller)</th>
                           <th scope="col">Handle</th>
@@ -117,15 +120,58 @@
         <li v-if="bundle" class="list-group-item">
                 <h3>UIs to install</h3>
 
+                <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Instance references</th>
+                                <th scope="col">UI references</th>
+                                <!--<th scope="col">URI</th>-->
+                                <th scope="col">file status</th>
+                                <th scope="col">installation status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="ui in bundle.UIs">
+                                <td class="name">{{ ui.name }}</td>
+                                <td>
+                                    <ul>
+                                        <li v-for="ref in ui.instance_references">
+                                            {{ ref.instance_id }}
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li v-for="ref in ui.ui_references">
+                                            {{ ref.ui_id }}
+                                        </li>
+                                    </ul>
+                                </td>
+                                <!--<td>{{ ui.uri }}</td>-->
+                                <td>
+                                    <div class="spinner-border" role="status" v-if="ui.downloadStatus == 'pending'">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <div class="alert alert-danger" v-if="ui.error">{{ui.error}}</div>
+                                    <div class="alert alert-success" v-if="ui.downloadStatus == 'done'">downloaded</div>
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
+                                    <span class="badge badge-light" v-if="ui.downloadStatus=='pending'">downloading...</span>
+                                    <span class="badge badge-info" v-if="ui.downloadStatus=='done'">To be installed...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                  </table>
+
+                <!--
                 <ul>
                     <li v-for="ui in bundle.UIs">
                         <h4>{{ ui.name }}</h4>
                         <span>Needs access to the following instances</span>
-                        <ul>
-                            <li v-for="ref in ui.instance_references">
-                                {{ ref.instance_id }}
-                            </li>
-                        </ul>
+                        
 
                         <div v-if="ui.ui_references && ui.ui_references.length > 0">
                             <span>Needs access to the following UIs</span>
@@ -136,7 +182,7 @@
                             </ul>
                         </div>
                     </li>
-                </ul>
+                </ul>-->  
             </li>
       </ul>
       <button type="button" class="btn btn-secondary" :disabled="!canInstall">Install</button>
@@ -202,6 +248,27 @@
                             rs.on('end', () => {
                                 fileStream.end()
                                 Vue.set(instance, 'downloadStatus', 'done')
+                            })
+                        })
+                      })
+
+                      app.bundle.UIs.map((ui) => {
+                        console.log("Processing UI:", ui)  
+                        ui.tempPath = temp.path()
+                        console.log("Temp path for UI file:", ui.tempPath)  
+                        Vue.set(ui, 'downloadStatus', 'pending')
+                        let fileStream = fs.createWriteStream(ui.tempPath)
+                        console.log("Trying to get URI:", ui.uri)  
+                        getUri(ui.uri, (err, rs) => {
+                            if(err) {
+                                Vue.set(ui, 'error', err.message)
+                                Vue.set(ui, 'downloadStatus', 'error')
+                                return
+                            }
+                            rs.pipe(fileStream)
+                            rs.on('end', () => {
+                                fileStream.end()
+                                Vue.set(ui, 'downloadStatus', 'done')
                             })
                         })
                       })
