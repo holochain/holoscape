@@ -57,7 +57,8 @@
                         <th scope="col">Name</th>
                         <th scope="col">DNA Hash</th>
                         <th scope="col">URI</th>
-                        <th scope="col">status</th>
+                        <th scope="col">file status</th>
+                        <th scope="col">installation status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,13 +66,22 @@
                         <td>{{ instance.name }}</td>
                         <td>{{ instance.dna_hash }}</td>
                         <td>{{ instance.uri }}</td>
+                        <td>
+                            <div class="spinner-border" role="status" v-if="instance.downloadStatus == 'pending'">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div class="alert alert-danger" v-if="instance.error">{{instance.error}}</div>
+                            <div class="alert alert-success" v-if="instance.downloadStatus == 'done'">downloaded</div>
+                        </td>
                         <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
                             <span class="badge badge-success">Already installed</span>
                         </td>
                         <td v-if="instanceStatus[instance.id] != 'installed'">
                             -->
                         <td>
-                            <span class="badge badge-info">To be installed...</span>
+                            <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
+                            <span class="badge badge-light" v-if="instance.downloadStatus=='pending'">downloading...</span>
+                            <span class="badge badge-info" v-if="instance.downloadStatus=='done'">To be installed...</span>
                         </td>
                     </tr>
                 </tbody>
@@ -136,6 +146,8 @@
         const { ipcRenderer } = require('electron')
         const toml = require('toml')
         const fs = require('fs')
+        const getUri = require('get-uri')
+        const temp = require('temp')
 
         let configured = false
 
@@ -165,6 +177,7 @@
                         app.bundle = undefined
                         try{
                             app.bundle = toml.parse(contents)
+                            this.processBundle()
                         }catch(e){
                             app.fileError = e
                         }
@@ -172,7 +185,26 @@
                     }
                   },
                   processBundle() {
-
+                      app.bundle.instances.map((instance) => {
+                        console.log("Processing instance:", instance)  
+                        instance.tempPath = temp.path()
+                        console.log("Temp path for DNA file:", instance.tempPath)  
+                        Vue.set(instance, 'downloadStatus', 'pending')
+                        let fileStream = fs.createWriteStream(instance.tempPath)
+                        console.log("Trying to get URI:", instance.uri)  
+                        getUri(instance.uri, (err, rs) => {
+                            if(err) {
+                                Vue.set(instance, 'error', err.message)
+                                Vue.set(instance, 'downloadStatus', 'error')
+                                return
+                            }
+                            rs.pipe(fileStream)
+                            rs.on('end', () => {
+                                fileStream.end()
+                                Vue.set(instance, 'downloadStatus', 'done')
+                            })
+                        })
+                      })
                   },
                   instanceStatus(instanceId) {
 

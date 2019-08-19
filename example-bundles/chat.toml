@@ -5,13 +5,13 @@ name = "Personas & Profiles"
 id = "__personas"
 dna_hash = "Qmasdfsadf"
 # Optional, might also be retrieved from hchc via hash long-term
-uri = "https://mydomain.com/mydna.json"
+uri = "https://github.com/holochain/personas-profiles/releases/download/0.1.8/personas-profiles.dna.json"
 
 [[instances]]
 name = "Basic Chat"
 id = "__basic-chat"
 dna_hash = "Qm3489nr43"
-uri = "file:./basic-chat/bc-dna.json"
+uri = "https://github.com/holochain/holochain-basic-chat/releases/download/0.0.15/holochain-basic-chat.dna.json"
 
 [[bridges]]
 handle = "p-p-bridge"
