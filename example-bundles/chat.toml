@@ -1,0 +1,62 @@
+# A declaration of an instance that this hApp needs to have installed.
+# `name` here is just an internal name to reference the given DNA inside the rest of this bundle.
+[[instances]]
+name = "Personas & Profiles"
+id = "__personas"
+dna_hash = "Qmasdfsadf"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "https://mydomain.com/mydna.json"
+
+[[instances]]
+name = "Basic Chat"
+id = "__basic-chat"
+dna_hash = "Qm3489nr43"
+uri = "file:./basic-chat/bc-dna.json"
+
+[[bridges]]
+handle = "p-p-bridge"
+caller_id = "__basic-chat"
+callee_id = "__personas"
+
+
+[[UIs]]
+name = "Basic Chat"
+id = "chat-channel"
+ui_bundle_hash = "Qm34abcde"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "file:./basic-chat/ui"
+
+[[UIs.instance_references]]
+ui_handle = "personas"
+instance_id = "__personas"
+
+# "__basic-chat" is the instance identifier in this config (declared above)
+# that needs to be linked to the handle "basic-chat" which is used inside
+# the definitions of the basic-chat UI.  This reference creates a link for that.
+# thus we could link a different implementation of basic-chat to use the same UI
+[[UIs.instance_references]]
+ui_handle = "basic-chat"
+instance_id = "__basic-chat"
+
+# "personas-ui" is the identifier in this config (declared below)
+# that needs to be linked to the handle "persons" which is used inside
+# the definitions of the chat-channel UI.  This reference creates a link for that.
+# thus we could link a different personas admin UI to use the same channel UI
+[[UIs.ui_references]]
+handle = "personas" 
+ui_id = "personas-ui"  
+
+
+
+
+
+[[UIs]]
+name = "Personas"
+id = "personas-ui"
+ui-bundle-hash = "Qm34abcde"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "https://holochain.org/happs/basic-chat/qm34bcde.json"
+
+[[UIs.instance_references]]
+ui_handle = "personas"
+instance_id = "personas"
