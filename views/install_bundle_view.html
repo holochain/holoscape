@@ -125,7 +125,6 @@
                             <tr>
                                 <th scope="col">Name</th>
                                 <th scope="col">Instance references</th>
-                                <th scope="col">UI references</th>
                                 <!--<th scope="col">URI</th>-->
                                 <th scope="col">file status</th>
                                 <th scope="col">installation status</th>
@@ -138,13 +137,6 @@
                                     <ul>
                                         <li v-for="ref in ui.instance_references">
                                             {{ ref.instance_id }}
-                                        </li>
-                                    </ul>
-                                </td>
-                                <td>
-                                    <ul>
-                                        <li v-for="ref in ui.ui_references">
-                                            {{ ref.ui_id }}
                                         </li>
                                     </ul>
                                 </td>

@@ -38,18 +38,6 @@ instance_id = "__personas"
 ui_handle = "basic-chat"
 instance_id = "__basic-chat"
 
-# "personas-ui" is the identifier in this config (declared below)
-# that needs to be linked to the handle "persons" which is used inside
-# the definitions of the chat-channel UI.  This reference creates a link for that.
-# thus we could link a different personas admin UI to use the same channel UI
-[[UIs.ui_references]]
-handle = "personas" 
-ui_id = "personas-ui"  
-
-
-
-
-
 [[UIs]]
 name = "Personas"
 id = "personas-ui"
