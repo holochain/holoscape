@@ -17,7 +17,10 @@ function loadUIinfo() {
 }
 
 function sanitizeUINameForScheme(name) {
-    return name.split('_').join('-')
+    name = name.split('_').join('-')
+    name = name.split(' ').join('-')
+    name = name.toLowerCase()
+    return name
 }
 
 /// This controller is managing all the custom hApp UIs that can be installed.
