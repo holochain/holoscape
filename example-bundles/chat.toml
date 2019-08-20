@@ -27,7 +27,7 @@ ui_bundle_hash = "Qm34abcde"
 uri = "file:///home/lucksus/code/holochain-basic-chat/basic-chat-holoscape.zip"
 
 [[UIs.instance_references]]
-ui_handle = "personas"
+ui_handle = "personas-profiles"
 instance_id = "__personas"
 
 # "__basic-chat" is the instance identifier in this config (declared above)
@@ -35,7 +35,7 @@ instance_id = "__personas"
 # the definitions of the basic-chat UI.  This reference creates a link for that.
 # thus we could link a different implementation of basic-chat to use the same UI
 [[UIs.instance_references]]
-ui_handle = "basic-chat"
+ui_handle = "holo-chat"
 instance_id = "__basic-chat"
 
 [[UIs]]
@@ -46,5 +46,5 @@ ui-bundle-hash = "Qm34abcde"
 uri = "file:///home/lucksus/code/personas-profiles/personas-ui.zip"
 
 [[UIs.instance_references]]
-ui_handle = "personas"
+ui_handle = "personas-profiles"
 instance_id = "__personas"
