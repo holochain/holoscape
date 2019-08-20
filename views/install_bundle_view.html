@@ -116,7 +116,7 @@
                           </td>
                           <td v-if="bridgeStatus[index] != 'installed'">-->
                           <td>
-                            <span class="badge badge-info" v-if="bridge.downloadStatus=='done' && bridge.installStatus==undefined">To be installed...</span>
+                            <span class="badge badge-info" v-if="bridge.installStatus==undefined">To be installed...</span>
                             <span class="badge badge-dark" v-if="bridge.installStatus=='installing'">Installing...</span>
                             <div class="spinner-border" role="status" v-if="bridge.installStatus == 'installing'">
                                 <span class="sr-only">Installing...</span>
@@ -163,6 +163,12 @@
                                     <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
                                     <span class="badge badge-light" v-if="ui.downloadStatus=='pending'">downloading...</span>
                                     <span class="badge badge-info" v-if="ui.downloadStatus=='done'">To be installed...</span>
+                                    <span class="badge badge-info" v-if="ui.downloadStatus=='done' && ui.installStatus==undefined">To be installed...</span>
+                                    <span class="badge badge-dark" v-if="ui.installStatus=='installing'">Installing...</span>
+                                    <div class="spinner-border" role="status" v-if="ui.installStatus == 'installing'">
+                                        <span class="sr-only">Installing...</span>
+                                    </div>
+                                    <span class="badge badge-success" v-if="ui.installStatus=='installed'">Installed!</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -196,6 +202,8 @@
         const fs = require('fs')
         const getUri = require('get-uri')
         const temp = require('temp')
+        const extract = require('extract-zip')
+        const getPort = require('get-port');
 
         let configured = false
 
@@ -301,6 +309,12 @@
                         await addBridge(bridge)
                         Vue.set(bridge, 'installStatus', 'installed')
                     }
+
+                    for(ui of app.bundle.UIs) {
+                        Vue.set(ui, 'installStatus', 'installing')
+                        await installUi(ui)
+                        Vue.set(ui, 'installStatus', 'installed')
+                    }
                   }
                 }
             })
@@ -331,6 +345,40 @@
                 let callee = app.bundle.instances.find((instance)=>instance.id==callee_id)
                 await call('admin/bridge/add')({handle, caller_id: caller.name, callee_id: callee.name})
                 console.log('Bridge added')
+            }
+
+            const installUi = async (ui) => {
+                let extractedPath = temp.path()
+                console.log(`Extracting ${ui.name} to ${extractedPath}`)
+                await new Promise((resolve, reject)=>{
+                    extract(ui.tempPath, {dir: extractedPath}, (err)=>{
+                        if(err) reject(err)
+                        else resolve()
+                    })
+                })
+                console.log(`Extraction done. Installing UI...`)
+                happUiController.installUIFromPath(extractedPath, ui.name)
+                console.log(`Done`)
+
+                console.log(`Creating interface for ${ui.name}`)
+                let id = `${ui.name}-interface`
+                let type = 'websocket'
+                let admin = false
+                let port = await getPort({port: getPort.makeRange(10000, 31000)})
+                await call('admin/interface/add')({id,admin,type,port})
+
+                for(ref of ui.instance_references) {
+                    console.log(`Applying UI -> instance reference: ${JSON.stringify(ref)}`)
+                    let instance = app.bundle.instances.find((instance)=>instance.id==ref.instance_id)
+                    let instance_id = instance.name
+                    let interface_id = id
+                    console.log(`Adding instance '${instance_id}' to interface '${interface_id}'`)
+                    await call('admin/interface/add_instance')({interface_id, instance_id})
+                }
+
+                console.log(`Setting UI '${ui.name}' to use interface '${id}'`)
+                await happUiController.setUiInterface(ui.name, id)
+                console.log(`Completed install of '${ui.name}'`)
             }
 
             window.app = app

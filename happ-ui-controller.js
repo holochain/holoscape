@@ -90,8 +90,10 @@ class HappUiController {
 
         if(!sourcePath) return
         sourcePath = sourcePath[0]
+        this.installUIFromPath(sourcePath, path.basename(sourcePath))
+    }
 
-        let name = path.basename(sourcePath)
+    installUIFromPath(sourcePath, name) {
         let UIsDir = path.join(conductor.rootConfigPath(), 'UIs')
         let installDir = path.join(UIsDir, name)
 
