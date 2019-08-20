@@ -84,7 +84,12 @@
                         <td>
                             <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
                             <span class="badge badge-light" v-if="instance.downloadStatus=='pending'">downloading...</span>
-                            <span class="badge badge-info" v-if="instance.downloadStatus=='done'">To be installed...</span>
+                            <span class="badge badge-info" v-if="instance.downloadStatus=='done' && instance.installStatus==undefined">To be installed...</span>
+                            <span class="badge badge-dark" v-if="instance.installStatus=='installing'">Installing...</span>
+                            <div class="spinner-border" role="status" v-if="instance.installStatus == 'installing'">
+                                <span class="sr-only">Installing...</span>
+                            </div>
+                            <span class="badge badge-success" v-if="instance.installStatus=='installed'">Installed!</span>
                         </td>
                     </tr>
                 </tbody>
@@ -111,7 +116,12 @@
                           </td>
                           <td v-if="bridgeStatus[index] != 'installed'">-->
                           <td>
-                              <span class="badge badge-info">To be installed...</span>
+                            <span class="badge badge-info" v-if="bridge.downloadStatus=='done' && bridge.installStatus==undefined">To be installed...</span>
+                            <span class="badge badge-dark" v-if="bridge.installStatus=='installing'">Installing...</span>
+                            <div class="spinner-border" role="status" v-if="bridge.installStatus == 'installing'">
+                                <span class="sr-only">Installing...</span>
+                            </div>
+                            <span class="badge badge-success" v-if="bridge.installStatus=='installed'">Installed!</span>
                           </td>
                       </tr>
                   </tbody>
@@ -177,7 +187,7 @@
                 </ul>-->  
             </li>
       </ul>
-      <button type="button" class="btn btn-secondary" :disabled="!canInstall">Install</button>
+      <button type="button" class="btn btn-success" v-on:click="install" :disabled="!canInstall">Install</button>
     </div>
 
     <script>
@@ -205,6 +215,7 @@
                   file: undefined,
                   fileError: undefined,
                   bundle: undefined,
+                  canInstall: false
                 },
                 methods: {
                   loadBundle() {
@@ -240,6 +251,7 @@
                             rs.on('end', () => {
                                 fileStream.end()
                                 Vue.set(instance, 'downloadStatus', 'done')
+                                this.checkInstallReady()
                             })
                         })
                       })
@@ -261,15 +273,65 @@
                             rs.on('end', () => {
                                 fileStream.end()
                                 Vue.set(ui, 'downloadStatus', 'done')
+                                this.checkInstallReady()
                             })
                         })
                       })
                   },
                   instanceById(instanceId) {
                     return app.bundle.instances.find((instance) => instance.id == instanceId)
-                  }  
+                  },
+                  checkInstallReady() {
+                      console.log('checkInstallReady')
+                    let all_instances_ok = app.bundle.instances.reduce((acc, instance) => {return instance.downloadStatus == 'done' && acc}, true)
+                    let all_uis_ok = app.bundle.UIs.reduce((acc, instance) => {return instance.downloadStatus == 'done' && acc}, true)
+                    console.log('instances ok', all_instances_ok)
+                    console.log('UIs ok', all_uis_ok)
+                    app.canInstall = all_instances_ok && all_uis_ok
+                  },
+                  async install() {
+                    for(instance of app.bundle.instances) {
+                        Vue.set(instance, 'installStatus', 'installing')
+                        await installInstance(instance)
+                        Vue.set(instance, 'installStatus', 'installed')
+                    }
+
+                    for(bridge of app.bundle.bridges) {
+                        Vue.set(bridge, 'installStatus', 'installing')
+                        await addBridge(bridge)
+                        Vue.set(bridge, 'installStatus', 'installed')
+                    }
+                  }
                 }
             })
+
+            const installInstance = async (instance) => {
+                console.log('Begin installInstance:', instance.name)
+                const agent_id = `${instance.name}-agent`
+                console.log('Adding agent', agent_id)
+                await call('admin/agent/add')({id: agent_id, name: agent_id})
+                console.log('Agent added')
+
+                const dna_id = `${instance.name}-dna`
+                const path = instance.tempPath
+                console.log('Installing DNA', dna_id)
+                await call('admin/dna/install_from_file')({id: dna_id, path, copy: true})
+                console.log('DNA installed')
+
+                const id = `${instance.name}`
+                console.log('Adding instance', id)
+                await call('admin/instance/add')({id,dna_id,agent_id})
+                console.log('Instance added')
+            }
+
+            const addBridge = async (bridge) => {
+                console.log('Adding bridge:', bridge)
+                let {handle, caller_id, callee_id} = bridge
+                let caller = app.bundle.instances.find((instance)=>instance.id==caller_id)
+                let callee = app.bundle.instances.find((instance)=>instance.id==callee_id)
+                await call('admin/bridge/add')({handle, caller_id: caller.name, callee_id: callee.name})
+                console.log('Bridge added')
+            }
 
             window.app = app
         })
