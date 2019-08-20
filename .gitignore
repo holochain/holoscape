@@ -1,3 +1,5 @@
 node_modules
 package-lock.json
 holochain-linux
+holochain-darwin
+.DS_Store
