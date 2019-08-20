@@ -372,8 +372,9 @@
                     let instance = app.bundle.instances.find((instance)=>instance.id==ref.instance_id)
                     let instance_id = instance.name
                     let interface_id = id
+                    let alias = ref.ui_handle
                     console.log(`Adding instance '${instance_id}' to interface '${interface_id}'`)
-                    await call('admin/interface/add_instance')({interface_id, instance_id})
+                    await call('admin/interface/add_instance')({interface_id, instance_id, alias})
                 }
 
                 console.log(`Setting UI '${ui.name}' to use interface '${id}'`)
