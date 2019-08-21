@@ -42,9 +42,12 @@ const happProtocolCallback = (request, callback) => {
             absoluteFilePath = url
         } else {
             if(url.endsWith('_dna_connections.json')) {
-            absoluteFilePath = path.join(conductor.rootConfigPath(), 'UIs', `${happDir}-interface.json`)
+                absoluteFilePath = path.join(conductor.rootConfigPath(), 'UIs', `${happDir}-interface.json`)
             } else {
-            absoluteFilePath = path.join(uiRootDir, path.normalize(url))
+                let filePath = path.normalize(url)
+                filePath = filePath.split("#")[0]
+                filePath = filePath.split("?")[0]
+                absoluteFilePath = path.join(uiRootDir, filePath)
             }
         }
         
