@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const conductor = require('./conductor.js')
 
+const HAPP_SCHEME = 'holoscape-happ'
+
 function UIinfoFile(){
     return path.join(conductor.rootConfigPath(), 'UIs.json')
 } 
@@ -21,6 +23,37 @@ function sanitizeUINameForScheme(name) {
     name = name.split(' ').join('-')
     name = name.toLowerCase()
     return name
+}
+
+const happProtocolCallback = (request, callback) => {
+    console.log(`HAPP SCHEME: got request for file ${request.url}`)
+    const url = request.url.substr(HAPP_SCHEME.length+1)
+    console.log('URL:', url)
+    const urlPath = path.normalize(url)
+    console.log('urlPath:', urlPath)
+    const happDir = urlPath.split('/')[1]
+    console.log('happDir:', happDir)
+    const uiRootDir = path.join(conductor.rootConfigPath(), 'UIs', happDir)
+    let absoluteFilePath
+    const base = `${HAPP_SCHEME}://${happDir}`
+    if(request.url.startsWith(base) && request.url.length > base.length+1){
+        const url = request.url.substr(base.length)
+        if(url.startsWith(__dirname)) {
+            absoluteFilePath = url
+        } else {
+            if(url.endsWith('_dna_connections.json')) {
+            absoluteFilePath = path.join(conductor.rootConfigPath(), 'UIs', `${happDir}-interface.json`)
+            } else {
+            absoluteFilePath = path.join(uiRootDir, path.normalize(url))
+            }
+        }
+        
+    } else {
+        absoluteFilePath = path.join(uiRootDir, 'index.html')
+    }
+
+    console.log('Redirecting to:', absoluteFilePath)
+    callback({ path: absoluteFilePath })
 }
 
 /// This controller is managing all the custom hApp UIs that can be installed.
@@ -57,6 +90,11 @@ class HappUiController {
         ipcMain.on('request-activate-happ-window', (event, args) => {
             console.log(`${args.requester} requested to show another UI: ${args.uiToActivate}`)
             this.showAndRiseUI(args.uiToActivate, args.location)
+        })
+
+        console.log('Registering file protocol:', HAPP_SCHEME)
+        protocol.registerFileProtocol(HAPP_SCHEME, happProtocolCallback, (error) => {
+            if(error) throw error
         })
     }
 
@@ -98,7 +136,7 @@ class HappUiController {
 
     installUIFromPath(sourcePath, name) {
         let UIsDir = path.join(conductor.rootConfigPath(), 'UIs')
-        let installDir = path.join(UIsDir, name)
+        let installDir = path.join(UIsDir, sanitizeUINameForScheme(name))
 
         if(fs.existsSync(installDir)) {
             dialog.showErrorBox('Holoscape', 'UI with name '+name+' already installed!')
@@ -139,7 +177,8 @@ class HappUiController {
         let interfaces = await global.conductor_call('admin/interface/list')()
         let interfaceConfig = interfaces.find((i) => i.id == interfaceId)
         const dnaInterfaceConfig = {dna_interface: interfaceConfig}
-        const filePath = path.join(conductor.rootConfigPath(), 'UIs', `${uiName}-interface.json`)
+        const sanitizedUiName = sanitizeUINameForScheme(uiName)
+        const filePath = path.join(conductor.rootConfigPath(), 'UIs', `${sanitizedUiName}-interface.json`)
         fs.writeFileSync(filePath, JSON.stringify(dnaInterfaceConfig))
         const window = this.runningUIs[uiName]
         if(window) {
@@ -162,49 +201,11 @@ class HappUiController {
 
         const partition = `persist:${name}`
         const ses = session.fromPartition(partition)
-        const scheme = `happ-${sanitizeUINameForScheme(name)}`
-        console.log('Registering protocol scheme', scheme)
         const uiRootDir = this.installedUIs[name].installDir
+        const uiSubDir = path.basename(uiRootDir)
 
-        const protocolCallback = (request, callback) => {
-            console.log(`Inside [${name}], got request for file ${request.url}`)
-            const url = request.url.substr(scheme.length+1)
-            let absoluteFilePath
-            const base = scheme+'://index.html'
-            if(request.url.startsWith(base) && request.url.length > base.length+1){
-            const url = request.url.substr(base.length)
-            if(url.startsWith(__dirname)) {
-                absoluteFilePath = url
-            } else {
-                if(url.endsWith('_dna_connections.json')) {
-                absoluteFilePath = path.join(conductor.rootConfigPath(), 'UIs', `${name}-interface.json`)
-                } else {
-                absoluteFilePath = path.join(uiRootDir, path.normalize(url))
-                }
-            }
-            
-            } else {
-            absoluteFilePath = path.join(uiRootDir, 'index.html')
-            }
-
-            console.log('Redirecting to:', absoluteFilePath)
-            callback({ path: absoluteFilePath })
-        }
-
-        
-        let protocolError = await new Promise((resolve, reject) => {
-            protocol.registerFileProtocol(scheme, protocolCallback, (error) => {
-            if (error) reject('Failed to register protocol '+error)
-            else resolve()
-            })
-        })
-        if(protocolError) {
-            console.error('Could not register custom hApp protocol globally: ', protocolError)
-            return
-        }
-
-        protocolError = await new Promise((resolve, reject) => {
-            ses.protocol.registerFileProtocol(scheme, protocolCallback, (error) => {
+        const protocolError = await new Promise((resolve, reject) => {
+            ses.protocol.registerFileProtocol(HAPP_SCHEME, happProtocolCallback, (error) => {
             if (error) reject('Failed to register protocol '+error)
             else resolve()
             })
@@ -226,7 +227,7 @@ class HappUiController {
         })
         window.uiName = name
 
-        const windowURL = `${scheme}://index.html`
+        const windowURL = `${HAPP_SCHEME}://${uiSubDir}/index.html`
         console.log('Created window. Loading', windowURL)
 
         window.loadURL(windowURL)
@@ -283,4 +284,5 @@ module.exports = {
     UIinfoFile,
     loadUIinfo,
     sanitizeUINameForScheme,
+    HAPP_SCHEME,
 }
