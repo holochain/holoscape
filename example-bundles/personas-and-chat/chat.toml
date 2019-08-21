@@ -24,7 +24,7 @@ name = "Basic Chat"
 id = "chat-channel"
 ui_bundle_hash = "Qm34abcde"
 # Optional, might also be retrieved from hchc via hash long-term
-uri = "file:///home/lucksus/code/holochain-basic-chat/basic-chat-holoscape.zip"
+uri = "file:./basic-chat-holoscape.zip"
 
 [[UIs.instance_references]]
 ui_handle = "personas-profiles"
@@ -43,7 +43,7 @@ name = "Personas"
 id = "personas-ui"
 ui-bundle-hash = "Qm34abcde"
 # Optional, might also be retrieved from hchc via hash long-term
-uri = "file:///home/lucksus/code/personas-profiles/personas-ui.zip"
+uri = "file:./personas-ui.zip"
 
 [[UIs.instance_references]]
 ui_handle = "personas-profiles"
