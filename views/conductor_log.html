@@ -17,7 +17,7 @@
       <ul id="example-1">
         <li v-for="log in logs">
           <span :class="log.level">
-            [{{ log.level }}] {{ log.message }}
+            <b>[{{ log.level }}]</b> <span v-html="log.message"></span>
           </span>
         </li>
       </ul>
@@ -26,6 +26,8 @@
     <script type="text/javascript" src="conductor_log.js"></script>
     <script>
       var ipcRenderer = require('electron').ipcRenderer;
+      var Convert = require('ansi-to-html');
+      var convert = new Convert();
 
       var app = new Vue({
         el: '#app',
@@ -36,6 +38,7 @@
 
       ipcRenderer.on('log', (event,store) => {
           let {level, message} = store
+          message = convert.toHtml(message)
           app.logs.push({level, message})
       });
 
