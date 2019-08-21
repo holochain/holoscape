@@ -70,11 +70,14 @@
                         <td>{{ instance.dna_hash }}</td>
                         <!--<td>{{ instance.uri }}</td>-->
                         <td>
-                            <div class="spinner-border" role="status" v-if="instance.downloadStatus == 'pending'">
-                                <span class="sr-only">Loading...</span>
+                            <div class="badge badge-warning" v-if="instance.downloadStatus == 'pending'">
+                                Downloading
+                                <div class="spinner-border" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                </div>
                             </div>
                             <div class="alert alert-danger" v-if="instance.error">{{instance.error}}</div>
-                            <div class="alert alert-success" v-if="instance.downloadStatus == 'done'">downloaded</div>
+                            <div class="badge badge-success" v-if="instance.downloadStatus == 'done'">Ready</div>
                         </td>
                         <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
                             <span class="badge badge-success">Already installed</span>
@@ -83,8 +86,10 @@
                             -->
                         <td>
                             <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
-                            <span class="badge badge-light" v-if="instance.downloadStatus=='pending'">downloading...</span>
-                            <span class="badge badge-info" v-if="instance.downloadStatus=='done' && instance.installStatus==undefined">To be installed...</span>
+                            <span class="badge badge-info" 
+                                v-if="instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined)">
+                                To be installed...
+                            </span>
                             <span class="badge badge-dark" v-if="instance.installStatus=='installing'">Installing...</span>
                             <div class="spinner-border" role="status" v-if="instance.installStatus == 'installing'">
                                 <span class="sr-only">Installing...</span>
@@ -146,24 +151,29 @@
                                 <td>
                                     <ul>
                                         <li v-for="ref in ui.instance_references">
-                                            {{ ref.instance_id }}
+                                            {{ instanceById(ref.instance_id).name }}
                                         </li>
                                     </ul>
                                 </td>
                                 <!--<td>{{ ui.uri }}</td>-->
                                 <td>
-                                    <div class="spinner-border" role="status" v-if="ui.downloadStatus == 'pending'">
-                                        <span class="sr-only">Loading...</span>
+                                    
+                                    <div class="badge badge-warning" v-if="ui.downloadStatus == 'pending'">
+                                        Downloading
+                                        <div class="spinner-border" role="status">
+                                                <span class="sr-only">Loading...</span>
+                                            </div>
                                     </div>
                                     <div class="alert alert-danger" v-if="ui.error">{{ui.error}}</div>
-                                    <div class="alert alert-success" v-if="ui.downloadStatus == 'done'">downloaded</div>
+                                    <div class="badge badge-success" v-if="ui.downloadStatus == 'done'">Ready</div>
                                 </td>
 
                                 <td>
                                     <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
-                                    <span class="badge badge-light" v-if="ui.downloadStatus=='pending'">downloading...</span>
-                                    <span class="badge badge-info" v-if="ui.downloadStatus=='done'">To be installed...</span>
-                                    <span class="badge badge-info" v-if="ui.downloadStatus=='done' && ui.installStatus==undefined">To be installed...</span>
+                                    <span class="badge badge-info" 
+                                        v-if="ui.downloadStatus=='pending' || (ui.downloadStatus=='done' && ui.installStatus==undefined)">
+                                        To be installed...
+                                    </span>
                                     <span class="badge badge-dark" v-if="ui.installStatus=='installing'">Installing...</span>
                                     <div class="spinner-border" role="status" v-if="ui.installStatus == 'installing'">
                                         <span class="sr-only">Installing...</span>
@@ -193,7 +203,18 @@
                 </ul>-->  
             </li>
       </ul>
-      <button type="button" class="btn btn-success" v-on:click="install" :disabled="!canInstall">Install</button>
+      <div class="container">
+            <div class="row justify-content-center" v-if="success">
+                <div class="col-7">
+                    <h2 class="alert alert-success">Bundle successfully installed!</h2>
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-7">
+                    <button type="button" class="btn btn-success" v-on:click="install" :disabled="!canInstall">Install</button>
+                </div>
+            </div>
+      </div>
     </div>
 
     <script>
@@ -224,7 +245,8 @@
                   file: undefined,
                   fileError: undefined,
                   bundle: undefined,
-                  canInstall: false
+                  canInstall: false,
+                  success: false,
                 },
                 methods: {
                   loadBundle() {
@@ -233,6 +255,7 @@
                         const contents = fs.readFileSync(app.file.path)
                         app.fileError = undefined
                         app.bundle = undefined
+                        app.success = false
                         try{
                             app.bundle = toml.parse(contents)
                             this.processBundle()
@@ -323,6 +346,13 @@
                         await installUi(ui)
                         Vue.set(ui, 'installStatus', 'installed')
                     }
+
+                    app.canInstall = false,
+                    app.file = undefined,
+                    app.fileError = undefined,
+                    app.bundle = undefined,
+                    app.canInstall = false
+                    app.success = true
                   }
                 }
             })
