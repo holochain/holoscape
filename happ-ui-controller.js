@@ -91,8 +91,13 @@ class HappUiController {
         this.holoscape = hs
         this.installedUIs = loadUIinfo()
         ipcMain.on('request-activate-happ-window', (event, args) => {
-            console.log(`${args.requester} requested to show another UI: ${args.uiToActivate}`)
-            this.showAndRiseUI(args.uiToActivate, args.location)
+            let name = args.uiToActivate
+            if(this.installedUIs[name]) {
+                console.log(`${args.requester} requested to show another UI: ${name}`)
+                this.showAndRiseUI(args.uiToActivate, args.location)
+            } else {
+                console.log(`${args.requester} requested to show non-existant UI: ${name}`)
+            }
         })
 
         console.log('Registering file protocol:', HAPP_SCHEME)
