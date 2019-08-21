@@ -5,15 +5,18 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build-mac": "electron-packager . Holoscape --platform=darwin --overwrite --icon=./images/HoloScape-hdpi.icns",
+    "build-linux": "electron-packager . Holoscape --platform=linux --overwrite"
   },
   "author": "Holochain Core Dev Team <devcore@holochain.org>",
   "license": "GPLv3",
   "devDependencies": {
     "electron": "^6.0.0",
-    "menubar": "^6.0.7"
+    "electron-packager": "^14.0.4"
   },
   "dependencies": {
+    "menubar": "^6.0.7",
     "@holochain/hc-web-client": "^0.5.0",
     "extract-zip": "^1.6.7",
     "get-port": "^5.0.0",
@@ -23,5 +26,11 @@
     "temp": "^0.9.0",
     "toml": "^3.0.0",
     "vue": "^2.6.10"
+  },
+  "build": {
+    "appId": "org.holochain.holoscape",
+    "mac": {
+      "category": "org.holochain.holoscape"
+    }
   }
 }

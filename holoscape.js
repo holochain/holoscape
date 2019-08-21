@@ -284,7 +284,7 @@ class Holoscape {
       const onExit = () => {
         this.conductorProcess = null
         this.updateTrayMenu()
-        mb.tray.setImage('images/Holochain50+alpha.png')
+        mb.tray.setImage(systemTrayIconEmpty())
       }
   
       let process = conductor.start(log, onExit)
@@ -303,7 +303,7 @@ class Holoscape {
         this.conductorPassphraseClient = null
         global.conductor_call = null
         this.updateTrayMenu()
-        mb.tray.setImage('images/Holochain50+alpha.png')
+        mb.tray.setImage(systemTrayIconEmpty())
       }
     }
   
@@ -346,7 +346,7 @@ class Holoscape {
           this.debuggerWindow.webContents.send('hc-signal', params)
         })
         global.conductor_call = call
-        mb.tray.setImage('images/HoloScape-system-tray.png')
+        mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()
         this.splash.hide()
         this.configWindow.webContents.send('conductor-call-set')
@@ -365,3 +365,10 @@ module.exports = {
     sanitizeUINameForScheme,
 }
   
+const systemTrayIconFull = () => {
+  return path.join(__dirname, 'images/HoloScape-system-tray.png')
+}
+
+const systemTrayIconEmpty = () => {
+  return path.join(__dirname, 'images/Holochain50+alpha.png')
+}

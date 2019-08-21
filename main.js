@@ -1,7 +1,7 @@
 const { menubar } = require('menubar')
 const { app, ipcMain, protocol } = require('electron')
 const conductor = require('./conductor.js')
-
+const path = require('path')
 const { Holoscape } = require('./holoscape')
 const { loadUIinfo, sanitizeUINameForScheme, HAPP_SCHEME } = require('./happ-ui-controller')
 
@@ -41,7 +41,7 @@ app.on('window-all-closed', e => {
 })
 
 mb.on('ready', () => {
-  mb.tray.setImage('images/Holochain50+alpha.png')
+  mb.tray.setImage(path.join(__dirname, 'images/Holochain50+alpha.png'))
 
   if(!conductor.hasConfig()) {
     console.log("No conductor config found. Initializing...")
