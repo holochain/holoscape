@@ -344,6 +344,10 @@
                 console.log('Adding instance', id)
                 await call('admin/instance/add')({id,dna_id,agent_id})
                 console.log('Instance added')
+
+                console.log('Starting instance ', id)
+                await call('admin/instance/start')({id})
+                console.log('Instance started')
             }
 
             const addBridge = async (bridge) => {
