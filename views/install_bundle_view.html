@@ -79,6 +79,16 @@
                             </div>
                             <div class="alert alert-danger" v-if="instance.error">{{instance.error}}</div>
                             <div class="badge badge-success" v-if="instance.downloadStatus == 'done'">Ready</div>
+                            <div class="badge badge-danger" v-if="instance.fileError">
+                                <div v-if="instance.fileError.hash">
+                                    <span>{{instance.fileError.message}}</span>
+                                    <br>
+                                    <span>{{instance.fileError.hash}}</span>
+                                </div>
+                                <div v-if="!instance.fileError.hash">
+                                    {{instance.fileError}}
+                                </div>
+                            </div>
                         </td>
                         <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
                             <span class="badge badge-success">Already installed</span>
@@ -227,6 +237,7 @@
         const extract = require('extract-zip')
         const getPort = require('get-port');
         const path = require('path')
+        const cli = require('../cli')
 
         let configured = false
 
@@ -283,7 +294,17 @@
                             rs.pipe(fileStream)
                             rs.on('end', () => {
                                 fileStream.end()
-                                Vue.set(instance, 'downloadStatus', 'done')
+                                let {hash, error} = cli.hash(instance.tempPath)
+                                console.log(`FOR INSTANCE ${instance.name}, got: hash = ${hash}, error = ${error}`)
+                                if(error) {
+                                    Vue.set(instance, 'downloadStatus', 'fileError')
+                                    Vue.set(instance, 'fileError', error)    
+                                } else if(hash != instance.dna_hash) {
+                                    Vue.set(instance, 'downloadStatus', 'fileError')
+                                    Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})    
+                                } else {
+                                    Vue.set(instance, 'downloadStatus', 'done')
+                                }
                                 this.checkInstallReady()
                             })
                         })

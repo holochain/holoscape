@@ -2,5 +2,7 @@ node_modules
 package-lock.json
 holochain-linux
 holochain-darwin
+hc-linux
+hc-darwin
 .DS_Store
 Holoscape-linux-x64
