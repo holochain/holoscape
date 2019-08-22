@@ -54,6 +54,8 @@ mb.on('ready', () => {
     return
   }
 
+  global.rootConfigPath = conductor.rootConfigPath()
+
   global.logMessages = []
   global.holoscape = new Holoscape()
   global.holoscape.init()

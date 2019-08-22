@@ -1,4 +1,8 @@
 const { spawnSync } = require('child_process')
+const path = require('path')
+const { remote } = require('electron')
+
+const rootConfigPath = remote.getGlobal('rootConfigPath')
 
 function executablePath() {
     let executable;
@@ -20,7 +24,11 @@ module.exports = {
     hash: (filePath) => {
         console.log("CLI: hashing file", filePath)
         let params = ["hash", "--path", filePath]
-        let { stdout, stderr, error } = spawnSync(executablePath(), params)
+        let { stdout, stderr, error } = spawnSync(
+            executablePath(), 
+            params,
+            {cwd: rootConfigPath}
+        )
         stderr = stderr.toString()
         stdout = stdout.toString()
         console.log("CLI: got results:")
