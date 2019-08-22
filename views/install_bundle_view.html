@@ -106,7 +106,7 @@
                                 <span class="sr-only">Installing...</span>
                             </div>
                             <span class="badge badge-success" v-if="instance.installStatus=='installed'">Installed!</span>
-                            <span class="badge badge-success" v-if="instance.installedInstanceId">Already installed</span>
+                            <span class="badge badge-light" v-if="instance.installedInstanceId">Already installed</span>
                         </td>r>
                 </tbody>
           </table>
@@ -132,12 +132,13 @@
                           </td>
                           <td v-if="bridgeStatus[index] != 'installed'">-->
                           <td>
-                            <span class="badge badge-info" v-if="bridge.installStatus==undefined">To be installed...</span>
+                            <span class="badge badge-info" v-if="bridge.installStatus==undefined && !bridge.alreadyInstalled">To be installed...</span>
                             <span class="badge badge-dark" v-if="bridge.installStatus=='installing'">Installing...</span>
                             <div class="spinner-border" role="status" v-if="bridge.installStatus == 'installing'">
                                 <span class="sr-only">Installing...</span>
                             </div>
                             <span class="badge badge-success" v-if="bridge.installStatus=='installed'">Installed!</span>
+                            <span class="badge badge-light" v-if="bridge.alreadyInstalled">Already installed</span>
                           </td>
                       </tr>
                   </tbody>
@@ -331,6 +332,23 @@
                         }
                       })
 
+                      app.bundle.bridges.map((bridge) => {
+                        let caller_id = bundleInstanceIdToRealId(bridge.caller_id)
+                        let callee_id = bundleInstanceIdToRealId(bridge.callee_id)
+                        let handle = bridge.handle
+                        console.log("Checking if bridge is already there:", {caller_id, callee_id, handle})
+                        if(app.installed_bridges.find((b)=>{
+                            return b.caller_id == caller_id 
+                                && b.callee_id == callee_id
+                                && b.handle == handle
+                        })) {
+                            console.log("Found bridge")
+                            Vue.set(bridge, 'alreadyInstalled', true)
+                        } else {
+                            console.log("Bridge not found")
+                        }
+                      })
+
                       app.bundle.UIs.map((ui) => {
                         console.log("Processing UI:", ui)  
                         ui.tempPath = temp.path()
@@ -383,6 +401,7 @@
                     }
 
                     for(bridge of app.bundle.bridges) {
+                        if(bridge.alreadyInstalled) continue
                         Vue.set(bridge, 'installStatus', 'installing')
                         await addBridge(bridge)
                         Vue.set(bridge, 'installStatus', 'installed')
@@ -427,15 +446,20 @@
                 console.log('Instance started')
             }
 
+            const bundleInstanceIdToRealId = (id) => {
+                // If the specified instance was installed before we have to make sure that use that id.
+                // Otherwise the ID we've setup when installing a new instance is the name:
+                let bundleInstance = app.bundle.instances.find((instance)=>instance.id==id)
+                return bundleInstance.installedInstanceId ? bundleInstance.installedInstanceId : bundleInstance.name
+            }
+            
+            window.bundleInstanceIdToRealId = bundleInstanceIdToRealId
+
             const addBridge = async (bridge) => {
                 console.log('Adding bridge:', bridge)
                 let {handle, caller_id, callee_id} = bridge
-                let caller = app.bundle.instances.find((instance)=>instance.id==caller_id)
-                let callee = app.bundle.instances.find((instance)=>instance.id==callee_id)
-                // If the specified instance was installed before we have to make sure that use that id.
-                // Otherwise the ID we've setup when installing a new instance is the name:
-                caller_id = caller.installedInstanceId ? caller.installedInstanceId : caller.name
-                callee_id = callee.installedInstanceId ? callee.installedInstanceId : callee.name
+                caller_id = bundleInstanceIdToRealId(caller_id)
+                callee_id = bundleInstanceIdToRealId(callee_id)
                 await call('admin/bridge/add')({handle, caller_id, callee_id})
                 console.log('Bridge added')
             }
@@ -462,10 +486,7 @@
 
                 for(ref of ui.instance_references) {
                     console.log(`Applying UI -> instance reference: ${JSON.stringify(ref)}`)
-                    let instance = app.bundle.instances.find((instance)=>instance.id==ref.instance_id)
-                    // If the specified instance was installed before we have to make sure that use that id.
-                    // Otherwise the ID we've setup when installing a new instance is the name:
-                    let instance_id = instance.installedInstanceId ? instance.installedInstanceId : instance.name
+                    let instance_id = bundleInstanceIdToRealId(ref.instance_id)
                     let interface_id = id
                     let alias = ref.ui_handle
                     console.log(`Adding instance '${instance_id}' to interface '${interface_id}'`)
