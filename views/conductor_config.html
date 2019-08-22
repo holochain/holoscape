@@ -18,6 +18,10 @@
       .modal-spinner {
         margin: 20px;
       }
+      .file-column {
+        max-width: 400px;
+        word-break: break-all;
+      }
     </style>
   </head>
   <body>
@@ -48,7 +52,7 @@
                 <td>{{ agent.id }}</td>
                 <td>{{ agent.name }}</td>
                 <td>{{ agent.address }}</td>
-                <td>{{ agent.keystore_file }}</td>
+                <td class="file-column">{{ agent.keystore_file }}</td>
                 <td>@mdo</td>
               </tr>
             </tbody>
