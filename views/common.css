@@ -1,4 +1,9 @@
 body {
     background: linear-gradient(45deg, #1a0231f2, #00017f);
     color: white;
+    padding-top: 40px;
+}
+
+h2, h3, h4 {
+    color: black;
 }

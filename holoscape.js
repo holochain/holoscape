@@ -156,7 +156,7 @@ class Holoscape {
     createConfigWindow() {
       let window = new BrowserWindow({
         width:1200,
-        height:800,
+        height:1200,
         webPreferences: {
           nodeIntegration: true
         },
