@@ -1,4 +1,4 @@
-const { app, Menu, BrowserWindow, ipcMain } = require('electron')
+const { app, Menu, BrowserWindow, ipcMain, shell } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
@@ -244,9 +244,10 @@ class Holoscape {
     updateTrayMenu(opt) {
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
       const settingsMenu = Menu.buildFromTemplate([
+        { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
         { label: 'Install UI...', click: ()=>this.happUiController.installUI() },
         { label: 'UI <> interface connections...', type: 'checkbox', checked: this.uiConfigWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideUiConfig() },
-        { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
+        { label: 'Reveal config directory', click: ()=>shell.openItem(conductor.rootConfigPath()) },
       ])
       const conductorMenu = Menu.buildFromTemplate([
         { label: 'Debug view', type: 'checkbox', checked: this.debuggerWindow.isVisible(), click: ()=>this.showHideDebuggerWindow() },
