@@ -7,6 +7,8 @@ const spawn = require('child_process').spawn
 const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape')
 const configPath = path.join(rootConfigPath, 'conductor-config.toml')
 const passphraseSocketPath = path.join(rootConfigPath, 'conductor_login.socket')
+
+const ADMIN_PORT = 4435
 module.exports = {
   configPath,
   passphraseSocketPath,
@@ -19,11 +21,15 @@ module.exports = {
     return fs.existsSync(configPath)
   },
 
+  adminPort: () => {
+    return ADMIN_PORT
+  },
+
   initConfig: () => {
     const initialConfigTemplate = fs.readFileSync(path.join(__dirname, 'initial_conductor_config.toml'), 'utf8')
     const persistenceDir = rootConfigPath
     const n3hPath = path.join(rootConfigPath, 'n3h')
-    const adminPort = 33444
+    const adminPort = ADMIN_PORT
     const passphraseSocket = passphraseSocketPath
     const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,n3hPath,passphraseSocket})
 

@@ -342,7 +342,7 @@ class Holoscape {
     }
   
     connectConductor() {
-      connect({url:"ws://localhost:33444"}).then(({call, callZome, close, onSignal}) => {
+      connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           this.debuggerWindow.webContents.send('hc-signal', params)
         })
