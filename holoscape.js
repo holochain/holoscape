@@ -256,7 +256,7 @@ class Holoscape {
         { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
       ])
       const contextMenu = Menu.buildFromTemplate([
-        { label: 'UIs', type: 'submenu', submenu: happMenu },
+        { label: 'hApps', type: 'submenu', submenu: happMenu },
         { type: 'separator' },
         { label: 'Settings', type: 'submenu', submenu: settingsMenu },
         { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
@@ -361,25 +361,15 @@ class Holoscape {
     }
   }
 
-const systemTrayIconFull = () => {
-  if(process.platform === "darwin") {
-    return path.join(__dirname, 'images/HoloScape-22px.png')
-  } else {
-    return path.join(__dirname, 'images/HoloScape-system-tray.png')
-  }
-}
-
-const systemTrayIconEmpty = () => {
-  if(process.platform === "darwin") {
-    return path.join(__dirname, 'images/Holochain-22px.png')
-  } else {
-    return path.join(__dirname, 'images/Holochain50+alpha.png')
-  }
-}
-
 module.exports = {
     Holoscape,
     sanitizeUINameForScheme,
-    systemTrayIconFull,
-    systemTrayIconEmpty,
+}
+  
+const systemTrayIconFull = () => {
+  return path.join(__dirname, 'images/HoloScape-system-tray.png')
+}
+
+const systemTrayIconEmpty = () => {
+  return path.join(__dirname, 'images/Holochain50+alpha.png')
 }
