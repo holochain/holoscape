@@ -361,15 +361,25 @@ class Holoscape {
     }
   }
 
-module.exports = {
-    Holoscape,
-    sanitizeUINameForScheme,
-}
-  
 const systemTrayIconFull = () => {
-  return path.join(__dirname, 'images/HoloScape-system-tray.png')
+  if(process.platform === "darwin") {
+    return path.join(__dirname, 'images/HoloScape-22px.png')
+  } else {
+    return path.join(__dirname, 'images/HoloScape-system-tray.png')
+  }
 }
 
 const systemTrayIconEmpty = () => {
-  return path.join(__dirname, 'images/Holochain50+alpha.png')
+  if(process.platform === "darwin") {
+    return path.join(__dirname, 'images/Holochain-22px.png')
+  } else {
+    return path.join(__dirname, 'images/Holochain50+alpha.png')
+  }
+}
+
+module.exports = {
+    Holoscape,
+    sanitizeUINameForScheme,
+    systemTrayIconFull,
+    systemTrayIconEmpty,
 }
