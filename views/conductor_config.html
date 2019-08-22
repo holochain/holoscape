@@ -53,7 +53,7 @@
                 <td>{{ agent.name }}</td>
                 <td>{{ agent.address }}</td>
                 <td class="file-column">{{ agent.keystore_file }}</td>
-                <td>@mdo</td>
+                <td><button type="button" class="btn btn-danger" data-dismiss="modal" disabled="true">Remove agent</button></td>
               </tr>
             </tbody>
         </table>
@@ -107,7 +107,7 @@
               <tr v-for="dna in dnas">
                 <td>{{ dna.id }}</td>
                 <td>{{ dna.hash }}</td>
-                <td><button type="button" class="btn btn-danger" :data-id="dna.id">Uninstall</button></td>
+                <td><button type="button" class="btn btn-danger" :data-id="dna.id" disabled="true">Uninstall</button></td>
               </tr>
             </tbody>
         </table>
@@ -167,7 +167,7 @@
                 <td>{{ instance.id }}</td>
                 <td>{{ instance.dna }}</td>
                 <td>{{ instance.agent }}</td>
-                <td>@mdo</td>
+                <td><button type="button" class="btn btn-danger" data-dismiss="modal" disabled="true">Remove instance</button></td>
               </tr>
             </tbody>
         </table>
@@ -236,7 +236,7 @@
                 <td>{{ interface.instances }}</td>
                 <td>
                   <button type="button" class="btn btn-success add-instance-to-interface-button" :data-id="interface.id" v-on:click="addInstanceToInterfaceClick">Add instance</button>
-                  <button type="button" class="btn btn-danger" :data-id="interface.id">Remove interface</button>
+                  <button type="button" class="btn btn-danger" :data-id="interface.id" disabled="true">Remove interface</button>
                 </td>
               </tr>
             </tbody>
@@ -338,7 +338,7 @@
                 <td>{{ bridge.handle }}</td>
                 <td>{{ bridge.caller_id }}</td>
                 <td>{{ bridge.callee_id }}</td>
-                <td>
+                <td><button type="button" class="btn btn-danger" data-dismiss="modal" disabled="true">Remove bridge</button>
                 </td>
               </tr>
             </tbody>
