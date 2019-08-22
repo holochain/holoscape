@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "DEV=true electron .",
     "build-mac": "electron-packager . Holoscape --platform=darwin --overwrite --icon=./images/HoloScape-hdpi.icns",
-    "build-linux": "electron-packager . Holoscape --platform=linux --overwrite"
+    "build-linux": "electron-packager . Holoscape --platform=linux --overwrite --icon=./images/HoloScape-hdpi.png"
   },
   "author": "Holochain Core Dev Team <devcore@holochain.org>",
   "license": "GPLv3",
