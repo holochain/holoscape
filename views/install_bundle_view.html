@@ -98,7 +98,7 @@
                         <td>
                             <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
                             <span class="badge badge-info" 
-                                v-if="instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined)">
+                                v-if="!instance.installedInstanceId && (instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined))">
                                 To be installed...
                             </span>
                             <span class="badge badge-dark" v-if="instance.installStatus=='installing'">Installing...</span>
@@ -106,8 +106,8 @@
                                 <span class="sr-only">Installing...</span>
                             </div>
                             <span class="badge badge-success" v-if="instance.installStatus=='installed'">Installed!</span>
-                        </td>
-                    </tr>
+                            <span class="badge badge-success" v-if="instance.installedInstanceId">Already installed</span>
+                        </td>r>
                 </tbody>
           </table>
       </li>
@@ -259,9 +259,15 @@
                   bundle: undefined,
                   canInstall: false,
                   success: false,
+                  installed_instances: [],
+                  installed_dnas: [],
+                  installed_bridges: [],
                 },
                 methods: {
-                  loadBundle() {
+                  async loadBundle() {
+                    this.installed_instances = await call('admin/instance/list')()
+                    this.installed_dnas = await call('admin/dna/list')()
+                    this.installed_bridges = await call('admin/bridge/list')()
                     if(this.$refs.bundleFile.files.length > 0) {
                         app.file = this.$refs.bundleFile.files[0]
                         const contents = fs.readFileSync(app.file.path)
@@ -277,37 +283,52 @@
                         
                     }
                   },
+                  installedInstanceId(instance) {
+                    console.log("Checking if instance is installed: ", instance)
+                    let installed_dna = app.installed_dnas.find((dna)=>{return dna.hash==instance.dna_hash})
+                    if(!installed_dna) return
+                    console.log("Found DNA:", installed_dna)
+                    let installed_instance = this.installed_instances.find((i)=>{return i.dna==installed_dna.id})
+                    console.log("Found instance:", installed_instance)
+                    return installed_instance.id
+                  },
                   processBundle() {
                       app.bundle.instances.map((instance) => {
-                        console.log("Processing instance:", instance)  
-                        instance.tempPath = temp.path()
-                        console.log("Temp path for DNA file:", instance.tempPath)  
-                        Vue.set(instance, 'downloadStatus', 'pending')
-                        let fileStream = fs.createWriteStream(instance.tempPath)
-                        console.log("Trying to get URI:", instance.uri)  
-                        getUri(instance.uri, (err, rs) => {
-                            if(err) {
-                                Vue.set(instance, 'error', err.message)
-                                Vue.set(instance, 'downloadStatus', 'error')
-                                return
-                            }
-                            rs.pipe(fileStream)
-                            rs.on('end', () => {
-                                fileStream.end()
-                                let {hash, error} = cli.hash(instance.tempPath)
-                                console.log(`FOR INSTANCE ${instance.name}, got: hash = ${hash}, error = ${error}`)
-                                if(error) {
-                                    Vue.set(instance, 'downloadStatus', 'fileError')
-                                    Vue.set(instance, 'fileError', error)    
-                                } else if(hash != instance.dna_hash) {
-                                    Vue.set(instance, 'downloadStatus', 'fileError')
-                                    Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})    
-                                } else {
-                                    Vue.set(instance, 'downloadStatus', 'done')
+                        console.log("Processing instance:", instance)
+                        let installed_instance_id = this.installedInstanceId(instance)
+                        if(installed_instance_id) {
+                            Vue.set(instance, 'installedInstanceId', installed_instance_id)
+                            this.checkInstallReady()
+                        } else {
+                            instance.tempPath = temp.path()
+                            console.log("Temp path for DNA file:", instance.tempPath)  
+                            Vue.set(instance, 'downloadStatus', 'pending')
+                            let fileStream = fs.createWriteStream(instance.tempPath)
+                            console.log("Trying to get URI:", instance.uri)  
+                            getUri(instance.uri, (err, rs) => {
+                                if(err) {
+                                    Vue.set(instance, 'error', err.message)
+                                    Vue.set(instance, 'downloadStatus', 'error')
+                                    return
                                 }
-                                this.checkInstallReady()
+                                rs.pipe(fileStream)
+                                rs.on('end', () => {
+                                    fileStream.end()
+                                    let {hash, error} = cli.hash(instance.tempPath)
+                                    console.log(`FOR INSTANCE ${instance.name}, got: hash = ${hash}, error = ${error}`)
+                                    if(error) {
+                                        Vue.set(instance, 'downloadStatus', 'fileError')
+                                        Vue.set(instance, 'fileError', error)    
+                                    } else if(hash != instance.dna_hash) {
+                                        Vue.set(instance, 'downloadStatus', 'fileError')
+                                        Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})    
+                                    } else {
+                                        Vue.set(instance, 'downloadStatus', 'done')
+                                    }
+                                    this.checkInstallReady()
+                                })
                             })
-                        })
+                        }
                       })
 
                       app.bundle.UIs.map((ui) => {
@@ -343,8 +364,11 @@
                     return app.bundle.instances.find((instance) => instance.id == instanceId)
                   },
                   checkInstallReady() {
-                      console.log('checkInstallReady')
-                    let all_instances_ok = app.bundle.instances.reduce((acc, instance) => {return instance.downloadStatus == 'done' && acc}, true)
+                    console.log('checkInstallReady')
+                    let all_instances_ok = app.bundle.instances.reduce((acc, instance) => {
+                        let instanceReady = instance.downloadStatus == 'done' || instance.installedInstanceId
+                        return  instanceReady && acc
+                    }, true)
                     let all_uis_ok = app.bundle.UIs.reduce((acc, instance) => {return instance.downloadStatus == 'done' && acc}, true)
                     console.log('instances ok', all_instances_ok)
                     console.log('UIs ok', all_uis_ok)
@@ -352,6 +376,7 @@
                   },
                   async install() {
                     for(instance of app.bundle.instances) {
+                        if(instance.installedInstanceId) continue
                         Vue.set(instance, 'installStatus', 'installing')
                         await installInstance(instance)
                         Vue.set(instance, 'installStatus', 'installed')
@@ -407,7 +432,11 @@
                 let {handle, caller_id, callee_id} = bridge
                 let caller = app.bundle.instances.find((instance)=>instance.id==caller_id)
                 let callee = app.bundle.instances.find((instance)=>instance.id==callee_id)
-                await call('admin/bridge/add')({handle, caller_id: caller.name, callee_id: callee.name})
+                // If the specified instance was installed before we have to make sure that use that id.
+                // Otherwise the ID we've setup when installing a new instance is the name:
+                caller_id = caller.installedInstanceId ? caller.installedInstanceId : caller.name
+                callee_id = callee.installedInstanceId ? callee.installedInstanceId : callee.name
+                await call('admin/bridge/add')({handle, caller_id, callee_id})
                 console.log('Bridge added')
             }
 
@@ -434,7 +463,9 @@
                 for(ref of ui.instance_references) {
                     console.log(`Applying UI -> instance reference: ${JSON.stringify(ref)}`)
                     let instance = app.bundle.instances.find((instance)=>instance.id==ref.instance_id)
-                    let instance_id = instance.name
+                    // If the specified instance was installed before we have to make sure that use that id.
+                    // Otherwise the ID we've setup when installing a new instance is the name:
+                    let instance_id = instance.installedInstanceId ? instance.installedInstanceId : instance.name
                     let interface_id = id
                     let alias = ref.ui_handle
                     console.log(`Adding instance '${instance_id}' to interface '${interface_id}'`)
