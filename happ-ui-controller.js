@@ -25,6 +25,16 @@ function sanitizeUINameForScheme(name) {
     return name
 }
 
+function setupWindowDevProduction(window) {
+    if(process.env.DEV) {
+      window.webContents.openDevTools()
+    } else {
+      window.setMenu(null)
+      window.removeMenu()
+    }
+  }
+  
+
 const happProtocolCallback = (request, callback) => {
     console.log(`HAPP SCHEME: got request for file ${request.url}`)
     const url = request.url.substr(HAPP_SCHEME.length+1)
@@ -239,7 +249,7 @@ class HappUiController {
         console.log('Created window. Loading', windowURL)
 
         window.loadURL(windowURL)
-        window.webContents.openDevTools()
+        setupWindowDevProduction(window)
         let holoscape = this.holoscape
         window.on('close', (event) => {
             if(!holoscape.quitting) event.preventDefault();
@@ -293,4 +303,5 @@ module.exports = {
     loadUIinfo,
     sanitizeUINameForScheme,
     HAPP_SCHEME,
+    setupWindowDevProduction,
 }

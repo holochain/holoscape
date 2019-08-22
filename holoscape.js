@@ -4,7 +4,7 @@ const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
 const net = require('net')
 const conductor = require('./conductor.js')
-const { HappUiController, sanitizeUINameForScheme } = require('./happ-ui-controller')
+const { HappUiController, sanitizeUINameForScheme, setupWindowDevProduction } = require('./happ-ui-controller')
 
 /// This is the main controller of the whole application.
 /// There is one instance of Holoscape that gets created in main.
@@ -141,7 +141,7 @@ class Holoscape {
         show: false,
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
-      //window.webContents.openDevTools()
+      setupWindowDevProduction(window)
   
       let holoscape = this
       window.on('close', (event) => {
@@ -163,7 +163,7 @@ class Holoscape {
         show: false,
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
-      window.webContents.openDevTools()
+      setupWindowDevProduction(window)
   
       let holoscape = this
       window.on('close', (event) => {
@@ -185,7 +185,7 @@ class Holoscape {
         show: false,
       })
       window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
-      window.webContents.openDevTools()
+      setupWindowDevProduction(window)
   
       let holoscape = this
       window.on('close', (event) => {
@@ -207,7 +207,7 @@ class Holoscape {
         show: false,
       })
       window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
-      window.webContents.openDevTools()
+      setupWindowDevProduction(window)
   
       let holoscape = this
       window.on('close', (event) => {
@@ -229,7 +229,7 @@ class Holoscape {
         show: false,
       })
       window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
-      window.webContents.openDevTools()
+      setupWindowDevProduction(window)
   
       let holoscape = this
       window.on('close', (event) => {
