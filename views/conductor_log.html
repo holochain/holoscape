@@ -8,7 +8,10 @@
         color: red;
       }
       .info {
-        color: blue;
+        color: white;
+      }
+      ul {
+        list-style-type: none;
       }
     </style>
   </head>
@@ -16,18 +19,16 @@
     <div id="app">
       <ul id="example-1">
         <li v-for="log in logs">
-          <span :class="log.level">
-            <b>[{{ log.level }}]</b> <span v-html="log.message"></span>
-          </span>
+          <div :class="log.level" v-html="log.message">
+          </div>
         </li>
       </ul>
     </div>
 
-    <script type="text/javascript" src="conductor_log.js"></script>
     <script>
       var ipcRenderer = require('electron').ipcRenderer;
       var Convert = require('ansi-to-html');
-      var convert = new Convert();
+      var convert = new Convert({newline: true});
 
       var app = new Vue({
         el: '#app',
@@ -37,9 +38,9 @@
       })
 
       ipcRenderer.on('log', (event,store) => {
-          let {level, message} = store
-          message = convert.toHtml(message)
-          app.logs.push({level, message})
+        let {level, message} = store
+        message = convert.toHtml(message)
+        app.logs.push({level, message})
       });
 
     </script>
