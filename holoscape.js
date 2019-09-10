@@ -1,4 +1,4 @@
-const { app, Menu, BrowserWindow, ipcMain, shell } = require('electron')
+const { app, Menu, BrowserWindow, ipcMain, shell, dialog } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
@@ -40,6 +40,19 @@ class Holoscape {
       await this.showSplashScreen()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
+      
+      setTimeout(()=> {
+        if(!global.conductor_call) {
+          this.splash.hide()
+          dialog.showMessageBoxSync({
+            type: "warning",
+            message: "Holoscape could not connect to the newly started conductor within 60 seconds. The log window will be shown now. Please read it carefully and check for any errors. The most probable reason for this is another conductor process running on that same port - watch out for 'Address already in use'.",
+            buttons: ["Ok"]
+          })
+          this.splash.show()
+          this.showHideLogs()
+        }
+      }, 60000)
     }
   
     showSplashScreen() {
