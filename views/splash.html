@@ -40,15 +40,33 @@
         transform: translateX(-50%);
       }
       .error {
-        color: red;
+        color: rgb(238, 153, 153);
       }
       .info {
-        color: blue;
+        color: rgb(173, 192, 245);
+      }
+      #log {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        padding: 5px;
+        color: white;
+        text-align: right;
+        font-size: 12px;
+      }
+      ul {
+        list-style-type: none;
       }
     </style>
   </head>
   <body class="background">
     <div id="app">
+      <ul id="log">
+        <li v-for="log in logs">
+          <div :class="log.level" v-html="log.message">
+          </div>
+        </li>
+      </ul>
       <h1 class="header">Holoscape</h1>
       <img class="logo" src="../images/HoloScape-mdpi.png"></img>
       <div class="status">{{status}}</div>
@@ -79,15 +97,24 @@
 
     <script>
       var ipcRenderer = require('electron').ipcRenderer;
+      var Convert = require('ansi-to-html');
+      var convert = new Convert({newline: true});
 
       var app = new Vue({
         el: '#app',
         data: {
-          status: "Initializing..."
+          status: "Initializing...",
+          logs: require('electron').remote.getGlobal('holoscape').logMessages
         }
       })
 
-      console.log('asdfsadfds')
+
+      ipcRenderer.on('log', (event,store) => {
+        let {level, message} = store
+        message = convert.toHtml(message)
+        app.logs.push({level, message})
+      });
+
       ipcRenderer.on('splash-status', (event, message) => {
         console.log(message)
         app.status = message

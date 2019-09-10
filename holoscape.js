@@ -280,6 +280,9 @@ class Holoscape {
         if(global.holoscape.logWindow && global.holoscape.logWindow.webContents) {
           global.holoscape.logWindow.webContents.send('log', {level,message})
         }
+        if(global.holoscape.splash && global.holoscape.splash.webContents) {
+          global.holoscape.splash.webContents.send('log', {level,message})
+        }
       }
   
       const onExit = () => {
