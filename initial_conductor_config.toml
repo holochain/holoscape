@@ -21,11 +21,8 @@ type = "debug"
 state_dump = true
 
 [network]
-type="n3h"
-n3h_log_level = "i"
-bootstrap_nodes = []
-n3h_mode = "REAL"
-n3h_persistence_path = "{{{n3hPath}}}"
+type="sim1h"
+dynamo_url="http://f2ba6adc.ngrok.io"
 
 [passphrase_service]
 type="unixsocket"
