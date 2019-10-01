@@ -22,7 +22,7 @@ state_dump = true
 
 [network]
 type="sim1h"
-dynamo_url="http://f2ba6adc.ngrok.io"
+dynamo_url="https://test-networking.holo-aws.org"
 
 [passphrase_service]
 type="unixsocket"
