@@ -52,6 +52,10 @@
                     </div>
                 </div>
                 <div v-if="fileError" class="alert alert-danger">{{ fileError }}</div>
+            <h3>Install with admin interface?</h3>
+            <div class="input-group">
+            <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
+          </div>
       </li>
       <li v-if="bundle" class="list-group-item">
           <h3>DNAs in this bundle</h3>
@@ -256,6 +260,7 @@
                 el: '#app',
                 data: {
                   canInstall: false,
+                  installAsAdmin: false,
                   file: undefined,
                   fileError: undefined,
                   bundle: undefined,
@@ -492,7 +497,7 @@
                 console.log(`Creating interface for ${ui.name}`)
                 let id = `${ui.name}-interface`
                 let type = 'websocket'
-                let admin = false
+                let admin = app.installAsAdmin
                 let port = await getPort({port: getPort.makeRange(10000, 31000)})
                 await call('admin/interface/add')({id,admin,type,port})
 
