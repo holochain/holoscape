@@ -25,11 +25,11 @@ class Holoscape {
     /// Conductor references (mabe move to conductor.js?)
     conductorProcess; // Handle to the return value of spawn
     conductorPassphraseClient; // Handle to the socket through which the conductor requests passphrases
-    
+
     /// Misc.:
     logMessages = [];
     quitting = false;
-      
+
     async init() {
       this.happUiController = new HappUiController(this)
       this.createLogWindow()
@@ -37,10 +37,9 @@ class Holoscape {
       this.createUiConfigWindow()
       this.createDebuggerWindow()
       this.createInstallBundleWindow()
-      await this.showSplashScreen()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
-      
+
       setTimeout(()=> {
         if(!global.conductor_call) {
           this.splash.hide()
@@ -54,7 +53,7 @@ class Holoscape {
         }
       }, 60000)
     }
-  
+
     showSplashScreen() {
       let window = new BrowserWindow({
         width:890,
@@ -70,45 +69,45 @@ class Holoscape {
       window.loadURL(path.join('file://', __dirname, 'views/splash.html'))
       //window.webContents.openDevTools()
       this.splash = window
-  
+
       return new Promise((resolve) => {
         window.webContents.on('did-finish-load', ()=>{
             resolve()
         })
       })
     }
-  
+
     checkConductorConnection() {
       if(this.conductorProcess && !global.conductor_call) {
         this.connectConductor()
       }
     }
-  
+
     checkConductorPassphraseSocket() {
       if(this.conductorProcess && !this.conductorPassphraseClient) {
         this.connectPassphraseSocket()
       }
     }
-  
+
     connectPassphraseSocket() {
       if(!fs.existsSync(conductor.passphraseSocketPath)) {
         console.log('Passphrase socket not found (yet)')
         return
       }
-  
+
       let client
       try{
         client = net.createConnection(conductor.passphraseSocketPath)
       } catch(e) {
         console.log('Error trying to connect to passphrase socket:', e)
       }
-  
-  
+
+
       const that = this
       client.on("connect", () => {
         that.conductorPassphraseClient = client
       })
-  
+
       /// The conductor requests a passphrase by sending something over the socket.
       /// We are not yet caring about what it sends, but we might want to add different
       /// styles of passphrase requests: setting a new one or unlocking a keystore that
@@ -121,7 +120,7 @@ class Holoscape {
         if(!splashWasVisible) {
           that.splash.show()
         }
-  
+
         that.splash.webContents.send('request-passphrase', "Booting conductor...")
         that.splash.webContents.send('splash-status', "Prompting for passphrase...")
         let passphrase = await new Promise((resolve)=>{
@@ -129,19 +128,19 @@ class Holoscape {
             resolve(message)
           })
         })
-  
+
         /// Ok, when we're here, we got the passphrase from the splash-screen dialog.
         /// We need to append a new-line so the conductor knows where the passphrase ends.
         /// (the channel is kept open as long as Holoscape and conductor live...)
         client.write(""+passphrase+"\n")
-  
+
         that.splash.webContents.send('splash-status', "Unlocking keystore...")
         if(!splashWasVisible) {
           that.splash.hide()
         }
       });
     }
-  
+
     createLogWindow() {
       let window = new BrowserWindow({
         width:1000,
@@ -155,17 +154,17 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
       setupWindowDevProduction(window)
-  
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
         window.hide();
         holoscape.updateTrayMenu()
       })
-  
+
       this.logWindow = window
     }
-  
+
     createConfigWindow() {
       let window = new BrowserWindow({
         width:1200,
@@ -177,17 +176,17 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
       setupWindowDevProduction(window)
-  
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
         window.hide();
         holoscape.updateTrayMenu()
       })
-  
+
       this.configWindow = window
     }
-  
+
     createUiConfigWindow() {
       let window = new BrowserWindow({
         width:1200,
@@ -199,14 +198,14 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
       setupWindowDevProduction(window)
-  
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
         window.hide();
         holoscape.updateTrayMenu()
       })
-  
+
       this.uiConfigWindow = window
     }
 
@@ -221,14 +220,14 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
       setupWindowDevProduction(window)
-  
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
         window.hide();
         holoscape.updateTrayMenu()
       })
-  
+
       this.debuggerWindow = window
     }
 
@@ -243,17 +242,17 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
       setupWindowDevProduction(window)
-  
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
         window.hide();
         holoscape.updateTrayMenu()
       })
-  
+
       this.installBundleWindow = window
     }
-  
+
     updateTrayMenu(opt) {
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
       const settingsMenu = Menu.buildFromTemplate([
@@ -281,10 +280,10 @@ class Holoscape {
       mb.tray.setToolTip('HoloScape')
       mb.tray.setContextMenu(contextMenu)
     }
-  
+
     bootConductor() {
       if(this.conductorProcess) this.shutdownConductor()
-  
+
       const log = (level, message) => {
         if(global.holoscape.quitting) return
         if(level == 'error') console.error(message)
@@ -297,22 +296,22 @@ class Holoscape {
           global.holoscape.splash.webContents.send('log', {level,message})
         }
       }
-  
+
       const onExit = () => {
         this.conductorProcess = null
         this.updateTrayMenu()
         mb.tray.setImage(systemTrayIconEmpty())
       }
-  
+
       let process = conductor.start(log, onExit)
-  
+
       app.on('before-quit', () => {
         process.kill('SIGINT');
       })
       this.conductorProcess = process
       this.connectConductor()
     }
-  
+
     shutdownConductor() {
       if(this.conductorProcess) {
         this.conductorProcess.kill('SIGINT')
@@ -323,7 +322,7 @@ class Holoscape {
         mb.tray.setImage(systemTrayIconEmpty())
       }
     }
-  
+
     showHideLogs() {
       if(this.logWindow.isVisible()) {
         this.logWindow.hide()
@@ -331,7 +330,7 @@ class Holoscape {
         this.logWindow.show()
       }
     }
-  
+
     showHideConfig() {
       if(this.configWindow.isVisible()) {
         this.configWindow.hide()
@@ -340,7 +339,7 @@ class Holoscape {
         this.configWindow.show()
       }
     }
-  
+
     showHideUiConfig() {
       if(this.uiConfigWindow.isVisible()) {
         this.uiConfigWindow.hide()
@@ -356,7 +355,7 @@ class Holoscape {
         this.debuggerWindow.show()
       }
     }
-  
+
     connectConductor() {
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {

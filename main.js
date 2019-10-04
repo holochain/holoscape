@@ -40,12 +40,29 @@ app.on('window-all-closed', e => {
   if(!global.holoscape.quitting) e.preventDefault()
 })
 
-mb.on('ready', () => {
+mb.on('ready', async () => {
   mb.tray.setImage(systemTrayIconEmpty())
+  global.holoscape = new Holoscape()
+  await global.holoscape.showSplashScreen()
 
   if(!conductor.hasConfig()) {
-    console.log("No conductor config found. Initializing...")
-    conductor.initConfig()
+      console.log("No conductor config found. Initializing...")
+      global.holoscape.splash.webContents.send('request-network-config')
+      const config = await new Promise( (resolve, reject) => {
+          ipcMain.on('network-config-set', (event, config) => {
+              resolve(config)
+          })
+      } )
+      let networkConfigToml = "";
+      if (config.type == "sim1h") {
+          const url = config.dynamo_url == "" ? "http://localhost:8000" : config.dynamo_url
+          networkConfigToml = `
+type="sim1h"
+dynamo_url = '${url}'
+`
+      }
+      console.log(networkConfigToml)
+    conductor.initConfig(networkConfigToml)
   }
 
   if(!conductor.hasConfig()) {
@@ -57,7 +74,6 @@ mb.on('ready', () => {
   global.rootConfigPath = conductor.rootConfigPath()
 
   global.logMessages = []
-  global.holoscape = new Holoscape()
   global.holoscape.init()
 });
 

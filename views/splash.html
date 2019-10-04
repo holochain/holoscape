@@ -4,59 +4,59 @@
     <script> window.$ = window.jQuery = require('jquery'); </script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
-      .background {
-        background: linear-gradient(45deg, #1a0231f2, #00017f);
-      }
+     .background {
+       background: linear-gradient(45deg, #1a0231f2, #00017f);
+     }
 
-      .header {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        top: 255px;
-        color: white;
-        z-index: 1;
-        font-family: sans-serif;
-        font-size: 95px;
-        text-shadow: 4px 5px 5px steelblue;
-      }
+     .header {
+       position: absolute;
+       left: 50%;
+       transform: translateX(-50%);
+       top: 255px;
+       color: white;
+       z-index: 1;
+       font-family: sans-serif;
+       font-size: 95px;
+       text-shadow: 4px 5px 5px steelblue;
+     }
 
-      .status {
-        position: absolute;
-        left: 30px;
-        bottom: 20px;
-        color: white;
-        z-index: 1;
-        font-family: sans-serif;
-        font-size: 45px;
-      }
+     .status {
+       position: absolute;
+       left: 30px;
+       bottom: 20px;
+       color: white;
+       z-index: 1;
+       font-family: sans-serif;
+       font-size: 45px;
+     }
 
-      .logo {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      .error {
-        color: rgb(238, 153, 153);
-      }
-      .info {
-        color: rgb(173, 192, 245);
-      }
-      #log {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        padding: 5px;
-        color: white;
-        text-align: right;
-        font-size: 12px;
-      }
-      ul {
-        list-style-type: none;
-      }
+     .logo {
+       position: absolute;
+       left: 50%;
+       transform: translateX(-50%);
+     }
+     .error {
+       color: rgb(238, 153, 153);
+     }
+     .info {
+       color: rgb(173, 192, 245);
+     }
+     #log {
+       position: absolute;
+       right: 0;
+       bottom: 0;
+       padding: 5px;
+       color: white;
+       text-align: right;
+       font-size: 12px;
+     }
+     ul {
+       list-style-type: none;
+     }
     </style>
   </head>
   <body class="background">
@@ -82,70 +82,132 @@
             <div class="modal-body">
               <div class="form-group">
                 <label for="passphrase">Please enter your passphrase to unlock keystores</label>
-                <input type="password" class="form-control" id="passphrase" aria-describedby="agent-id-help" placeholder="Passphrase">
+                <input type="password" class="form-control" id="passphrase" aria-describedby="passphrase-help" placeholder="Passphrase">
                 <small id="passphrase-help" class="form-text text-muted"></small>
               </div>
             </div>
             <div class="modal-footer">
-              <button id="quit-button" type="button" class="btn btn-secondary" data-dismiss="modal">Quit</button>
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
               <button id="unlock-button" type="button" class="btn btn-primary">Unlock keystores</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class="modal fade" id="network-config-modal" tabindex="-1" role="dialog" aria-labelledby="network-config-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Network Configuration...</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Network Type
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="networkType">
+                    <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
+                    <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
+                    <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
+                <label for="dynamo-url">Dynamodb URL</label>
+                <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
+                <small id="dynamo-url-help" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
+                Sim2h config not yet impelmented
+              </div>
+              <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
+                Lib3h config not yet impelmented
+              </div>
+              <div class="modal-footer">
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
+              <button id="set-network-type-button" type="button" class="btn btn-primary">Set Network Type</button>
+            </div>
+          </div>
+        </div>
+      </div>    </div>
 
-    <script>
-      var ipcRenderer = require('electron').ipcRenderer;
-      var Convert = require('ansi-to-html');
-      var convert = new Convert({newline: true});
+      <script>
+       var ipcRenderer = require('electron').ipcRenderer;
+       var Convert = require('ansi-to-html');
+       var convert = new Convert({newline: true});
 
-      var app = new Vue({
-        el: '#app',
-        data: {
-          status: "Initializing...",
-          logs: require('electron').remote.getGlobal('holoscape').logMessages
-        }
-      })
+       var app = new Vue({
+           el: '#app',
+           data: {
+               status: "Initializing...",
+               logs: require('electron').remote.getGlobal('holoscape').logMessages,
+               network_type: "sim1h"
+           }
+       })
 
 
-      ipcRenderer.on('log', (event,store) => {
-        let {level, message} = store
-        message = convert.toHtml(message)
-        app.logs.push({level, message})
-      });
+       ipcRenderer.on('log', (event,store) => {
+           let {level, message} = store
+           message = convert.toHtml(message)
+           app.logs.push({level, message})
+       });
 
-      ipcRenderer.on('splash-status', (event, message) => {
-        console.log(message)
-        app.status = message
-      });
+       ipcRenderer.on('splash-status', (event, message) => {
+           console.log(message)
+           app.status = message
+       });
 
-      ipcRenderer.on('request-passphrase', (event, message) => {
-        $('#passphrase-modal').modal()
-      })
+       const cancel = () => {
+           ipcRenderer.send('quit')
+       }
 
-      const submit = () => {
-        ipcRenderer.send('passphrase-set', $('#passphrase').val())
-        $('#passphrase-modal').modal('hide')
-      }
+       //-------------------------------------------------------------------
+       // Network config management
+       ipcRenderer.on('request-network-config', (event, message) => {
+           $('#network-config-modal').modal()
+       })
+       const network_config_submit = () => {
+           const config = {
+               type: "sim1h",
+               dynamo_url: $('#dynamo-url').val()
+           }
+           ipcRenderer.send('network-config-set', config)
+           $('#network-config-modal').modal('hide')
+       }
 
-      const cancel = () => {
-        ipcRenderer.send('quit')
-      }
+       $('#set-network-type-button').click(network_config_submit)
 
-      $('#unlock-button').click(submit)
-      $('#quit-button').click(cancel)
+       $('#sim1h-type').click(()=>{app.network_type="sim1h"})
+       $('#sim2h-type').click(()=>{app.network_type="sim2h"})
+       $('#lib3h-type').click(()=>{app.network_type="lib3h"})
 
-      $('#passphrase').on('keyup', (event) => {
-        if (event.keyCode === 13) {
-          submit()
-        }
+       //-------------------------------------------------------------------
+       // Passphrase management
+       ipcRenderer.on('request-passphrase', (event, message) => {
+           $('#passphrase-modal').modal()
+       })
 
-        if (event.keyCode === 27) {
-          cancel()
-        }
-      })
+       const pass_submit = () => {
+           ipcRenderer.send('passphrase-set', $('#passphrase').val())
+           $('#passphrase-modal').modal('hide')
+       }
 
-    </script>
+       $('#unlock-button').click(pass_submit)
+       $('.quit-button').click(cancel)
+
+       $('#passphrase').on('keyup', (event) => {
+           if (event.keyCode === 13) {
+               submit()
+           }
+
+           if (event.keyCode === 27) {
+               cancel()
+           }
+       })
+
+      </script>
   </body>
 </html>
