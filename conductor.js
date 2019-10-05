@@ -25,12 +25,12 @@ module.exports = {
     return ADMIN_PORT
   },
 
-  initConfig: (networkConfigStr) => {
+  initConfig: (networkConfigToml) => {
     const initialConfigTemplate = fs.readFileSync(path.join(__dirname, 'initial_conductor_config.toml'), 'utf8')
     const persistenceDir = rootConfigPath
     const adminPort = ADMIN_PORT
     const passphraseSocket = passphraseSocketPath
-    const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,networkConfigStr,rootConfigPath,passphraseSocket})
+    const config = Mustache.render(initialConfigTemplate, {adminPort,persistenceDir,networkConfigToml,rootConfigPath,passphraseSocket})
 
     if(!fs.existsSync(rootConfigPath)) {
         fs.mkdirSync(rootConfigPath)

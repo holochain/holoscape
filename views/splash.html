@@ -112,6 +112,7 @@
                     <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
                     <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
                     <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
+                    <a class="dropdown-item" href="#" id="memory-type">memory</a>
                   </div>
                 </div>
               </div>
@@ -121,10 +122,19 @@
                 <small id="dynamo-url-help" class="form-text text-muted"></small>
               </div>
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-                Sim2h config not yet impelmented
+                <label for="sim2h-url">Sim2h Multiplexer URL</label>
+                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://">
+                <small id="sim2h-url-help" class="form-text text-muted"></small>
               </div>
               <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
-                Lib3h config not yet impelmented
+                <label for="lib3h-network-name">Network Name</label>
+                <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
+                <small id="lib3h-network-name-help" class="form-text text-muted"></small>
+                <label for="lib3h-bootstrap-url">Bootstrap Url</label>
+                <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
+                <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
+              </div>
+              <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
               </div>
               <div class="modal-footer">
               <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
@@ -170,9 +180,25 @@
            $('#network-config-modal').modal()
        })
        const network_config_submit = () => {
-           const config = {
-               type: "sim1h",
-               dynamo_url: $('#dynamo-url').val()
+           let config = {
+               type: app.network_type
+           }
+           switch(config.type) {
+               case "sim1h":
+                   config.dynamo_url = $('#dynamo-url').val()
+                   break;
+               case "sim2h":
+                   config.sim2h_url = $('#sim2h-url').val()
+                   break;
+               case "lib3h":
+                   config.network_id = {nickname: $('#lib3h-network-name').val()}
+                   const bootstrap = $('#lib3h-bootstrap-url').val()
+                   let nodes = []
+                   if (bootstrap != "") {
+                       nodes = [bootstrap]
+                   }
+                   config.bootstrap_nodes = nodes
+                   break;
            }
            ipcRenderer.send('network-config-set', config)
            $('#network-config-modal').modal('hide')
@@ -183,6 +209,7 @@
        $('#sim1h-type').click(()=>{app.network_type="sim1h"})
        $('#sim2h-type').click(()=>{app.network_type="sim2h"})
        $('#lib3h-type').click(()=>{app.network_type="lib3h"})
+       $('#memory-type').click(()=>{app.network_type="memory"})
 
        //-------------------------------------------------------------------
        // Passphrase management

@@ -1,5 +1,4 @@
 persistence_dir = "{{{persistenceDir}}}"
-
 agents = []
 dnas = []
 instances = []
@@ -20,8 +19,7 @@ instances = []
 type = "debug"
 state_dump = true
 
-[network]
-{{{networkConfigStr}}}
+{{{networkConfigToml}}}
 
 [passphrase_service]
 type="unixsocket"
