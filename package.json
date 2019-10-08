@@ -22,6 +22,7 @@
     "extract-zip": "^1.6.7",
     "get-port": "^5.0.0",
     "get-uri": "^2.0.3",
+    "jquery": "^3.4.1",
     "menubar": "^6.0.7",
     "mustache": "^3.0.1",
     "ncp": "^2.0.0",
