@@ -1,5 +1,4 @@
 persistence_dir = "{{{persistenceDir}}}"
-
 agents = []
 dnas = []
 instances = []
@@ -20,12 +19,7 @@ instances = []
 type = "debug"
 state_dump = true
 
-[network]
-type="n3h"
-n3h_log_level = "i"
-bootstrap_nodes = []
-n3h_mode = "REAL"
-n3h_persistence_path = "{{{n3hPath}}}"
+{{{networkConfigToml}}}
 
 [passphrase_service]
 type="unixsocket"

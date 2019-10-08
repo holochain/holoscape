@@ -4,6 +4,7 @@ const conductor = require('./conductor.js')
 const path = require('path')
 const { Holoscape, systemTrayIconEmpty } = require('./holoscape')
 const { loadUIinfo, sanitizeUINameForScheme, HAPP_SCHEME } = require('./happ-ui-controller')
+const TOML = require('@iarna/toml')
 
 const mb = menubar();
 global.mb = mb
@@ -40,12 +41,67 @@ app.on('window-all-closed', e => {
   if(!global.holoscape.quitting) e.preventDefault()
 })
 
-mb.on('ready', () => {
+mb.on('ready', async () => {
   mb.tray.setImage(systemTrayIconEmpty())
+  global.holoscape = new Holoscape()
+  await global.holoscape.showSplashScreen()
 
   if(!conductor.hasConfig()) {
-    console.log("No conductor config found. Initializing...")
-    conductor.initConfig()
+      console.log("No conductor config found. Initializing...")
+      global.holoscape.splash.webContents.send('request-network-config')
+      let config = await new Promise( (resolve, reject) => {
+          ipcMain.on('network-config-set', (event, config) => {
+              resolve(config)
+          })
+      } )
+      const type = config.type
+      // apply defaults
+      switch(type) {
+      case "sim1h":
+          config = {
+              dynamo_url: config.dynamo_url || "http://localhost:8000"
+          }
+          break
+      case "sim2h":
+          break
+      case "lib3h":
+          let network_id = config.network_id
+          network_id = {
+              nickname: network_id.nickname || "holochain-testnet",
+              id: "HcMFakeAddr"
+          }
+          config = {
+              network_id: network_id,
+              bootstrap_nodes: config.bootstrap_nodes,
+              transport_configs: [{type: "websocket", data:"Unencrypted"}],
+              work_dir: "",
+              log_level: "d",
+              bind_url: "ws://0.0.0.0",
+              dht_gossip_interval: 3000,
+              dht_timeout_threshold: 1000,
+              dht_custom_config: [],
+          }
+          break
+      case "memory":
+          config = {
+              network_id: {
+                  nickname: "holoscape-in-memory",
+                  id: "HcMFakeAddr"
+              },
+              bootstrap_nodes: [],
+              transport_configs: [{type: "memory", data:""}],
+              work_dir: "",
+              log_level: "d",
+              bind_url: "none:",
+              dht_gossip_interval: 3000,
+              dht_timeout_threshold: 1000,
+              dht_custom_config: [],
+          }
+      }
+    config.type = type
+    const networkConfigToml = TOML.stringify({network: config})
+    console.log(networkConfigToml)
+    conductor.initConfig(networkConfigToml)
   }
 
   if(!conductor.hasConfig()) {
@@ -57,7 +113,6 @@ mb.on('ready', () => {
   global.rootConfigPath = conductor.rootConfigPath()
 
   global.logMessages = []
-  global.holoscape = new Holoscape()
   global.holoscape.init()
 });
 
