@@ -11,7 +11,7 @@ uri = "https://github.com/holochain/personas-profiles/releases/download/0.1.8/pe
 name = "Basic Chat"
 id = "__basic-chat"
 dna_hash = "QmPKDwLTDqbPVEYey9bra3nzKPZ5BDbeZ7GoXKsK9C9s8m"
-uri = "https://github.com/holochain/holochain-basic-chat/releases/download/0.0.15/holochain-basic-chat.dna.json"
+uri = "https://github.com/holochain/peer-chat/releases/download/0.0.15/holochain-basic-chat.dna.json"
 
 [[bridges]]
 handle = "p-p-bridge"
