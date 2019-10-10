@@ -11,7 +11,7 @@ uri = "https://holo-host.github.io/holofuel/releases/download/v0.11.1-alpha1/hol
 name = "HoloFuel"
 id = "HoloFuel-ui-id"
 ui_bundle_hash = "Qm34abcde"
-uri = "file:./holofuel-app-2.zip"
+uri = "file:./holofuel-app.zip"
 
 [[UIs.instance_references]]
 ui_handle = "holofuel"
