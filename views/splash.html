@@ -122,8 +122,8 @@
                 <small id="dynamo-url-help" class="form-text text-muted"></small>
               </div>
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-                <label for="sim2h-url">Sim2h Multiplexer URL</label>
-                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://">
+                <label for="sim2h-url">Sim2h Switchboard URL</label>
+                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://localhost:9000">
                 <small id="sim2h-url-help" class="form-text text-muted"></small>
               </div>
               <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
@@ -131,7 +131,7 @@
                 <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
                 <small id="lib3h-network-name-help" class="form-text text-muted"></small>
                 <label for="lib3h-bootstrap-url">Bootstrap Url</label>
-                <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://localhost:9000">
+                <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
                 <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
               </div>
               <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
