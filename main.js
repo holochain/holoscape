@@ -63,6 +63,9 @@ mb.on('ready', async () => {
           }
           break
       case "sim2h":
+          config = {
+              sim2h_url: config.sim2h_url || "wss://localhost:9000"
+          }
           break
       case "lib3h":
           let network_id = config.network_id
