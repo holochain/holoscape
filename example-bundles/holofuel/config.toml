@@ -1,0 +1,18 @@
+
+bridges = []
+
+[[instances]]
+name = "HoloFuel"
+id = "__holofuel"
+dna_hash = "QmcnYu8B54tFnJUv68aB3imPRwLxqJH2DQzjkX9Dvxmsf9"
+uri = "https://holo-host.github.io/holofuel/releases/download/v0.11.1-alpha1/holofuel.dna.json"
+
+[[UIs]]
+name = "HoloFuel"
+id = "HoloFuel-ui-id"
+ui_bundle_hash = "Qm34abcde"
+uri = "file:./holofuel-app-2.zip"
+
+[[UIs.instance_references]]
+ui_handle = "holofuel"
+instance_id = "__holofuel"
