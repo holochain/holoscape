@@ -491,7 +491,7 @@
                     })
                 })
                 console.log(`Extraction done. Installing UI...`)
-                happUiController.installUIFromPath(extractedPath, ui.name)
+                await happUiController.installUIFromPath(extractedPath, ui.name)
                 console.log(`Done`)
 
                 console.log(`Creating interface for ${ui.name}`)

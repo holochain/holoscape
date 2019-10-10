@@ -167,7 +167,7 @@ class HappUiController {
 
         const that = this
 
-        new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             ncp(sourcePath, installDir, (err) => {
                 //if(err) reject(err)
                 //else 
