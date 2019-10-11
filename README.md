@@ -28,10 +28,7 @@ As a hApp developer:
 * You share the hApp bundle with your users
 
 But there is more...
-During development of your hApp and DNAs, it would be nice to see what actually is going on in your DNA's source chain and which entries are held in the DHT.
-
-Holoscape as a debug view that shows state dumps and all Holochain core redux actions:
-![](images/Debug_view_screenshot.png)
+During development of your hApp and DNAiew_screenshot.png)
 (*so it doubles as a holoscope...*)
 
 ## Setup for development
@@ -60,15 +57,19 @@ npm start
 ```
 
 ### Personas
-You can run multiple instances of Holoscape by setting the `HOLOSCAPE_PERSONA` environment variable at startup.  Note that the **first** time you launch Holoscape with a new persona you **must** also use the `HOLOSCAPE_ADMIN_PORT` environment to specify a unique port for the instance of Holoscape to communicate with it's conductor, like this:
+Persona's allow you to run multiple instances of Holoscape.  This is useful for a few reasons:
+- Networks: Because each Holoscape instance is configured to communicate over one network, you can use this run instances on different networks.
+- Testing: this makes it easy to spin up multiple nodes on the same network for testing purposes.
+
+You can select personas setting the `HOLOSCAPE_PERSONA` environment variable at startup.  Note that the **first** time you launch Holoscape with a new persona you **must** also use the `HOLOSCAPE_ADMIN_PORT` environment to specify a unique port for the instance of Holoscape to communicate with it's conductor, like this:
 
 ``` shell
 HOLOSCAPE_PERSONA=my_persona HOLOSCAPE_ADMIN_PORT=4436
 ```
-This value is set in the conductor config file which on linux systems you will find at `~/.config/Holoscape-<persona>/conductor-config.toml`.
+Note that this value is set in the conductor config file which on linux systems you will find at `~/.config/Holoscape-<persona>/conductor-config.toml`.
 
 ## Releasing
-A self-sustained Electron package can be build with
+A stand-alone Electron package can be built with
 ```
 npm run build-linux
 ```
@@ -77,7 +78,7 @@ or
 npm run build-mac
 ```
 
-It expects above mentioned binaries (`holochain-<platform>` and `hc-<platform>`) to be present in the root directory and puts them into the build with everything else.
+The build script expects above mentioned binaries (`holochain-<platform>` and `hc-<platform>`) to be present in the root directory and puts them into the final package with everything else.
 In order to have Linux builds be portable across all Linux distributions, releases need to have a static build of those binaries. There is a branch in [holochain-rust/static-holoscape-build](https://github.com/holochain/holochain-rust/tree/static-holoscape-build) that gets tracked and automatically build and statically linked. Binaries can be downloaded here: https://hydra.holo.host/jobset/holochain-rust/static-holoscape-build.
 
 ## Contribute
