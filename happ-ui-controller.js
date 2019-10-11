@@ -57,6 +57,9 @@ const happProtocolCallback = (request, callback) => {
                 let filePath = path.normalize(url)
                 filePath = filePath.split("#")[0]
                 filePath = filePath.split("?")[0]
+                if(filePath == "/") {
+                    filePath = "/index.html"
+                }
                 absoluteFilePath = path.join(uiRootDir, filePath)
             }
         }
