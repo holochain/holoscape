@@ -46,7 +46,7 @@
                         <span class="input-group-text" id="inputGroupFileAddon01">Bundle file</span>
                     </div>
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="bundle-file" 
+                        <input type="file" class="custom-file-input" id="bundle-file"
                             aria-describedby="inputGroupFileAddon01" ref="bundleFile" @change="loadBundle">
                         <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
                     </div>
@@ -101,7 +101,7 @@
                             -->
                         <td>
                             <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
-                            <span class="badge badge-info" 
+                            <span class="badge badge-info"
                                 v-if="!instance.installedInstanceId && (instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined))">
                                 To be installed...
                             </span>
@@ -173,7 +173,7 @@
                                 </td>
                                 <!--<td>{{ ui.uri }}</td>-->
                                 <td>
-                                    
+
                                     <div class="badge badge-warning" v-if="ui.downloadStatus == 'pending'">
                                         Downloading
                                         <div class="spinner-border" role="status">
@@ -186,7 +186,7 @@
 
                                 <td>
                                     <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
-                                    <span class="badge badge-info" 
+                                    <span class="badge badge-info"
                                         v-if="!ui.alreadyInstalled && (ui.downloadStatus=='pending' || (ui.downloadStatus=='done' && ui.installStatus==undefined))">
                                         To be installed...
                                     </span>
@@ -206,7 +206,7 @@
                     <li v-for="ui in bundle.UIs">
                         <h4>{{ ui.name }}</h4>
                         <span>Needs access to the following instances</span>
-                        
+
 
                         <div v-if="ui.ui_references && ui.ui_references.length > 0">
                             <span>Needs access to the following UIs</span>
@@ -217,7 +217,7 @@
                             </ul>
                         </div>
                     </li>
-                </ul>-->  
+                </ul>-->
             </li>
       </ul>
       <div class="container">
@@ -287,7 +287,7 @@
                         }catch(e){
                             app.fileError = e
                         }
-                        
+
                     }
                   },
                   installedInstanceId(instance) {
@@ -308,10 +308,10 @@
                             this.checkInstallReady()
                         } else {
                             instance.tempPath = temp.path()
-                            console.log("Temp path for DNA file:", instance.tempPath)  
+                            console.log("Temp path for DNA file:", instance.tempPath)
                             Vue.set(instance, 'downloadStatus', 'pending')
                             let fileStream = fs.createWriteStream(instance.tempPath)
-                            console.log("Trying to get URI:", instance.uri)  
+                            console.log("Trying to get URI:", instance.uri)
                             getUri(instance.uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(instance, 'error', err.message)
@@ -325,10 +325,10 @@
                                     console.log(`FOR INSTANCE ${instance.name}, got: hash = ${hash}, error = ${error}`)
                                     if(error) {
                                         Vue.set(instance, 'downloadStatus', 'fileError')
-                                        Vue.set(instance, 'fileError', error)    
+                                        Vue.set(instance, 'fileError', error)
                                     } else if(hash != instance.dna_hash) {
                                         Vue.set(instance, 'downloadStatus', 'fileError')
-                                        Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})    
+                                        Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})
                                     } else {
                                         Vue.set(instance, 'downloadStatus', 'done')
                                     }
@@ -344,7 +344,7 @@
                         let handle = bridge.handle
                         console.log("Checking if bridge is already there:", {caller_id, callee_id, handle})
                         if(app.installed_bridges.find((b)=>{
-                            return b.caller_id == caller_id 
+                            return b.caller_id == caller_id
                                 && b.callee_id == callee_id
                                 && b.handle == handle
                         })) {
@@ -364,7 +364,7 @@
                             this.checkInstallReady()
                         } else {
                             ui.tempPath = temp.path()
-                            console.log("Temp path for UI file:", ui.tempPath)  
+                            console.log("Temp path for UI file:", ui.tempPath)
                             Vue.set(ui, 'downloadStatus', 'pending')
                             let fileStream = fs.createWriteStream(ui.tempPath)
                             let uri = ui.uri
@@ -374,7 +374,7 @@
                                 parts[0] = `file://${path.dirname(bundlePath)}`
                                 uri = parts.join('/')
                             }
-                            console.log("Trying to get URI:", uri)  
+                            console.log("Trying to get URI:", uri)
                             getUri(uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(ui, 'error', err.message)
@@ -469,7 +469,7 @@
                 let bundleInstance = app.bundle.instances.find((instance)=>instance.id==id)
                 return bundleInstance.installedInstanceId ? bundleInstance.installedInstanceId : bundleInstance.name
             }
-            
+
             window.bundleInstanceIdToRealId = bundleInstanceIdToRealId
 
             const addBridge = async (bridge) => {

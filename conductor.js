@@ -4,14 +4,21 @@ const fs = require('fs')
 const Mustache = require('mustache')
 const spawn = require('child_process').spawn
 
-const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape')
+const persona = process.env.HOLOSCAPE_PERSONA ? process.env.HOLOSCAPE_PERSONA : "default"
+
+const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape-'+persona)
 const configPath = path.join(rootConfigPath, 'conductor-config.toml')
 const passphraseSocketPath = path.join(rootConfigPath, 'conductor_login.socket')
 
-const ADMIN_PORT = 4435
+const ADMIN_PORT = process.env.HOLOSCAPE_ADMIN_PORT ? process.env.HOLOSCAPE_ADMIN_PORT : 4435
 module.exports = {
   configPath,
   passphraseSocketPath,
+
+  persona: () => {
+      return persona
+  },
+
 
   rootConfigPath: () => {
     return rootConfigPath

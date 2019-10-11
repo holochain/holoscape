@@ -270,7 +270,7 @@ class Holoscape {
       const contextMenu = Menu.buildFromTemplate([
         { label: 'hApps', type: 'submenu', submenu: happMenu },
         { type: 'separator' },
-        { label: 'Settings', type: 'submenu', submenu: settingsMenu },
+        { label: 'Settings-'+conductor.persona(), type: 'submenu', submenu: settingsMenu },
         { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
         { type: 'separator' },
         { label: 'Install hApp...', click: ()=>this.installBundleWindow.show() },
