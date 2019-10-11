@@ -16,3 +16,13 @@ uri = "file:./holofuel-ui.zip"
 [[UIs.instance_references]]
 ui_handle = "holofuel"
 instance_id = "__holofuel"
+
+[[UIs]]
+name = "hAppy HoloFuel"
+id = "holofuel-app"
+ui_bundle_hash = "Qm34abcde"
+uri = "file:./happy-holofuel.zip"
+
+[[UIs.instance_references]]
+ui_handle = "happy-holofuel"
+instance_id = "__holofuel"
