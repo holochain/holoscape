@@ -59,6 +59,14 @@ npm install
 npm start
 ```
 
+### Personas
+You can run multiple instances of Holoscape by setting the `HOLOSCAPE_PERSONA` environment variable at startup.  Note that the **first** time you launch Holoscape with a new persona you **must** also use the `HOLOSCAPE_ADMIN_PORT` environment to specify a unique port for the instance of Holoscape to communicate with it's conductor, like this:
+
+``` shell
+HOLOSCAPE_PERSONA=my_persona HOLOSCAPE_ADMIN_PORT=4436
+```
+This value is set in the conductor config file which on linux systems you will find at `~/.config/Holoscape-<persona>/conductor-config.toml`.
+
 ## Releasing
 A self-sustained Electron package can be build with
 ```
