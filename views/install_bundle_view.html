@@ -300,7 +300,7 @@
                     return installed_instance.id
                   },
                   processBundle() {
-                      app.bundle.instances.map((instance) => {
+                      app.bundle.instances && app.bundle.instances.map((instance) => {
                         console.log("Processing instance:", instance)
                         let installed_instance_id = this.installedInstanceId(instance)
                         if(installed_instance_id) {
@@ -338,7 +338,7 @@
                         }
                       })
 
-                      app.bundle.bridges.map((bridge) => {
+                      app.bundle.bridges && app.bundle.bridges.map((bridge) => {
                         let caller_id = bundleInstanceIdToRealId(bridge.caller_id)
                         let callee_id = bundleInstanceIdToRealId(bridge.callee_id)
                         let handle = bridge.handle
@@ -357,7 +357,7 @@
 
                       let installedUIs = happUiController.getInstalledUIs()
 
-                      app.bundle.UIs.map((ui) => {
+                      app.bundle.UIs && app.bundle.UIs.map((ui) => {
                         console.log("Processing UI:", ui)
                         if(ui.name in installedUIs) {
                             Vue.set(ui, 'alreadyInstalled', true)
