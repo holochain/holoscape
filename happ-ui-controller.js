@@ -248,7 +248,7 @@ class HappUiController {
         })
         window.uiName = name
 
-        const windowURL = `${HAPP_SCHEME}://${uiSubDir}/index.html`
+        const windowURL = `${HAPP_SCHEME}://${uiSubDir}/`
         console.log('Created window. Loading', windowURL)
 
         window.loadURL(windowURL)
