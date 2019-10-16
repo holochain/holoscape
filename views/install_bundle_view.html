@@ -312,6 +312,13 @@
                             Vue.set(instance, 'downloadStatus', 'pending')
                             let fileStream = fs.createWriteStream(instance.tempPath)
                             console.log("Trying to get URI:", instance.uri)
+                            let uri = instance.uri
+                            if(uri.startsWith("file:./")) {
+                                const bundlePath = this.$refs.bundleFile.files[0].path
+                                let parts = uri.split('/')
+                                parts[0] = `file://${path.dirname(bundlePath)}`
+                                uri = parts.join('/')
+                            }
                             getUri(instance.uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(instance, 'error', err.message)
