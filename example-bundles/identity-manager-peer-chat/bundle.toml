@@ -28,7 +28,7 @@ uri = "file:./peer-chat-ui.zip"
 
 [[UIs.instance_references]]
 ui_handle = "identity-manager"
-instance_id = "__identiity-manager"
+instance_id = "__identity-manager"
 
 # "__peer-chat" is the instance identifier in this config (declared above)
 # that needs to be linked to the handle "peer-chat" which is used inside
@@ -51,4 +51,4 @@ instance_id = "__identity-manager"
 
 [[UIs.instance_references]]
 ui_handle = "peer-chat-ui"
-instance_id = "__peer-chat"
+instance_id = "peer-chat-public"
