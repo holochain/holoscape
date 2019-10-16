@@ -319,7 +319,7 @@
                                 parts[0] = `file://${path.dirname(bundlePath)}`
                                 uri = parts.join('/')
                             }
-                            getUri(instance.uri, (err, rs) => {
+                            getUri(uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(instance, 'error', err.message)
                                     Vue.set(instance, 'downloadStatus', 'error')
