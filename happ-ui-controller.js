@@ -8,7 +8,7 @@ const HAPP_SCHEME = 'holoscape-happ'
 
 function UIinfoFile(){
     return path.join(conductor.rootConfigPath(), 'UIs.json')
-} 
+}
 
 function loadUIinfo() {
     if(!fs.existsSync(UIinfoFile())) {
@@ -33,7 +33,7 @@ function setupWindowDevProduction(window) {
       window.removeMenu()
     }
   }
-  
+
 
 const happProtocolCallback = (request, callback) => {
     console.log(`HAPP SCHEME: got request for file ${request.url}`)
@@ -63,7 +63,7 @@ const happProtocolCallback = (request, callback) => {
                 absoluteFilePath = path.join(uiRootDir, filePath)
             }
         }
-        
+
     } else {
         absoluteFilePath = path.join(uiRootDir, 'index.html')
     }
@@ -83,7 +83,7 @@ const happProtocolCallback = (request, callback) => {
 ///   'basic-chat': {
 ///      installDir: '/home/lucksus/.config/Holoscape/UIs/basic-chat',
 ///      interface: 'basic-chat-interface'
-///   }   
+///   }
 /// }
 /// ```
 ///
@@ -121,27 +121,27 @@ class HappUiController {
 
     createUiMenuTemplate() {
         let menuTemplate = []
-      
+
         for(let uiName in this.installedUIs) {
             let visible = false
-            if(this.runningUIs[uiName] && this.runningUIs[uiName].isVisible()) {
-                visible = true
-            }
+            // if(this.runningUIs[uiName] && this.runningUIs[uiName].isVisible()) {
+            //     visible = true
+            // }
 
             menuTemplate.push({
                 label: uiName,
                 click: ()=>this.showHideUI(uiName),
-                type: 'checkbox', 
+                type: 'checkbox',
                 checked: visible
             })
         }
 
         return menuTemplate
     }
-      
+
     saveUIinfo() {
         fs.writeFileSync(UIinfoFile(), JSON.stringify(this.installedUIs))
-    }  
+    }
 
     installUI() {
         let sourcePath = dialog.showOpenDialogSync({
@@ -173,7 +173,7 @@ class HappUiController {
         return new Promise((resolve, reject) => {
             ncp(sourcePath, installDir, (err) => {
                 //if(err) reject(err)
-                //else 
+                //else
                 resolve()
             })
         })
@@ -273,11 +273,12 @@ class HappUiController {
             return
         }
 
-        if(window.isVisible()) {
-            window.hide()
-        } else {
-            window.show()
-        }
+        // if(window.isVisible()) {
+        //     window.hide()
+        // } else {
+        //     window.show()
+        // }
+        window.show()
         this.holoscape.updateTrayMenu()
     }
 

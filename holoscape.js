@@ -80,6 +80,7 @@ class Holoscape {
     checkConductorConnection() {
       if(this.conductorProcess && !global.conductor_call) {
         this.connectConductor()
+        this.dnaViewSwitchSignals()
       }
     }
 
@@ -310,6 +311,7 @@ class Holoscape {
       })
       this.conductorProcess = process
       this.connectConductor()
+      this.dnaViewSwitchSignals()
     }
 
     shutdownConductor() {
@@ -356,11 +358,30 @@ class Holoscape {
       }
     }
 
+    dnaViewSwitchSignals() {
+      console.log(`dnaViewSwitchSignals ws://localhost:${conductor.dnaPort()}`)
+      connect({url:`ws://localhost:${conductor.dnaPort()}`}).then(({call, callZome, close, onSignal}) => {
+        onSignal((signal) => {
+          console.log(JSON.stringify(signal))
+          if (signal.signal.name === 'new_profile_spec_registered') {
+            const { profileSourceDna } = JSON.parse(signal.signal.arguments)
+            console.log('Open Profile for ' + profileSourceDna)
+            this.happUiController.showHideUI('identity-manager')
+          }
+        })
+        console.log(`dnaViewSwitchSignals connected`)
+      }).catch((error)=> {
+        console.error('Holoscape could not connect to dna conductor', error)
+      })
+    }
+
     connectConductor() {
+      console.log(`connectConductor ws://localhost:${conductor.adminPort()}`)
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           this.debuggerWindow.webContents.send('hc-signal', params)
         })
+        console.log(`connectConductor connected`)
         global.conductor_call = call
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()

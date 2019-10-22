@@ -1,0 +1,18 @@
+[[interfaces]]
+admin = true
+id = 'admin interface'
+instances = []
+[interfaces.driver]
+port = 4435
+type = 'websocket'
+
+[[interfaces]]
+  id = "websocket_interface"
+  admin = true
+[interfaces.driver]
+  type = "websocket"
+  port = 10000
+[[interfaces.instances]]
+  id = "peer-chat-public"
+[[interfaces.instances]]
+  id = "personas-profiles"

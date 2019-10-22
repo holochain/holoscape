@@ -1,34 +1,30 @@
 # A declaration of an instance that this hApp needs to have installed.
 # `name` here is just an internal name to reference the given DNA inside the rest of this bundle.
 [[instances]]
-name = "Identity Manager"
-id = "__identity-manager"
-dna_hash = "QmTnymrEAtfzV2tTv2kRixNzUTYFurA4NEQ8gtMRmsy9bW"
+name = "personas-profiles"
+id = "personas-profiles"
+dna_hash = "QmPVkysxaXrpVz9CRCU9z7UnLSLKXQ2coPUMzn5DmWvWMd"
 # Optional, might also be retrieved from hchc via hash long-term
 uri = "file:./personas-profiles.dna.json"
 
 [[instances]]
-name = "Peer Chat"
+name = "peer-chat-public"
 id = "peer-chat-public"
-dna_hash = "QmSDkLm394rXfxLN1tu1cd8BtdFAMTgT5iWAXsMKQ8sMvu"
+dna_hash = "QmRLzAgxAxCUtSgXXh6EoxJ59WP7Q97WUtuv7DFAcYYN2C"
 uri = "file:./peer-chat.dna.json"
 
 [[bridges]]
 handle = "p-p-bridge"
 caller_id = "peer-chat-public"
-callee_id = "__identity-manager"
+callee_id = "personas-profiles"
 
 
 [[UIs]]
-name = "Peer Chat"
+name = "peer-chat"
 id = "peer-chat-ui"
 ui_bundle_hash = "Qm34abcde"
 # Optional, might also be retrieved from hchc via hash long-term
 uri = "file:./peer-chat-ui.zip"
-
-[[UIs.instance_references]]
-ui_handle = "identity-manager"
-instance_id = "__identity-manager"
 
 # "__peer-chat" is the instance identifier in this config (declared above)
 # that needs to be linked to the handle "peer-chat" which is used inside
@@ -39,7 +35,7 @@ ui_handle = "peer-chat-ui"
 instance_id = "peer-chat-public"
 
 [[UIs]]
-name = "Identity Manager"
+name = "identity-manager"
 id = "identity-manager-ui"
 ui-bundle-hash = "Qm34abcde"
 # Optional, might also be retrieved from hchc via hash long-term
@@ -47,8 +43,4 @@ uri = "file:./identity-manager-ui.zip"
 
 [[UIs.instance_references]]
 ui_handle = "identity-manager-ui"
-instance_id = "__identity-manager"
-
-[[UIs.instance_references]]
-ui_handle = "peer-chat-ui"
-instance_id = "peer-chat-public"
+instance_id = "personas-profiles"
