@@ -1,9 +1,9 @@
 {
-  "name": "Holochain App Name",
-  "description": "A Holochain app",
+  "name": "Identity Manager",
+  "description": "Manage y0ur keys and profiles across all your Holochain hApps.",
   "authors": [
     {
-      "indentifier": "Author Name <author@name.com>",
+      "indentifier": "Philip Beadle <philip.beadle@holo.host>",
       "public_key_source": "",
       "signature": ""
     }

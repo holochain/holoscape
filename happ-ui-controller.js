@@ -294,8 +294,11 @@ class HappUiController {
         this.ensureWindowFor(name).then((window)=>{
             window.show()
             window.focus()
+            console.log(window)
+            console.log(window.webContents.getURL())
             if(location){
-                window.location.assign(location)
+              console.log(`Opening ${name} at ${location}`)
+              window.location.assign(location)
             }
         })
     }

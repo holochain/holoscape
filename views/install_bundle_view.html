@@ -457,7 +457,7 @@
                 const dna_id = `${instance.name}-dna`
                 const path = instance.tempPath
                 console.log('Installing DNA', dna_id)
-                await call('admin/dna/install_from_file')({id: dna_id, path, copy: true})
+                await call('admin/dna/install_from_file')({id: dna_id, name: instance.name, path, copy: true})
                 console.log('DNA installed')
 
                 const id = `${instance.name}`

@@ -3,14 +3,14 @@
 [[instances]]
 name = "personas-profiles"
 id = "personas-profiles"
-dna_hash = "QmPVkysxaXrpVz9CRCU9z7UnLSLKXQ2coPUMzn5DmWvWMd"
+dna_hash = "QmVQ9GBqgsgMioCtm3fPZQhDBM8m7tBKgTnD1PCxKXqRub"
 # Optional, might also be retrieved from hchc via hash long-term
 uri = "file:./personas-profiles.dna.json"
 
 [[instances]]
 name = "peer-chat-public"
 id = "peer-chat-public"
-dna_hash = "QmRLzAgxAxCUtSgXXh6EoxJ59WP7Q97WUtuv7DFAcYYN2C"
+dna_hash = "QmPDteJSXF34CygPQFVgf7XgsoDFx5Hb3mGYvhAHH7X5Qt"
 uri = "file:./peer-chat.dna.json"
 
 [[bridges]]

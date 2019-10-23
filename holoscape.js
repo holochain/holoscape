@@ -364,9 +364,9 @@ class Holoscape {
         onSignal((signal) => {
           console.log(JSON.stringify(signal))
           if (signal.signal.name === 'new_profile_spec_registered') {
-            const { profileSourceDna } = JSON.parse(signal.signal.arguments)
-            console.log('Open Profile for ' + profileSourceDna)
-            this.happUiController.showHideUI('identity-manager')
+            const { location } = JSON.parse(signal.signal.arguments)
+            console.log('Open Profile for ' + location)
+            this.happUiController.showAndRiseUI('identity-manager', `/${location}`)
           }
         })
         console.log(`dnaViewSwitchSignals connected`)
