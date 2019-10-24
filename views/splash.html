@@ -54,7 +54,7 @@
        text-align: right;
        font-size: 12px;
      }
-     ul {
+     ul#log {
        list-style-type: none;
      }
     </style>
@@ -124,7 +124,23 @@
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
                 <label for="sim2h-url">Sim2h Switchboard URL</label>
                 <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000">
-                <small id="sim2h-url-help" class="form-text text-muted"></small>
+                <small id="sim2h-url-help" class="form-text text-muted">
+                  The default of wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch board.
+                  This is a centralized simulation of the Holochain network that connects all agents of the DHT through one central switch board
+                  to enable easy debugging by logging all network traffic between all nodes.
+                  <br>
+                  You can run your own sim2h server to debug your hApp yourself.
+                  The Holochain public server can be used for public testing during alpha stages.
+                  <br>
+                  <bold>
+                    DISCLAIMER:
+                    <ul>
+                      <li>This public instance comes with no guarantee of up-time!</li>
+                      <li>This is for testing only! Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
+                    </ul>
+                  </bold>
+                  
+                </small>
               </div>
               <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
                 <label for="lib3h-network-name">Network Name</label>
