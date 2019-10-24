@@ -268,6 +268,7 @@
                   installed_instances: [],
                   installed_dnas: [],
                   installed_bridges: [],
+                  used_ports: [],
                 },
                 methods: {
                   async loadBundle() {
@@ -487,6 +488,15 @@
                 console.log('Bridge added')
             }
 
+            const nextMinPort = () => {
+                if(app.used_ports.length > 0) {
+                    app.used_ports.sort()
+                    return app.used_ports[app.used_ports.length -1] + 1
+                } else {
+                    return 10000
+                }
+            }
+
             const installUi = async (ui) => {
                 let extractedPath = temp.path()
                 console.log(`Extracting ${ui.name} to ${extractedPath}`)
@@ -504,7 +514,8 @@
                 let id = `${ui.name}-interface`
                 let type = 'websocket'
                 let admin = app.installAsAdmin
-                let port = await getPort({port: getPort.makeRange(10000, 31000)})
+                let port = await getPort({port: getPort.makeRange(nextMinPort(), 31000)})
+                app.used_ports.push(port)
                 await call('admin/interface/add')({id,admin,type,port})
 
                 for(ref of ui.instance_references) {
