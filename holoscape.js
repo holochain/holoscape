@@ -254,6 +254,9 @@ class Holoscape {
     }
 
     updateTrayMenu(opt) {
+      if(this.quitting) {
+        return
+      }
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
       const settingsMenu = Menu.buildFromTemplate([
         { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
