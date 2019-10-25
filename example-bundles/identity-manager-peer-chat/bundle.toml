@@ -7,6 +7,9 @@ dna_hash = "QmUb9qzjm2F2PJCaJDT9ue9YvKak4cEBw77fWSqpHr9pvY"
 # Optional, might also be retrieved from hchc via hash long-term
 uri = "https://github.com/holochain/identity-manager/releases/download/0.1.9/personas-profiles.dna.json"
 
+[instances.dna_properties]
+agent_id = "${AGENT_ID}"
+
 [[instances]]
 name = "Peer Chat Public"
 id = "__peer-chat-public"
