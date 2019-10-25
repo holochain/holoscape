@@ -37,8 +37,20 @@
       <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
       <div><span>agents:</span><span>{{ agents }}</span></div>
       -->
+
+      <ul class="nav">
+        <li class="nav-item">
+            <a id="nav-happ-store" class="nav-link active" href="#" v-on:click="tab = 'happ-store'">Poor man's hApp store</a>
+        </li>
+        <li class="nav-item">
+            <a id="nav-from-file" class="nav-link" href="#" v-on:click="tab = 'from-file'">Install from hApp bundle file</a>
+        </li>
+    </ul>
       <ul class="list-group">
-      <li class="list-group-item">
+        <li v-if="tab == 'happ-store'" class="list-group-item">
+            <h3>Poor man's hApp-store</h3>
+        </li>
+      <li v-if="tab == 'from-file'" class="list-group-item">
           <h3>Please select a bundle file to install</h3>
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -258,6 +270,7 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                  tab: 'happ-store',  
                   canInstall: false,
                   installAsAdmin: false,
                   file: undefined,
