@@ -68,7 +68,15 @@
       <ul class="list-group">
         <li v-if="tab == 'happ-store'" class="list-group-item">
             <h3>Poor man's hApp-store</h3>
-            
+            <p class="card-text">
+                This is an alpha-prototype of the real hApp-Store that is currently under development. 
+                This prototype pulls a list of hApp descriptions from the <a href="#" v-on:click="openExternal('https://github.com/holochain/happ-index')">hApp-index repository</a>.
+                If you want your hApp to be listed below, please create a pull-request to <a href="#" v-on:click="openExternal('https://github.com/holochain/happ-index')">https://github.com/holochain/happ-index</a>
+                including your <a href="#" v-on:click="openExternal('https://github.com/holochain/holoscape/tree/master/example-bundles')">hApp-bundle file</a> and links to all resources as described in its README.
+            </p>
+            <p class="card-text">
+                This will soon be replaced by a decentralized hApp store based on Holochain.
+            </p>
             <div class="container">
                 <div v-for="happ in happ_index" 
                      :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" 
@@ -282,7 +290,7 @@
     </div>
 
     <script>
-        const { ipcRenderer } = require('electron')
+        const { ipcRenderer, shell } = require('electron')
         const toml = require('toml')
         const fs = require('fs')
         const getUri = require('get-uri')
@@ -518,6 +526,9 @@
                   deselect() {
                       app.bundle = undefined
                       app.selected_happ = undefined
+                  },
+                  openExternal(url) {
+                      shell.openExternal(url)
                   }
                 }
             })
