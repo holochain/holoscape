@@ -25,6 +25,9 @@
       .name {
           font-weight: bold;
       }
+      .screenshot {
+          max-width: 400px;
+      }
     </style>
   </head>
   <body>
@@ -38,17 +41,35 @@
       <div><span>agents:</span><span>{{ agents }}</span></div>
       -->
 
-      <ul class="nav">
+      <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a id="nav-happ-store" class="nav-link active" href="#" v-on:click="tab = 'happ-store'">Poor man's hApp store</a>
+            <a id="nav-happ-store" class="nav-link" v-bind:class="{ active: tab == 'happ-store'}" href="#" v-on:click="tab = 'happ-store'">Poor man's hApp store</a>
         </li>
         <li class="nav-item">
-            <a id="nav-from-file" class="nav-link" href="#" v-on:click="tab = 'from-file'">Install from hApp bundle file</a>
+            <a id="nav-from-file" class="nav-link" v-bind:class="{ active: tab == 'from-file'}" href="#" v-on:click="tab = 'from-file'">Install from hApp bundle file</a>
         </li>
     </ul>
       <ul class="list-group">
         <li v-if="tab == 'happ-store'" class="list-group-item">
             <h3>Poor man's hApp-store</h3>
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Screenshot</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="happ in happ_index">
+                        <td class="name">{{ happ.name }}</td>
+                        <td>{{ happ.description }}</td>
+                        <td><img class="screenshot" :src="happ.screenshot"></td>
+                        <td><button type="button" class="btn btn-primary" v-on:click="showContentsFromHappIndex(happ)">Show contents...</button></td>
+                    </tr>
+                </tbody>
+            </table>
         </li>
       <li v-if="tab == 'from-file'" class="list-group-item">
           <h3>Please select a bundle file to install</h3>
@@ -255,6 +276,7 @@
         const getPort = require('get-port');
         const path = require('path')
         const cli = require('../cli')
+        const request = require('request')
 
         let configured = false
 
@@ -282,6 +304,7 @@
                   installed_dnas: [],
                   installed_bridges: [],
                   used_ports: [],
+                  happ_index: [],
                 },
                 methods: {
                   async loadBundle() {
@@ -456,6 +479,24 @@
                     app.bundle = undefined,
                     app.canInstall = false
                     app.success = true
+                  },
+                  getHappIndex() {
+                    request('https://raw.githubusercontent.com/holochain/happ-index/master/index.json', { json: true }, (err, res, body) => {
+                        if (err) { return console.log(err); }
+                        app.happ_index = body
+                    });
+                  },
+                  async showContentsFromHappIndex(happMeta) {
+                      let {directory} = happMeta
+                      let bundleUrl = `https://raw.githubusercontent.com/holochain/happ-index/master/happ-resources/${directory}/bundle.toml`
+                      this.installed_instances = await call('admin/instance/list')()
+                      this.installed_dnas = await call('admin/dna/list')()
+                      this.installed_bridges = await call('admin/bridge/list')()
+                      request(bundleUrl, { json: true }, (err, res, body) => {
+                        if (err) { return console.log(err); }
+                        app.bundle = toml.parse(body)
+                        this.processBundle()
+                    });
                   }
                 }
             })
@@ -546,6 +587,7 @@
             }
 
             window.app = app
+            app.getHappIndex()
         })
     </script>
 
