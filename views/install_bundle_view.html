@@ -526,11 +526,27 @@
                 console.log('Adding agent', agent_id)
                 await call('admin/agent/add')({id: agent_id, name: agent_id})
                 console.log('Agent added')
+                let installed_agents = await call('admin/agent/list')()
+                let agent_address = undefined
+                for(let agent of installed_agents) {
+                    if(agent.id == agent_id) {
+                        agent_address = agent.public_address
+                    }
+                }
 
                 const dna_id = `${instance.name}-dna`
                 const path = instance.tempPath
                 console.log('Installing DNA', dna_id)
-                await call('admin/dna/install_from_file')({id: dna_id, name: instance.name, path, copy: true})
+                let properties = undefined
+                console.log('PROPERTIES:', instance.dna_properties)
+                if(instance.dna_properties) {
+                    properties = instance.dna_properties
+                    for(let name in properties) {
+                        properties[name] = properties[name].replace("${AGENT_ID}", agent_address)
+                    }
+                }
+                console.log('PROPERTIES interpolated:', instance.dna_properties)
+                await call('admin/dna/install_from_file')({id: dna_id, name: instance.name, path, copy: true, properties})
                 console.log('DNA installed')
 
                 const id = `${instance.name}`
