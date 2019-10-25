@@ -498,6 +498,7 @@
             }
 
             const installUi = async (ui) => {
+              console.log(JSON.stringify(ui))
                 let extractedPath = temp.path()
                 console.log(`Extracting ${ui.name} to ${extractedPath}`)
                 await new Promise((resolve, reject)=>{
