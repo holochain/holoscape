@@ -38,6 +38,12 @@
         font-size: 24px;
         margin: 25px 0 60px 0;
       }
+      .card {
+          margin: 20px 0;
+      }
+      .card-text {
+          color: dimgrey;
+      }
     </style>
   </head>
   <body>
@@ -62,27 +68,21 @@
       <ul class="list-group">
         <li v-if="tab == 'happ-store'" class="list-group-item">
             <h3>Poor man's hApp-store</h3>
-            <button type="button" class="btn btn-danger" v-if="selected_happ!=undefined" v-on:click="deselect()">back</button>
-            <table class="table">
-                <thead class="thead-light">
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Screenshot</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="happ in happ_index" :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" v-on:click="showContentsFromHappIndex(happ)">
-                        <td class="name">{{ happ.name }}</td>
-                        <td>{{ happ.description }}</td>
-                        <td><img class="screenshot" :src="happ.screenshot"></td>
-                        <!--<td>
-                            <button type="button" class="btn btn-primary" v-if="selected_happ==undefined" v-on:click="showContentsFromHappIndex(happ)">Show bundle contents...</button>
-                        </td>-->
-                    </tr>
-                </tbody>
-            </table>
+            
+            <div class="container">
+                <div v-for="happ in happ_index" 
+                     :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" 
+                     v-on:click="showContentsFromHappIndex(happ)"
+                     class="card" style="width: 30rem;">
+                    <img :src="happ.screenshot" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ happ.name }}</h2>
+                        <p class="card-text">{{ happ.description }}</p>
+                        <a href="#" class="card-link">View contents and install...</a>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger" v-if="selected_happ!=undefined" v-on:click="deselect()">Back to list...</button>
         </li>
       <li v-if="tab == 'from-file'" class="list-group-item">
           <h3>Please select a bundle file to install</h3>
