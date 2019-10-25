@@ -2,11 +2,11 @@
   <head>
     <title>Holoscape conductor log</title>
     <script> window.$ = window.jQuery = require('jquery'); </script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>const Vue = require('vue/dist/vue.common');</script>
+    <script>require('popper.js');</script>
+    <script>require('bootstrap');</script>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
     <style>
      .background {
        background: linear-gradient(45deg, #1a0231f2, #00017f);
@@ -54,7 +54,7 @@
        text-align: right;
        font-size: 12px;
      }
-     ul {
+     ul#log {
        list-style-type: none;
      }
     </style>
@@ -123,8 +123,24 @@
               </div>
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
                 <label for="sim2h-url">Sim2h Switchboard URL</label>
-                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://localhost:9000">
-                <small id="sim2h-url-help" class="form-text text-muted"></small>
+                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000">
+                <small id="sim2h-url-help" class="form-text text-muted">
+                  The default of wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch board.
+                  This is a centralized simulation of the Holochain network that connects all agents of the DHT through one central switch board
+                  to enable easy debugging by logging all network traffic between all nodes.
+                  <br>
+                  You can run your own sim2h server to debug your hApp yourself.
+                  The Holochain public server can be used for public testing during alpha stages.
+                  <br>
+                  <bold>
+                    DISCLAIMER:
+                    <ul>
+                      <li>This public instance comes with no guarantee of up-time!</li>
+                      <li>This is for testing only! Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
+                    </ul>
+                  </bold>
+                  
+                </small>
               </div>
               <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
                 <label for="lib3h-network-name">Network Name</label>
@@ -177,7 +193,9 @@
        //-------------------------------------------------------------------
        // Network config management
        ipcRenderer.on('request-network-config', (event, message) => {
-           $('#network-config-modal').modal()
+          app.network_type = 'sim2h'
+          $('#sim2h-url').val("wss://sim2h.holochain.org:9000")
+          $('#network-config-modal').modal()
        })
        const network_config_submit = () => {
            let config = {

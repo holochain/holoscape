@@ -255,6 +255,9 @@ class Holoscape {
     }
 
     updateTrayMenu(opt) {
+      if(this.quitting) {
+        return
+      }
       const happMenu = Menu.buildFromTemplate(this.happUiController.createUiMenuTemplate())
       const settingsMenu = Menu.buildFromTemplate([
         { label: 'Conductor config...', type: 'checkbox', checked: this.configWindow.isVisible(), enabled: global.conductor_call != null, click: ()=>this.showHideConfig() },
@@ -386,10 +389,12 @@ class Holoscape {
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()
         this.splash.hide()
-        this.configWindow.webContents.send('conductor-call-set')
-        this.uiConfigWindow.webContents.send('conductor-call-set')
-        this.debuggerWindow.webContents.send('conductor-call-set')
-        this.installBundleWindow.webContents.send('conductor-call-set')
+        setTimeout(() => {
+          this.configWindow.webContents.send('conductor-call-set')
+          this.uiConfigWindow.webContents.send('conductor-call-set')
+          this.debuggerWindow.webContents.send('conductor-call-set')
+          this.installBundleWindow.webContents.send('conductor-call-set')
+        }, 500)
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()
