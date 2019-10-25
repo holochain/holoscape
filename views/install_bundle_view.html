@@ -28,6 +28,16 @@
       .screenshot {
           max-width: 400px;
       }
+      .hidden {
+          display: none;
+      }
+      .happItem {
+          cursor: pointer;
+      }
+      .install-button {
+        font-size: 24px;
+        margin: 25px 0 60px 0;
+      }
     </style>
   </head>
   <body>
@@ -52,6 +62,7 @@
       <ul class="list-group">
         <li v-if="tab == 'happ-store'" class="list-group-item">
             <h3>Poor man's hApp-store</h3>
+            <button type="button" class="btn btn-danger" v-if="selected_happ!=undefined" v-on:click="deselect()">back</button>
             <table class="table">
                 <thead class="thead-light">
                     <tr>
@@ -62,11 +73,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="happ in happ_index">
+                    <tr v-for="happ in happ_index" :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" v-on:click="showContentsFromHappIndex(happ)">
                         <td class="name">{{ happ.name }}</td>
                         <td>{{ happ.description }}</td>
                         <td><img class="screenshot" :src="happ.screenshot"></td>
-                        <td><button type="button" class="btn btn-primary" v-on:click="showContentsFromHappIndex(happ)">Show contents...</button></td>
+                        <!--<td>
+                            <button type="button" class="btn btn-primary" v-if="selected_happ==undefined" v-on:click="showContentsFromHappIndex(happ)">Show bundle contents...</button>
+                        </td>-->
                     </tr>
                 </tbody>
             </table>
@@ -252,7 +265,7 @@
                 </ul>-->
             </li>
       </ul>
-      <div class="container">
+      <div class="container" v-if="bundle">
             <div class="row justify-content-center" v-if="success">
                 <div class="col-7">
                     <h2 class="alert alert-success">Bundle successfully installed!</h2>
@@ -260,7 +273,7 @@
             </div>
             <div class="row justify-content-end">
                 <div class="col-7">
-                    <button type="button" class="btn btn-success" v-on:click="install" :disabled="!canInstall">Install</button>
+                    <button type="button" class="btn btn-success install-button" v-on:click="install" :disabled="!canInstall">Install</button>
                 </div>
             </div>
       </div>
@@ -305,6 +318,7 @@
                   installed_bridges: [],
                   used_ports: [],
                   happ_index: [],
+                  selected_happ: undefined,
                 },
                 methods: {
                   async loadBundle() {
@@ -487,6 +501,7 @@
                     });
                   },
                   async showContentsFromHappIndex(happMeta) {
+                      app.selected_happ = happMeta
                       let {directory} = happMeta
                       let bundleUrl = `https://raw.githubusercontent.com/holochain/happ-index/master/happ-resources/${directory}/bundle.toml`
                       this.installed_instances = await call('admin/instance/list')()
@@ -497,6 +512,10 @@
                         app.bundle = toml.parse(body)
                         this.processBundle()
                     });
+                  },
+                  deselect() {
+                      app.bundle = undefined
+                      app.selected_happ = undefined
                   }
                 }
             })
