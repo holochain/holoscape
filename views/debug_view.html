@@ -22,6 +22,9 @@
         overflow:auto;
         background:#bbb;
       }
+      .clickFetch {
+          cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -78,7 +81,7 @@
                                 <tr><td>Prev. header:</td><td>{{ header.link }}</td></tr>
                             </tbody>
                         </table>
-                        <div class="alert alert-dark" role="alert">{{ contents[header.entry_address] ? contents[header.entry_address].content : 'fetching...' }}</div>
+                        <div class="alert alert-dark" role="alert" :class="{clickFetch: contents[header.entry_address]==undefined}" v-on:click="updateContent(header.entry_address, instance_id)">{{ contents[header.entry_address] ? contents[header.entry_address].content : 'click to fetch' }}</div>
                     </div>
                 </div>
             </li>
@@ -98,7 +101,7 @@
                                             <tr><td>Address:</td><td>{{ address }}</td></tr>
                                         </tbody>
                                     </table>
-                                    <div class="alert alert-dark" role="alert">{{ contents[address] ? contents[address].content : 'fetching...' }}</div>
+                                    <div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'click to fetch' }}</div>
                             </li>
                         </ul>
                 </div>
@@ -194,13 +197,6 @@
                       call('debug/state_dump')({instance_id})
                         .then((dump) => {
                             console.log("Got state dump: ", dump)
-                            
-                            dump.held_entries.map(async (address)=>{
-                                await updateContent(address, instance_id)
-                            })
-                            dump.source_chain.map(async (header)=>{
-                                await updateContent(header.entry_address, instance_id)
-                            })
                             Vue.set(app.stateDumps, instance_id, dump)
                         })
                         .catch((error) => {

@@ -25,6 +25,19 @@
       .name {
           font-weight: bold;
       }
+      .screenshot {
+          max-width: 400px;
+      }
+      .hidden {
+          display: none;
+      }
+      .happItem {
+          cursor: pointer;
+      }
+      .install-button {
+        font-size: 24px;
+        margin: 25px 0 60px 0;
+      }
     </style>
   </head>
   <body>
@@ -37,8 +50,41 @@
       <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
       <div><span>agents:</span><span>{{ agents }}</span></div>
       -->
+
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a id="nav-happ-store" class="nav-link" v-bind:class="{ active: tab == 'happ-store'}" href="#" v-on:click="tab = 'happ-store'">Poor man's hApp store</a>
+        </li>
+        <li class="nav-item">
+            <a id="nav-from-file" class="nav-link" v-bind:class="{ active: tab == 'from-file'}" href="#" v-on:click="tab = 'from-file'">Install from hApp bundle file</a>
+        </li>
+    </ul>
       <ul class="list-group">
-      <li class="list-group-item">
+        <li v-if="tab == 'happ-store'" class="list-group-item">
+            <h3>Poor man's hApp-store</h3>
+            <button type="button" class="btn btn-danger" v-if="selected_happ!=undefined" v-on:click="deselect()">back</button>
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Screenshot</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="happ in happ_index" :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" v-on:click="showContentsFromHappIndex(happ)">
+                        <td class="name">{{ happ.name }}</td>
+                        <td>{{ happ.description }}</td>
+                        <td><img class="screenshot" :src="happ.screenshot"></td>
+                        <!--<td>
+                            <button type="button" class="btn btn-primary" v-if="selected_happ==undefined" v-on:click="showContentsFromHappIndex(happ)">Show bundle contents...</button>
+                        </td>-->
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+      <li v-if="tab == 'from-file'" class="list-group-item">
           <h3>Please select a bundle file to install</h3>
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -219,7 +265,7 @@
                 </ul>-->
             </li>
       </ul>
-      <div class="container">
+      <div class="container" v-if="bundle">
             <div class="row justify-content-center" v-if="success">
                 <div class="col-7">
                     <h2 class="alert alert-success">Bundle successfully installed!</h2>
@@ -227,7 +273,7 @@
             </div>
             <div class="row justify-content-end">
                 <div class="col-7">
-                    <button type="button" class="btn btn-success" v-on:click="install" :disabled="!canInstall">Install</button>
+                    <button type="button" class="btn btn-success install-button" v-on:click="install" :disabled="!canInstall">Install</button>
                 </div>
             </div>
       </div>
@@ -243,6 +289,7 @@
         const getPort = require('get-port');
         const path = require('path')
         const cli = require('../cli')
+        const request = require('request')
 
         let configured = false
 
@@ -258,6 +305,7 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                  tab: 'happ-store',  
                   canInstall: false,
                   installAsAdmin: false,
                   file: undefined,
@@ -269,6 +317,8 @@
                   installed_dnas: [],
                   installed_bridges: [],
                   used_ports: [],
+                  happ_index: [],
+                  selected_happ: undefined,
                 },
                 methods: {
                   async loadBundle() {
@@ -443,6 +493,29 @@
                     app.bundle = undefined,
                     app.canInstall = false
                     app.success = true
+                  },
+                  getHappIndex() {
+                    request('https://raw.githubusercontent.com/holochain/happ-index/master/index.json', { json: true }, (err, res, body) => {
+                        if (err) { return console.log(err); }
+                        app.happ_index = body
+                    });
+                  },
+                  async showContentsFromHappIndex(happMeta) {
+                      app.selected_happ = happMeta
+                      let {directory} = happMeta
+                      let bundleUrl = `https://raw.githubusercontent.com/holochain/happ-index/master/happ-resources/${directory}/bundle.toml`
+                      this.installed_instances = await call('admin/instance/list')()
+                      this.installed_dnas = await call('admin/dna/list')()
+                      this.installed_bridges = await call('admin/bridge/list')()
+                      request(bundleUrl, { json: true }, (err, res, body) => {
+                        if (err) { return console.log(err); }
+                        app.bundle = toml.parse(body)
+                        this.processBundle()
+                    });
+                  },
+                  deselect() {
+                      app.bundle = undefined
+                      app.selected_happ = undefined
                   }
                 }
             })
@@ -534,6 +607,7 @@
             }
 
             window.app = app
+            app.getHappIndex()
         })
     </script>
 
