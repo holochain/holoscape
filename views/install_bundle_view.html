@@ -109,6 +109,7 @@
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">DNA Hash</th>
+                        <th scope="col">DNA Properties</th>
                         <!--<th scope="col">URI</th>-->
                         <th scope="col">file status</th>
                         <th scope="col">installation status</th>
@@ -118,6 +119,7 @@
                     <tr v-for="instance in bundle.instances">
                         <td class="name">{{ instance.name }}</td>
                         <td>{{ instance.dna_hash }}</td>
+                        <td><span v-for="(property, name, index) in instance.dna_properties">{{name}}={{property}}</span></td>
                         <!--<td>{{ instance.uri }}</td>-->
                         <td>
                             <div class="badge badge-warning" v-if="instance.downloadStatus == 'pending'">
