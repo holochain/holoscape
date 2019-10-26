@@ -24,6 +24,8 @@ let
   sha256 = "0mhqhq21y5vrr1f30qd2bvydv4bbbslvyzclhw0kdxmkgg3z4c92";
  }) { };
 
+ target-os = if holonix.pkgs.stdenv.isDarwin then "darwin" else "linux";
+
 in
 with holonix.pkgs;
 {
@@ -31,8 +33,8 @@ with holonix.pkgs;
   name = "dev-shell";
 
   shellHook = holonix.pkgs.lib.concatStrings [''
-  ln -sf `command -v holochain` holochain-linux
-  ln -sf `command -v hc` hc-linux
+  ln -sf `command -v holochain` holochain-${target-os}
+  ln -sf `command -v hc` hc-${target-os}
   npm install
   export PATH="$PATH:$( npm bin )"
   ''
