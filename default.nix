@@ -34,16 +34,20 @@ with holonix.pkgs;
   ln -sf `command -v holochain` holochain-linux
   ln -sf `command -v hc` hc-linux
   npm install
-  export PATH="$PATH:$PWD/node_modules/.bin"
+  export PATH="$PATH:$( npm bin )"
   ''
   holonix.shell.shellHook
   ];
 
   buildInputs = [
+   holonix.pkgs.unzip
    newer-pkgs.electron_6
+
+   (holonix.pkgs.writeShellScriptBin "holoscape" ''
+   electron .
+   '')
   ]
    ++ holonix.shell.buildInputs
-   ++ config.buildInputs
   ;
  });
 }

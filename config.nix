@@ -1,6 +1,4 @@
 {
- # extend the shell with buildInputs specific to this project
- buildInputs = [ ];
 
  # configure holonix itself
  holonix = {
