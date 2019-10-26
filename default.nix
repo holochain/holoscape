@@ -39,6 +39,8 @@ with holonix.pkgs;
   holonix.shell.shellHook
   ];
 
+  DEV="true";
+
   buildInputs = [
    holonix.pkgs.unzip
    newer-pkgs.electron_6
