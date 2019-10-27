@@ -21,9 +21,15 @@ function executablePath() {
 }
 
 module.exports = {
-    hash: (filePath) => {
+    hash: (filePath, properties) => {
         console.log("CLI: hashing file", filePath)
         let params = ["hash", "--path", filePath]
+        if(properties) {
+            for(let name in properties) {
+                params.push("--property")
+                params.push(`${name}=${properties[name]}`)
+            }
+        }
         let { stdout, stderr, error } = spawnSync(
             executablePath(), 
             params,

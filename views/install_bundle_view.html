@@ -44,6 +44,10 @@
       .card-text {
           color: dimgrey;
       }
+      .properties-col {
+          max-width: 300px;
+          overflow-wrap: break-word;
+      }
     </style>
   </head>
   <body>
@@ -126,8 +130,8 @@
                 <tbody>
                     <tr v-for="instance in bundle.instances">
                         <td class="name">{{ instance.name }}</td>
-                        <td>{{ instance.dna_hash }}</td>
-                        <td><span v-for="(property, name, index) in instance.dna_properties">{{name}}={{property}}</span></td>
+                        <td>{{ instance.dna_hash }}<br><small v-if="instance.interpolatedDnaHash">->{{instance.interpolatedDnaHash}}</small></td>
+                        <td class="properties-col"><span v-for="(property, name, index) in instance.dna_properties">{{name}}={{property}}</span></td>
                         <!--<td>{{ instance.uri }}</td>-->
                         <td>
                             <div class="badge badge-warning" v-if="instance.downloadStatus == 'pending'">
@@ -311,6 +315,22 @@
             const happUiController = remote.getGlobal('holoscape').happUiController
             const call = remote.getGlobal('conductor_call')
 
+            const interpolateProperties = (properties, variables) => {
+                console.log(`Interpolating DNA hash with properties: ${JSON.stringify(properties)}`)
+                let {agent_id} = variables
+                properties = instance.dna_properties
+                for(let name in properties) {
+                    properties[name] = properties[name].replace("${AGENT_ID}", agent_id)
+                }
+                return properties
+            }
+
+            const interpolateDnaHash = (instance, variables) => {
+                instance.dna_properties = (instance.dna_properties, variables)
+                let {hash, error} = cli.hash(instance.tempPath, instance.dna_properties)
+                Vue.set(instance, 'interpolatedDnaHash', hash)
+                return {hash, error}
+            }
 
             var app = new Vue({
                 el: '#app',
@@ -323,6 +343,7 @@
                   bundle: undefined,
                   canInstall: false,
                   success: false,
+                  installed_agents: [],
                   installed_instances: [],
                   installed_dnas: [],
                   installed_bridges: [],
@@ -332,9 +353,6 @@
                 },
                 methods: {
                   async loadBundle() {
-                    this.installed_instances = await call('admin/instance/list')()
-                    this.installed_dnas = await call('admin/dna/list')()
-                    this.installed_bridges = await call('admin/bridge/list')()
                     if(this.$refs.bundleFile.files.length > 0) {
                         app.file = this.$refs.bundleFile.files[0]
                         const contents = fs.readFileSync(app.file.path)
@@ -352,17 +370,63 @@
                   },
                   installedInstanceId(instance) {
                     console.log("Checking if instance is installed: ", instance)
-                    let installed_dna = app.installed_dnas.find((dna)=>{return dna.hash==instance.dna_hash})
+                    let installed_dna = undefined
+
+                    if(instance.dna_properties) {
+                        // If the bundle wants to have specific DNA properties set,
+                        // we have to interpolate the resulting DNA hash...
+                        // But since we have variables that can be used for property value interpolation
+                        // (currently only the agent id, but more stuff like DeepKey root key id in the future)
+                        // we have to try all combinations of agent ids and dnas to see if we have the specified
+                        // installed installed already:
+                        console.log(`Checking combinations with all agents: ${JSON.stringify(this.installed_agents)}`)
+                        for(agent of this.installed_agents) {
+                            console.log(`Checking combinations with agent: ${agent}`)
+                            let dna_hash = instance.dna_hash
+                            if(instance.dna_properties) {
+                                console.log(`Interpolating hash for instance ${instance.id} with agent ${agent.public_address}`)
+                                let {hash, error} = interpolateDnaHash(instance, {agent_id: agent.public_address})
+                                if(error) {
+                                    Vue.set(instance, 'downloadStatus', 'fileError')
+                                    Vue.set(instance, 'fileError', error)
+                                }
+                                console.log(`Hash: ${hash}`)
+                                dna_hash = hash
+                            }
+                            installed_dna = this.installed_dnas.find((dna)=>{return dna.hash==dna_hash})
+                            if(installed_dna) break
+                        }
+                    } else {
+                        let dna_hash = instance.dna_hash
+                        installed_dna = this.installed_dnas.find((dna)=>{return dna.hash==dna_hash})
+                    }
+
                     if(!installed_dna) return
                     console.log("Found DNA:", installed_dna)
                     let installed_instance = this.installed_instances.find((i)=>{return i.dna==installed_dna.id})
                     console.log("Found instance:", installed_instance)
                     return installed_instance.id
                   },
-                  processBundle() {
+                  async processBundle() {
+                    this.installed_agents = await call('admin/agent/list')()  
+                    this.installed_instances = await call('admin/instance/list')()
+                    this.installed_dnas = await call('admin/dna/list')()
+                    this.installed_bridges = await call('admin/bridge/list')()
+
                       app.bundle.instances && app.bundle.instances.map((instance) => {
                         console.log("Processing instance:", instance)
-                        let installed_instance_id = this.installedInstanceId(instance)
+                        // Here we are checking if we have an instance with the same DNA installed already.
+                        // If so, we don't install it again but use the already installed instance ID.
+                        // BUT: this first check only happens with the bundle doesn't set a property, because
+                        // setting a property would change the hash anyways. In that case we will have to download the
+                        // DNA first and then calculate the hash with property and check again if we have a DNA with that
+                        // hash already.
+                        // That happens further down...
+                        let installed_instance_id
+                        if(!instance.dna_properties) {
+                            installed_instance_id = this.installedInstanceId(instance)    
+                        }
+
                         if(installed_instance_id) {
                             Vue.set(instance, 'installedInstanceId', installed_instance_id)
                             this.checkInstallReady()
@@ -398,6 +462,15 @@
                                         Vue.set(instance, 'fileError', {message: 'Hash of found file is different:', hash})
                                     } else {
                                         Vue.set(instance, 'downloadStatus', 'done')
+                                    }
+
+                                    // Ok, here we do the checking for already installed instances in the case of unique properties
+                                    // as mentioned above:
+                                    if(instance.dna_properties) {
+                                        let installed_instance_id = this.installedInstanceId(instance)
+                                        if(installed_instance_id) {
+                                            Vue.set(instance, 'installedInstanceId', installed_instance_id)
+                                        }
                                     }
                                     this.checkInstallReady()
                                 })
@@ -553,10 +626,9 @@
                 let properties = undefined
                 console.log('PROPERTIES:', instance.dna_properties)
                 if(instance.dna_properties) {
-                    properties = instance.dna_properties
-                    for(let name in properties) {
-                        properties[name] = properties[name].replace("${AGENT_ID}", agent_address)
-                    }
+                    let variables = {agent_id: agent_address}
+                    properties = interpolateProperties(instance.dna_properties, variables)
+                    interpolateDnaHash(instance, variables)
                 }
                 console.log('PROPERTIES interpolated:', instance.dna_properties)
                 await call('admin/dna/install_from_file')({id: dna_id, name: instance.name, path, copy: true, properties})
