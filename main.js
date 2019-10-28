@@ -6,7 +6,7 @@ const { Holoscape, systemTrayIconEmpty } = require('./holoscape')
 const { loadUIinfo, sanitizeUINameForScheme, HAPP_SCHEME } = require('./happ-ui-controller')
 const TOML = require('@iarna/toml')
 
-const mb = menubar();
+const mb = menubar({showDockIcon: true});
 global.mb = mb
 
 
