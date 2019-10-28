@@ -1,0 +1,49 @@
+# A declaration of an instance that this hApp needs to have installed.
+# `name` here is just an internal name to reference the given DNA inside the rest of this bundle.
+[[instances]]
+name = "Personas & Profiles"
+id = "__personas-profiles"
+dna_hash = "QmUb9qzjm2F2PJCaJDT9ue9YvKak4cEBw77fWSqpHr9pvY"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "https://github.com/holochain/identity-manager/releases/download/0.1.9/personas-profiles.dna.json"
+
+[instances.dna_properties]
+agent_id = "${AGENT_ID}"
+
+[[instances]]
+name = "Peer Chat Public"
+id = "__peer-chat-public"
+dna_hash = "QmcJBG4Z5qz1q4zhgJwF3xmmqKaobW7i5wL27QYGKz57aY"
+uri = "https://github.com/holochain/peer-chat/releases/download/0.016/peer-chat.dna.json"
+
+[[bridges]]
+handle = "p-p-bridge"
+caller_id = "__peer-chat-public"
+callee_id = "__personas-profiles"
+
+
+[[UIs]]
+name = "Peer Chat"
+id = "peer-chat-ui"
+ui_bundle_hash = "Qm34abcde"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "https://github.com/holochain/peer-chat/releases/download/0.016/peer-chat-ui.zip"
+
+# "__peer-chat" is the instance identifier in this config (declared above)
+# that needs to be linked to the handle "peer-chat" which is used inside
+# the definitions of the peer-chat UI.  This reference creates a link for that.
+# thus we could link a different implementation of peer-chat to use the same UI
+[[UIs.instance_references]]
+ui_handle = "peer-chat-public"
+instance_id = "__peer-chat-public"
+
+[[UIs]]
+name = "Identity Manager"
+id = "identity-manager-ui"
+ui-bundle-hash = "Qm34abcde"
+# Optional, might also be retrieved from hchc via hash long-term
+uri = "https://github.com/holochain/identity-manager/releases/download/0.1.9/identity-manager-ui.zip"
+
+[[UIs.instance_references]]
+ui_handle = "personas-profiles"
+instance_id = "__personas-profiles"

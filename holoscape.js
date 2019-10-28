@@ -80,6 +80,7 @@ class Holoscape {
     checkConductorConnection() {
       if(this.conductorProcess && !global.conductor_call) {
         this.connectConductor()
+        // this.dnaViewSwitchSignals()
       }
     }
 
@@ -313,6 +314,7 @@ class Holoscape {
       })
       this.conductorProcess = process
       this.connectConductor()
+      // this.dnaViewSwitchSignals()
     }
 
     shutdownConductor() {
@@ -359,11 +361,36 @@ class Holoscape {
       }
     }
 
+    // dnaViewSwitchSignals() {
+    //   console.log(`dnaViewSwitchSignals ws://localhost:${conductor.dnaPort()}`)
+    //   connect({url:`ws://localhost:${conductor.dnaPort()}`}).then(({call, callZome, close, onSignal}) => {
+    //     onSignal((signal) => {
+    //       console.log(JSON.stringify(signal))
+    //       if (signal.signal.name === 'new_profile_spec_registered') {
+    //         const { location } = JSON.parse(signal.signal.arguments)
+    //         console.log('Open Profile for ' + location)
+    //         this.happUiController.showAndRiseUI('Identity Manager', `/${location}`)
+    //       }
+    //     })
+    //     console.log(`dnaViewSwitchSignals connected`)
+    //   }).catch((error)=> {
+    //     console.error('Holoscape could not connect to dna conductor', error)
+    //   })
+    // }
+
     connectConductor() {
+      console.log(`connectConductor ws://localhost:${conductor.adminPort()}`)
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           this.debuggerWindow.webContents.send('hc-signal', params)
+          console.log(JSON.stringify(params))
+          if (params.signal.name === 'new_profile_spec_registered') {
+            const { location } = JSON.parse(params.signal.arguments)
+            console.log('Open Profile for ' + location)
+            this.happUiController.showAndRiseUI('Identity Manager', `/${location}`)
+          }
         })
+        console.log(`connectConductor connected`)
         global.conductor_call = call
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()

@@ -443,7 +443,7 @@
                                 parts[0] = `file://${path.dirname(bundlePath)}`
                                 uri = parts.join('/')
                             }
-                            getUri(instance.uri, (err, rs) => {
+                            getUri(uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(instance, 'error', err.message)
                                     Vue.set(instance, 'downloadStatus', 'error')
@@ -672,6 +672,7 @@
             }
 
             const installUi = async (ui) => {
+              console.log(JSON.stringify(ui))
                 let extractedPath = temp.path()
                 console.log(`Extracting ${ui.name} to ${extractedPath}`)
                 await new Promise((resolve, reject)=>{
