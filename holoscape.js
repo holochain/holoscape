@@ -363,6 +363,12 @@ class Holoscape {
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           this.debuggerWindow.webContents.send('hc-signal', params)
+          console.log(JSON.stringify(params))
+          if (params.signal.name === 'new_profile_spec_registered') {
+            const { location } = JSON.parse(params.signal.arguments)
+            console.log('Open Profile for ' + location)
+            this.happUiController.showAndRiseUI('Identity Manager', `/${location}`)
+          }
         })
         global.conductor_call = call
         mb.tray.setImage(systemTrayIconFull())
