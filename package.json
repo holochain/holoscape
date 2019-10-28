@@ -5,9 +5,11 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "DEV=true electron .",
+    "start": "electron .",
+    "start:dev": "DEV=true electron .",
     "build-mac": "electron-packager . Holoscape --platform=darwin --overwrite --icon=./images/HoloScape-hdpi.icns",
-    "build-linux": "electron-packager . Holoscape --platform=linux --overwrite --icon=./images/HoloScape-hdpi.png"
+    "build-linux": "electron-packager . Holoscape --platform=linux --overwrite --icon=./images/HoloScape-hdpi.png",
+    "delete:app-support": "rm -rf '/Users/philipbeadle/Library/Application Support/holoscape' && rm -rf '/Users/philipbeadle/Library/Application Support/Holoscape-default'"
   },
   "author": "Holochain Core Dev Team <devcore@holochain.org>",
   "license": "GPLv3",
