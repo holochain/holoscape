@@ -37,6 +37,7 @@ class Holoscape {
       this.createUiConfigWindow()
       this.createDebuggerWindow()
       this.createInstallBundleWindow()
+      this.updateTrayMenu()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
 
