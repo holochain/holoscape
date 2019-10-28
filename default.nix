@@ -18,15 +18,40 @@ let
  ) { config = config; };
  # END HOLONIX IMPORT BOILERPLATE
 
+ # hopefully this won't be needed someday when holonix updates
+ newer-pkgs = import (fetchTarball {
+  url = "https://github.com/NixOS/nixpkgs/archive/19.09.tar.gz";
+  sha256 = "0mhqhq21y5vrr1f30qd2bvydv4bbbslvyzclhw0kdxmkgg3z4c92";
+ }) { };
+
+ target-os = if holonix.pkgs.stdenv.isDarwin then "darwin" else "linux";
+
 in
 with holonix.pkgs;
 {
  dev-shell = stdenv.mkDerivation (holonix.shell // {
   name = "dev-shell";
 
-  buildInputs = [ ]
+  shellHook = holonix.pkgs.lib.concatStrings [''
+  ln -sf `command -v holochain` holochain-${target-os}
+  ln -sf `command -v hc` hc-${target-os}
+  npm install
+  export PATH="$PATH:$( npm bin )"
+  ''
+  holonix.shell.shellHook
+  ];
+
+  DEV="true";
+
+  buildInputs = [
+   holonix.pkgs.unzip
+   newer-pkgs.electron_6
+
+   (holonix.pkgs.writeShellScriptBin "holoscape" ''
+   electron .
+   '')
+  ]
    ++ holonix.shell.buildInputs
-   ++ config.buildInputs
   ;
  });
 }
