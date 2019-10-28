@@ -9,7 +9,7 @@ const persona = process.env.HOLOSCAPE_PERSONA ? process.env.HOLOSCAPE_PERSONA : 
 const rootConfigPath = path.join(app.getPath('appData'), 'Holoscape-'+persona)
 const configPath = path.join(rootConfigPath, 'conductor-config.toml')
 const passphraseSocketPath = path.join(rootConfigPath, 'conductor_login.socket')
-
+const DNA_PORT = process.env.HOLOSCAPE_DNA_PORT ? process.env.HOLOSCAPE_DNA_PORT : 10000
 const ADMIN_PORT = process.env.HOLOSCAPE_ADMIN_PORT ? process.env.HOLOSCAPE_ADMIN_PORT : 4435
 module.exports = {
   configPath,
@@ -30,6 +30,10 @@ module.exports = {
 
   adminPort: () => {
     return ADMIN_PORT
+  },
+
+  dnaPort: () => {
+    return DNA_PORT
   },
 
   initConfig: (networkConfigToml) => {
