@@ -50,6 +50,15 @@ with holonix.pkgs;
    (holonix.pkgs.writeShellScriptBin "holoscape" ''
    electron .
    '')
+
+   (holonix.pkgs.writeShellScriptBin "holoscape-flush" ''
+   rm -rf $HOME/.config/holoscape
+   rm -rf $HOME/.config/Holoscape-default
+   rm -rf ./Holoscape-linux-x64
+   rm -rf ./Holoscape-darwin-x64
+   rm -rf ./node_modules
+   rm -rf ./package-lock.json
+   '')
   ]
    ++ holonix.shell.buildInputs
   ;
