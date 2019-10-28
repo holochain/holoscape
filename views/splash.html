@@ -70,6 +70,19 @@
      ul#log {
        list-style-type: none;
      }
+     #network-config-content {
+       width: 750px;
+     }
+     #network-config-wrapper {
+      left: -150px;
+     }
+     .disclaimer {
+       font-weight: bold;
+     }
+     .disclaimer-label {
+       font-weight: bold;
+       word-wrap: break-word;
+     }
     </style>
   </head>
   <body class="background">
@@ -108,13 +121,10 @@
         </div>
       </div>
       <div class="modal fade" id="network-config-modal" tabindex="-1" role="dialog" aria-labelledby="network-config-modal" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
+        <div class="modal-dialog" role="document" id="network-config-wrapper">
+          <div class="modal-content" id="network-config-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Network Configuration...</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+              <h5 class="modal-title" id="exampleModalLabel">Holochain Network Configuration...</h5>
             </div>
             <div class="modal-body">
               <div class="form-group">
@@ -136,23 +146,26 @@
                 <small id="dynamo-url-help" class="form-text text-muted"></small>
               </div>
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-                <label for="sim2h-url">Sim2h Switchboard URL</label>
-                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000">
-                <small id="sim2h-url-help" class="form-text text-muted">
-                  The default of wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch board.
-                  This is a centralized simulation of the Holochain network that connects all agents of the DHT through one central switch board
+                <label for="sim2h-url">Sim2h Switch-Board URL</label>
+                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
+                <small id="sim2h-url-help" class="form-text text-muted" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
+                  The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch board.
+                  Sim2h is a centralized simulation of the Holochain network that connects all agents of the DHT through one central switch board
                   to enable easy debugging by logging all network traffic between all nodes.
                   <br>
                   You can run your own sim2h server to debug your hApp yourself.
                   The Holochain public server can be used for public testing during alpha stages.
                   <br>
-                  <bold>
+                  <bold class="disclaimer">
                     DISCLAIMER:
                     <ul>
                       <li>This public instance comes with no guarantee of up-time!</li>
                       <li>This is for testing only! Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
                     </ul>
                   </bold>
+                  Please confirm:
+                  <input type="checkbox" id="checkbox" v-model="disclaimer">
+                  <label class="disclaimer-label" for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
                   
                 </small>
               </div>
@@ -168,7 +181,7 @@
               </div>
               <div class="modal-footer">
               <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-              <button id="set-network-type-button" type="button" class="btn btn-primary">Set Network Type</button>
+              <button id="set-network-type-button" type="button" class="btn btn-primary" :disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</button>
             </div>
           </div>
         </div>
@@ -184,7 +197,9 @@
            data: {
                status: "Initializing...",
                logs: require('electron').remote.getGlobal('holoscape').logMessages,
-               network_type: "sim1h"
+               network_type: "sim2h",
+               sim2h_url: 'wss://sim2h.holochain.org:9000',
+               disclaimer: false,
            }
        })
 

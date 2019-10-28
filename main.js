@@ -53,6 +53,7 @@ mb.on('ready', async () => {
 
   if(!conductor.hasConfig()) {
       console.log("No conductor config found. Initializing...")
+      await new Promise((resolve)=>setTimeout(resolve, 1000))
       global.holoscape.splash.webContents.send('request-network-config')
       let config = await new Promise( (resolve, reject) => {
           ipcMain.on('network-config-set', (event, config) => {
