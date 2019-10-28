@@ -364,8 +364,9 @@ class Holoscape {
       console.log(`connectConductor ws://localhost:${conductor.adminPort()}`)
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
+          if(this.quitting) return
           this.debuggerWindow.webContents.send('hc-signal', params)
-          console.log(JSON.stringify(params))
+          //console.log(JSON.stringify(params))
           if (params.signal.name === 'new_profile_spec_registered') {
             const { location } = JSON.parse(params.signal.arguments)
             console.log('Open Profile for ' + location)
