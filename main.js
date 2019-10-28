@@ -2,11 +2,16 @@ const { menubar } = require('menubar')
 const { app, ipcMain, protocol } = require('electron')
 const conductor = require('./conductor.js')
 const path = require('path')
-const { Holoscape, systemTrayIconEmpty } = require('./holoscape')
+const { Holoscape, systemTrayIconEmpty, systemTrayIconFull } = require('./holoscape')
 const { loadUIinfo, sanitizeUINameForScheme, HAPP_SCHEME } = require('./happ-ui-controller')
 const TOML = require('@iarna/toml')
 
-const mb = menubar({showDockIcon: true});
+const mb = menubar({
+  showDockIcon: true, 
+  browserWindow: {icon: systemTrayIconFull()},
+  icon: systemTrayIconFull(),
+  tooltip: 'Holoscape - The Holochain run-time'
+});
 global.mb = mb
 
 

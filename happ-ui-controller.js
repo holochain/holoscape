@@ -3,6 +3,7 @@ const { ncp } = require('ncp')
 const fs = require('fs')
 const path = require('path')
 const conductor = require('./conductor.js')
+const { systemTrayIconFull } = require('./holoscape.js')
 
 const HAPP_SCHEME = 'holoscape-happ'
 
@@ -236,6 +237,18 @@ class HappUiController {
             return
         }
 
+        let icon
+        if(process.platform === "darwin") {
+            icon = path.join(__dirname, 'images/HoloScape-22px.png')
+        } else {
+            icon = path.join(__dirname, 'images/HoloScape-system-tray.png')
+        }
+
+        let favicon_path = path.join(uiRootDir, 'favicon.ico')
+        if(fs.existsSync(favicon_path)) {
+            icon = favicon_path
+        }
+
         let window = new BrowserWindow({
             width:890,
             height:535,
@@ -245,6 +258,7 @@ class HappUiController {
                 partition,
                 preload: path.join(__dirname, 'happ-ui-preload.js')
             },
+            icon: icon,
         })
         window.uiName = name
 

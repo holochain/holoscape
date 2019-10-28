@@ -66,6 +66,7 @@ class Holoscape {
         alwaysOnTop: true,
         frame: false,
         transparent: true,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/splash.html'))
       //window.webContents.openDevTools()
@@ -153,6 +154,7 @@ class Holoscape {
         minimizable: false,
         alwaysOnTop: true,
         show: false,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_log.html'))
       setupWindowDevProduction(window)
@@ -175,6 +177,7 @@ class Holoscape {
           nodeIntegration: true
         },
         show: false,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
       setupWindowDevProduction(window)
@@ -197,6 +200,7 @@ class Holoscape {
           nodeIntegration: true
         },
         show: false,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
       setupWindowDevProduction(window)
@@ -219,6 +223,7 @@ class Holoscape {
           nodeIntegration: true
         },
         show: false,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
       setupWindowDevProduction(window)
@@ -241,6 +246,7 @@ class Holoscape {
           nodeIntegration: true
         },
         show: false,
+        icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
       setupWindowDevProduction(window)
