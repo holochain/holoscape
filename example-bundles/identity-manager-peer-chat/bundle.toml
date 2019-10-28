@@ -30,8 +30,8 @@ ui_bundle_hash = "Qm34abcde"
 uri = "https://github.com/holochain/peer-chat/releases/download/0.016/peer-chat-ui.zip"
 
 # "__peer-chat" is the instance identifier in this config (declared above)
-# that needs to be linked to the handle "peer-chat" which is used inside
-# the definitions of the peer-chat UI.  This reference creates a link for that.
+# that needs to be linked to the handle "peer-chat-public" which is used inside
+# the definitions of the peer-chat UI to call the right instance.  This reference creates a link for that.
 # thus we could link a different implementation of peer-chat to use the same UI
 [[UIs.instance_references]]
 ui_handle = "peer-chat-public"
