@@ -80,6 +80,7 @@ class Holoscape {
     checkConductorConnection() {
       if(this.conductorProcess && !global.conductor_call) {
         this.connectConductor()
+        // this.dnaViewSwitchSignals()
       }
     }
 
@@ -360,6 +361,7 @@ class Holoscape {
     }
 
     connectConductor() {
+      console.log(`connectConductor ws://localhost:${conductor.adminPort()}`)
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           this.debuggerWindow.webContents.send('hc-signal', params)
@@ -370,6 +372,7 @@ class Holoscape {
             this.happUiController.showAndRiseUI('Identity Manager', `/${location}`)
           }
         })
+        console.log(`connectConductor connected`)
         global.conductor_call = call
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()

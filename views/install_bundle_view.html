@@ -71,9 +71,9 @@
     </ul>
       <ul class="list-group">
         <li v-if="tab == 'happ-store'" class="list-group-item">
-            <h3>Poor man's hApp-store</h3>
+            <h3>Alpha Prototype hApp-store</h3>
             <p class="card-text">
-                This is an alpha-prototype of the real hApp-Store that is currently under development. 
+                This is an alpha-prototype of the real hApp-Store that is currently under development.
                 This prototype pulls a list of hApp descriptions from the <a href="#" v-on:click="openExternal('https://github.com/holochain/happ-index')">hApp-index repository</a>.
                 If you want your hApp to be listed below, please create a pull-request to <a href="#" v-on:click="openExternal('https://github.com/holochain/happ-index')">https://github.com/holochain/happ-index</a>
                 including your <a href="#" v-on:click="openExternal('https://github.com/holochain/holoscape/tree/master/example-bundles')">hApp-bundle file</a> and links to all resources as described in its README.
@@ -82,8 +82,8 @@
                 This will soon be replaced by a decentralized hApp store based on Holochain.
             </p>
             <div class="container">
-                <div v-for="happ in happ_index" 
-                     :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}" 
+                <div v-for="happ in happ_index"
+                     :class="{hidden: selected_happ && selected_happ!=happ, happItem: selected_happ==undefined}"
                      v-on:click="showContentsFromHappIndex(happ)"
                      class="card" style="width: 30rem;">
                     <img :src="happ.screenshot" class="card-img-top" alt="...">
@@ -335,7 +335,7 @@
             var app = new Vue({
                 el: '#app',
                 data: {
-                  tab: 'happ-store',  
+                  tab: 'happ-store',
                   canInstall: false,
                   installAsAdmin: false,
                   file: undefined,
@@ -408,7 +408,7 @@
                     return installed_instance.id
                   },
                   async processBundle() {
-                    this.installed_agents = await call('admin/agent/list')()  
+                    this.installed_agents = await call('admin/agent/list')()
                     this.installed_instances = await call('admin/instance/list')()
                     this.installed_dnas = await call('admin/dna/list')()
                     this.installed_bridges = await call('admin/bridge/list')()
@@ -424,7 +424,7 @@
                         // That happens further down...
                         let installed_instance_id
                         if(!instance.dna_properties) {
-                            installed_instance_id = this.installedInstanceId(instance)    
+                            installed_instance_id = this.installedInstanceId(instance)
                         }
 
                         if(installed_instance_id) {
@@ -443,7 +443,7 @@
                                 parts[0] = `file://${path.dirname(bundlePath)}`
                                 uri = parts.join('/')
                             }
-                            getUri(instance.uri, (err, rs) => {
+                            getUri(uri, (err, rs) => {
                                 if(err) {
                                     Vue.set(instance, 'error', err.message)
                                     Vue.set(instance, 'downloadStatus', 'error')
@@ -672,6 +672,7 @@
             }
 
             const installUi = async (ui) => {
+              console.log(JSON.stringify(ui))
                 let extractedPath = temp.path()
                 console.log(`Extracting ${ui.name} to ${extractedPath}`)
                 await new Promise((resolve, reject)=>{

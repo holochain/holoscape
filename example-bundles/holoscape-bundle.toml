@@ -1,0 +1,17 @@
+bridges = []
+
+[[instances]]
+name = "Testing DNA"
+id = "__passthrough"
+dna_hash = "QmNT541aXcG4mzUw1fbpxkgCqextkm4mgGyyTcNbG5ShAg"
+uri = "https://github.com/holochain/passthrough-dna/releases/download/v0.0.3/passthrough-dna.dna.json"
+
+[[UIs]]
+name = "Testing UI"
+id = "__testing-ui"
+ui_bundle_hash = "Qm34abcde"
+uri = "https://github.com/holochain/passthrough-dna/releases/download/v0.0.3/ui.zip"
+
+[[UIs.instance_references]]
+ui_handle = "test-instance"
+instance_id = "__passthrough"

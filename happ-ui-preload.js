@@ -9,3 +9,5 @@ window.activateHappWindow = (otherHappUiName, location) => {
         location,
     })
 }
+
+window.electron = true
