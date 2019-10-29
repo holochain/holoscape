@@ -11,7 +11,7 @@ uri = "https://github.com/Holo-Host/happ-store/releases/download/0.3.0-alpha1/Qm
 name = "Happ-Store"
 id = "happ-store-app"
 ui_bundle_hash = "Qm34abcde"
-uri = "file:./happ-store-ui.zip"
+uri = "https://github.com/Holo-Host/happ-store/releases/download/0.3.0-alpha1/happ-store-ui.zip"
 
 [[UIs.instance_references]]
 ui_handle = "happ-store"
