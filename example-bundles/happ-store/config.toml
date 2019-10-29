@@ -1,0 +1,18 @@
+
+bridges = []
+
+[[instances]]
+name = "happ-store"
+id = "__happ-store"
+dna_hash = "Qmdu8qqv1sgGyZuZibAaZMGjyL5VvDWCYTzK8dHi2Xo1LW"
+uri = "https://github.com/Holo-Host/happ-store/releases/download/0.3.0-alpha1/Qmdu8qqv1sgGyZuZibAaZMGjyL5VvDWCYTzK8dHi2Xo1LW.hApp-store.dna.json"
+
+[[UIs]]
+name = "Happ-Store"
+id = "happ-store-app"
+ui_bundle_hash = "Qm34abcde"
+uri = "https://github.com/Holo-Host/happ-store/releases/download/0.3.0-alpha1/happ-store-ui.zip"
+
+[[UIs.instance_references]]
+ui_handle = "happ-store"
+instance_id = "__happ-store"
