@@ -3,8 +3,7 @@ const { ncp } = require('ncp')
 const fs = require('fs')
 const path = require('path')
 const conductor = require('./conductor.js')
-const { systemTrayIconFull } = require('./holoscape.js')
-
+const url = require('url')
 const HAPP_SCHEME = 'holoscape-happ'
 
 function UIinfoFile(){
@@ -237,18 +236,6 @@ class HappUiController {
             return
         }
 
-        let icon
-        if(process.platform === "darwin") {
-            icon = path.join(__dirname, 'images/HoloScape-22px.png')
-        } else {
-            icon = path.join(__dirname, 'images/HoloScape-system-tray.png')
-        }
-
-        let favicon_path = path.join(uiRootDir, 'favicon.ico')
-        if(fs.existsSync(favicon_path)) {
-            icon = favicon_path
-        }
-
         let window = new BrowserWindow({
             width:890,
             height:535,
@@ -258,7 +245,6 @@ class HappUiController {
                 partition,
                 preload: path.join(__dirname, 'happ-ui-preload.js')
             },
-            icon: icon,
         })
         window.uiName = name
 
@@ -306,14 +292,31 @@ class HappUiController {
 
     async showAndRiseUI(name, location) {
         this.ensureWindowFor(name).then((window)=>{
-            window.show()
-            window.focus()
-            console.log(window)
-            console.log(window.webContents.getURL())
-            if(location){
-              console.log(`Opening ${name} at ${location}`)
-              window.location.assign(location)
-            }
+          window.show()
+          window.focus()
+          console.log(window)
+          const uiRootDir = this.installedUIs[name].installDir
+          const uiSubDir = path.basename(uiRootDir)
+          if(location){
+            window.loadURL(url.format({
+              pathname: path.join(uiSubDir, './index.html'),
+              protocol: HAPP_SCHEME,
+              slashes: true,
+              hash: location
+            }))
+            console.log(`Opening ${name} at ${location}`)
+          } else {
+            console.log(`Reloading ${name}`)
+            window.loadURL(url.format({
+              pathname: path.join(uiSubDir, './index.html'),
+              protocol: HAPP_SCHEME,
+              slashes: true,
+              hash: '/'
+            }))
+          }
+        }).catch(err => {
+          console.log('showAndRiseUI error')
+          console.log(err)
         })
     }
 }
