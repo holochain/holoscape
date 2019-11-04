@@ -83,6 +83,15 @@
        font-weight: bold;
        word-wrap: break-word;
      }
+     .disclaimer-checkbox {
+       display: block;
+       float: right;
+       transform: scale(1.5);
+       margin: 20px;
+     }
+     .clearfix {
+       overflow: auto;
+     }
     </style>
   </head>
   <body class="background">
@@ -148,25 +157,22 @@
               <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
                 <label for="sim2h-url">Sim2h Switch-Board URL</label>
                 <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
-                <small id="sim2h-url-help" class="form-text text-muted" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
-                  The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch board.
-                  Sim2h is a centralized simulation of the Holochain network that connects all agents of the DHT through one central switch board
-                  to enable easy debugging by logging all network traffic between all nodes.
-                  <br>
-                  You can run your own sim2h server to debug your hApp yourself.
-                  The Holochain public server can be used for public testing during alpha stages.
-                  <br>
-                  <bold class="disclaimer">
+                <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
+                  The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
+                  <p class="disclaimer">
                     DISCLAIMER:
                     <ul>
                       <li>This public instance comes with no guarantee of up-time!</li>
-                      <li>This is for testing only! Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
+                      <li>This is for testing only!</li>
+                      <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
                     </ul>
-                  </bold>
-                  Please confirm:
-                  <input type="checkbox" id="checkbox" v-model="disclaimer">
-                  <label class="disclaimer-label" for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
+                  </p>
+                  <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
                   
+                  <span class="disclaimer-label">Please confirm:</span>
+                  <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
+                  <br>
+                  <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
                 </small>
               </div>
               <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
@@ -185,10 +191,11 @@
             </div>
           </div>
         </div>
-      </div>    </div>
+      </div>    
+    </div>
 
       <script>
-       var ipcRenderer = require('electron').ipcRenderer;
+       const { ipcRenderer, shell } = require('electron')
        var Convert = require('ansi-to-html');
        var convert = new Convert({newline: true});
 
@@ -200,6 +207,11 @@
                network_type: "sim2h",
                sim2h_url: 'wss://sim2h.holochain.org:9000',
                disclaimer: false,
+           },
+           methods: {
+              openExternal(url) {
+                  shell.openExternal(url)
+              }
            }
        })
 
