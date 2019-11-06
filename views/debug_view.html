@@ -44,6 +44,7 @@
                 {{ instance_id }}
             </a>
         </h2>
+        <button class="btn btn-primary" v-on:click="updateStateDump()">Update state dump</button>
 
         <ul class="list-group collapse" v-bind:id="sanitizeName(instance_id)">
             <li class="list-group-item">
@@ -262,7 +263,6 @@
                 }
 
                 app.reduxActions[instance_id].push(signal.action)
-                app.updateStateDump(instance_id)
             })
 
             refresh()
