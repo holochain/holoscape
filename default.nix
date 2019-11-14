@@ -18,13 +18,8 @@ let
  ) { config = config; };
  # END HOLONIX IMPORT BOILERPLATE
 
- # hopefully this won't be needed someday when holonix updates
- newer-pkgs = import (fetchTarball {
-  url = "https://github.com/NixOS/nixpkgs/archive/19.09.tar.gz";
-  sha256 = "0mhqhq21y5vrr1f30qd2bvydv4bbbslvyzclhw0kdxmkgg3z4c92";
- }) { };
-
  target-os = if holonix.pkgs.stdenv.isDarwin then "darwin" else "linux";
+ config-uri = if holonix.pkgs.stdenv.isDarwin then "Library/Application\\ Support" else ".config";
 
 in
 with holonix.pkgs;
@@ -40,6 +35,7 @@ with holonix.pkgs;
   ''
   holonix.shell.shellHook
   ];
+  HOLOSCAPE_CONFIG_URI = config-uri;
 
   DEV="true";
 
@@ -52,8 +48,9 @@ with holonix.pkgs;
    '')
 
    (holonix.pkgs.writeShellScriptBin "holoscape-flush" ''
-   rm -rf $HOME/.config/holoscape
-   rm -rf $HOME/.config/Holoscape-default
+   set -euxo pipefail
+   rm -rf $HOME/${config-uri}/holoscape
+   rm -rf $HOME/${config-uri}/Holoscape-default
    rm -rf ./Holoscape-linux-x64
    rm -rf ./Holoscape-darwin-x64
    rm -rf ./node_modules
