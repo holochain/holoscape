@@ -33,10 +33,10 @@ with holonix.pkgs;
   name = "dev-shell";
 
   shellHook = holonix.pkgs.lib.concatStrings [''
-  ln -sf `command -v holochain` holochain-${target-os}
-  ln -sf `command -v hc` hc-${target-os}
-  npm install
-  export PATH="$PATH:$( npm bin )"
+  ln -sf ${holonix.holochain.holochain}/bin/holochain holochain-${target-os}
+  ln -sf ${holonix.holochain.hc}/bin/hc hc-${target-os}
+  ${holonix.pkgs.nodejs}/bin/npm install
+  export PATH="$PATH:$( ${holonix.pkgs.nodejs}/bin/npm bin )"
   ''
   holonix.shell.shellHook
   ];
@@ -45,10 +45,10 @@ with holonix.pkgs;
 
   buildInputs = [
    holonix.pkgs.unzip
-   newer-pkgs.electron_6
+   holonix.pkgs.electron_6
 
    (holonix.pkgs.writeShellScriptBin "holoscape" ''
-   electron .
+   ${holonix.pkgs.electron_6}/bin/electron .
    '')
 
    (holonix.pkgs.writeShellScriptBin "holoscape-flush" ''
