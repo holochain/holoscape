@@ -18,13 +18,8 @@ let
  ) { config = config; };
  # END HOLONIX IMPORT BOILERPLATE
 
- # hopefully this won't be needed someday when holonix updates
- newer-pkgs = import (fetchTarball {
-  url = "https://github.com/NixOS/nixpkgs/archive/19.09.tar.gz";
-  sha256 = "0mhqhq21y5vrr1f30qd2bvydv4bbbslvyzclhw0kdxmkgg3z4c92";
- }) { };
-
  target-os = if holonix.pkgs.stdenv.isDarwin then "darwin" else "linux";
+ config-uri = if holonix.pkgs.stdenv.isDarwin then "Library/Application\\ Support" else ".config";
 
 in
 with holonix.pkgs;
@@ -33,27 +28,29 @@ with holonix.pkgs;
   name = "dev-shell";
 
   shellHook = holonix.pkgs.lib.concatStrings [''
-  ln -sf `command -v holochain` holochain-${target-os}
-  ln -sf `command -v hc` hc-${target-os}
-  npm install
-  export PATH="$PATH:$( npm bin )"
+  ln -sf ${holonix.holochain.holochain}/bin/holochain holochain-${target-os}
+  ln -sf ${holonix.holochain.hc}/bin/hc hc-${target-os}
+  ${holonix.pkgs.nodejs}/bin/npm install
+  export PATH="$PATH:$( ${holonix.pkgs.nodejs}/bin/npm bin )"
   ''
   holonix.shell.shellHook
   ];
+  HOLOSCAPE_CONFIG_URI = config-uri;
 
   DEV="true";
 
   buildInputs = [
    holonix.pkgs.unzip
-   newer-pkgs.electron_6
+   holonix.pkgs.electron_6
 
    (holonix.pkgs.writeShellScriptBin "holoscape" ''
-   electron .
+   ${holonix.pkgs.electron_6}/bin/electron .
    '')
 
    (holonix.pkgs.writeShellScriptBin "holoscape-flush" ''
-   rm -rf $HOME/.config/holoscape
-   rm -rf $HOME/.config/Holoscape-default
+   set -euxo pipefail
+   rm -rf $HOME/${config-uri}/holoscape
+   rm -rf $HOME/${config-uri}/Holoscape-default
    rm -rf ./Holoscape-linux-x64
    rm -rf ./Holoscape-darwin-x64
    rm -rf ./node_modules
