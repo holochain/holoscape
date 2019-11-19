@@ -5,7 +5,7 @@ bridges = []
 name = "holofuel"
 id = "__holofuel"
 dna_hash = "QmcnYu8B54tFnJUv68aB3imPRwLxqJH2DQzjkX9Dvxmsf9"
-uri = "https://holo-host.github.io/holofuel/releases/download/v0.11.1-alpha1/holofuel.dna.json"
+uri = "https://holo-host.github.io/holofuel/releases/download/v0.13.0-alpha1/holofuel.dna.json"
 
 [[UIs]]
 name = "HoloFuel"
