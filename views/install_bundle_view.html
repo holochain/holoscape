@@ -110,10 +110,6 @@
                     </div>
                 </div>
                 <div v-if="fileError" class="alert alert-danger">{{ fileError }}</div>
-            <h3>Install with admin interface?</h3>
-            <div class="input-group">
-            <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
-          </div>
       </li>
       <li v-if="bundle" class="list-group-item">
           <h3>DNAs in this bundle</h3>
@@ -280,6 +276,20 @@
                 </ul>-->
             </li>
       </ul>
+      <div class="list-group-item">
+        <h3>Install with admin interface?</h3>
+        <div class="input-group">
+          <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
+        </div>
+        <h3>Select storage implementation:</h3>
+        <div class="input-group">
+           <select id="storage-impl" v-model="storageImpl">
+            <option v-for="storage in storageOpts" v-bind:value="storage">
+                {{storage}}
+            </option>
+          </select> 
+        </div>
+      <div>
       <div class="container" v-if="bundle">
             <div class="row justify-content-center" v-if="success">
                 <div class="col-7">
@@ -339,6 +349,8 @@
                   tab: 'happ-store',
                   canInstall: false,
                   installAsAdmin: false,
+                  storageOpts: ['lmdb', 'file', 'pickle', 'memory'],
+                  storageImpl: 'lmdb',
                   file: undefined,
                   fileError: undefined,
                   bundle: undefined,
@@ -637,7 +649,10 @@
 
                 const id = `${instance.name}`
                 console.log('Adding instance', id)
-                await call('admin/instance/add')({id,dna_id,agent_id})
+                const storage = app.storageImpl
+                let instance_add_args = {id,dna_id,agent_id,storage}
+                console.log("Adding instance with ", JSON.stringify(instance_add_args))
+                await call('admin/instance/add')(instance_add_args)
                 console.log('Instance added')
 
                 console.log('Starting instance ', id)
