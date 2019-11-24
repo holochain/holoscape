@@ -147,7 +147,9 @@
                             <td>Running zome calls:</td>
                             <td><ul>
                                 <li v-for="call in dump.running_calls" class="zome-call">
-                                {{`${call.zome_name}.${call.fn_name}(${call.parameters})`}}
+                                {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters})`}}
+                                <br>
+                                HDK calls: {{call[1]}}
                                 </li></ul>
                             </td>
                         <tr>
