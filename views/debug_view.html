@@ -113,18 +113,27 @@
                     </a>
                 </h3>
                 <div class="collapse" v-bind:id="sanitizeName(instance_id)+'-dht'">
+                        <span>Validation queue:</span>
+                        <table class="table">
+                            <tbody>
+                                <tr v-for="validation in dump.queued_holding_workflows">
+                                    <td>{{validation[0].workflow}}</td>
+                                    <td>{{validation[1]}}</td>
+                                    <td>{{validation[0].entry_with_header}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <span>Held entries:</span>
-                        <ul>
-                            <li v-for="address in dump.held_entries">
-                                    <table class="table">
-                                        <tbody>
-                                            <tr><td>Type:</td><td>{{ contents[address] ? contents[address].type : 'fetching...' }}</td></tr>
-                                            <tr><td>Address:</td><td>{{ address }}</td></tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'click to fetch' }}</div>
-                            </li>
-                        </ul>
+                        <table class="table">
+                            <tbody>
+                                <tr v-for="(address, aspects) in dump.held_aspects">
+                                    <td>{{ address }}</td>
+                                    <td>{{ contents[address] ? contents[address].type : 'get type' }}</td>
+                                    <td><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'get content' }}</div></td>
+                                    <td>{{aspects}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                 </div>
             </li>
             <li class="list-group-item">
