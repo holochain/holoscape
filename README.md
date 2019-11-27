@@ -33,6 +33,12 @@ During development of your hApp and DNAiew_screenshot.png)
 
 ## Setup for development
 
+```
+$ git clone https://github.com/holochain/holoscape.git
+$ cd holoscape
+# Run all commands for this project while cd'd in this directory
+```
+
 Holoscape needs both binaries ouf the [holochain-rust](https://github.com/holochain/holochain-rust) repository: `hc` and `holochain`.
 
 Depending on the OS, it expects to find either `hc-linux` and `holochain-linux` or `hc-darwin` and `holochain-darwin` in the application directory (the root of the repository during development).
