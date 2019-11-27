@@ -66,9 +66,12 @@ module.exports = {
         run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
       }
       else {
-          log('error', "unsupported platform: "+process.platform)
-          return
+        log('error', "unsupported platform: "+process.platform)
+        return
       }
+      run.on('error', function (error) {
+        global.holoscape.splash.webContents.send('missing-binaries')
+      })
       run.stdout.on('data', data => {
         log('info', data.toString())
         if (data.toString().indexOf("Listening on http://127.0.0.1:3000") > -1) {
