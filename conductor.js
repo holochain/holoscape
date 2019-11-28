@@ -69,9 +69,6 @@ module.exports = {
         log('error', "unsupported platform: "+process.platform)
         return
       }
-      run.on('error', function (error) {
-        global.holoscape.splash.webContents.send('missing-binaries')
-      })
       run.stdout.on('data', data => {
         log('info', data.toString())
         if (data.toString().indexOf("Listening on http://127.0.0.1:3000") > -1) {
@@ -88,5 +85,22 @@ module.exports = {
         onExit()
       })
       return run
+  },
+
+  hasBinaries: () => {
+    let holochain, hc
+
+    if (process.platform === "win32") {
+      holochain = "./holochain.exe"
+      hc = "./hc.exe"
+    } else if (process.platform === "darwin") {
+      holochain = "./holochain-darwin"
+      hc = "./hc-darwin"
+    } else if (process.platform === "linux") {
+      holochain = "./holochain-linux"
+      hc = "./hc-linux"
+    }
+
+    return fs.existsSync(path.join(__dirname, holochain)) && fs.existsSync(path.join(__dirname, hc))
   }
 }
