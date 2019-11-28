@@ -51,6 +51,11 @@ mb.on('ready', async () => {
   global.holoscape = new Holoscape()
   await global.holoscape.showSplashScreen()
 
+  if(!conductor.hasBinaries()) {
+    global.holoscape.splash.webContents.send('missing-binaries')
+    return
+  }
+
   if(!conductor.hasConfig()) {
       console.log("No conductor config found. Initializing...")
       await new Promise((resolve)=>setTimeout(resolve, 1000))

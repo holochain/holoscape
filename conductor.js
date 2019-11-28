@@ -66,8 +66,8 @@ module.exports = {
         run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
       }
       else {
-          log('error', "unsupported platform: "+process.platform)
-          return
+        log('error', "unsupported platform: "+process.platform)
+        return
       }
       run.stdout.on('data', data => {
         log('info', data.toString())
@@ -85,5 +85,22 @@ module.exports = {
         onExit()
       })
       return run
+  },
+
+  hasBinaries: () => {
+    let holochain, hc
+
+    if (process.platform === "win32") {
+      holochain = "./holochain.exe"
+      hc = "./hc.exe"
+    } else if (process.platform === "darwin") {
+      holochain = "./holochain-darwin"
+      hc = "./hc-darwin"
+    } else if (process.platform === "linux") {
+      holochain = "./holochain-linux"
+      hc = "./hc-linux"
+    }
+
+    return fs.existsSync(path.join(__dirname, holochain)) && fs.existsSync(path.join(__dirname, hc))
   }
 }

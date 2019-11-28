@@ -36,7 +36,6 @@
        text-shadow: 0px 0px 3px #00017f;
      }
 
-
      .status {
        position: absolute;
        left: 30px;
@@ -89,6 +88,12 @@
        transform: scale(1.5);
        margin: 20px;
      }
+     .code {
+         background-color: lightgray;
+         font-family: 'Courier New', Courier, monospace;
+         padding: 3px;
+         color: #444;
+     }
      .clearfix {
        overflow: auto;
      }
@@ -106,6 +111,31 @@
       <h3 class="version">v0.0.3-alpha</h3>
       <img class="logo" src="../images/HoloScape-mdpi.png"></img>
       <div class="status">{{status}}</div>
+    
+      <div class="modal fade" id="binaries-modal" tabindex="-1" role="dialog" aria-labelledby="binaries-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Holoscape Error - Missing Binaries</h5>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <p>Holoscape needs both binaries out of the <a href="#" v-on:click="openExternal('https://github.com/holochain/holochain-rust')">holochain-rust</a> repository: <span class='code'>hc</span> and <span class='code'>holochain</span>.</p>
+                <p>Depending on the OS, it expects to find either <span class='code'>hc-linux</span> and <span class='code'>holochain-linux</span> or <span class='code'>hc-darwin</span> and <span class='code'>holochain-darwin</span> in the application directory (the root of the repository during development).</p>
+                <p>For development you can either build those yourself or get them through Holonix like this:</p>              
+  <pre>  $ nix-shell https://holochain.love
+    $ cp `which holochain` holochain-linux
+    $ cp `which hc` hc-linux</pre>
+                <p>(or <span class='code'>holochain-darwin</span> for macOS - Windows is currently not support but will follow soon)</p>
+                <p>See <a href="#" v-on:click="openExternal('https://github.com/holochain/holoscape/blob/master/README.md')">README</a></p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal fade" id="passphrase-modal" tabindex="-1" role="dialog" aria-labelledby="passphrase-modal" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -193,6 +223,7 @@
         </div>
       </div>    
     </div>
+  </div>
 
       <script>
        const { ipcRenderer, shell } = require('electron')
@@ -215,7 +246,6 @@
            }
        })
 
-
        ipcRenderer.on('log', (event,store) => {
            let {level, message} = store
            message = convert.toHtml(message)
@@ -230,6 +260,13 @@
        const cancel = () => {
            ipcRenderer.send('quit')
        }
+
+       //-------------------------------------------------------------------
+       // Binaries check
+       ipcRenderer.on('missing-binaries', (event, message) => {
+          $('#splash-window').hide()
+          $('#binaries-modal').modal()
+       })
 
        //-------------------------------------------------------------------
        // Network config management
