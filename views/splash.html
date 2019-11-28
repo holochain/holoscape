@@ -111,117 +111,118 @@
       <h3 class="version">v0.0.3-alpha</h3>
       <img class="logo" src="../images/HoloScape-mdpi.png"></img>
       <div class="status">{{status}}</div>
-    </div>
-    <div class="modal fade" id="binaries-modal" tabindex="-1" role="dialog" aria-labelledby="binaries-modal" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Holoscape Error - Missing Binaries</h5>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <p>Holoscape needs both binaries out of the [holochain-rust](https://github.com/holochain/holochain-rust) repository: <span class='code'>hc</span> and <span class='code'>holochain</span>.</p>
-              <p>Depending on the OS, it expects to find either <span class='code'>hc-linux</span> and <span class='code'>holochain-linux</span> or <span class='code'>hc-darwin</span> and <span>holochain-darwin</span> in the application directory (the root of the repository during development).</p>
-              <p>For development you can either build those yourself or get them through Holonix like this:</p>              
-<pre>  $ nix-shell https://holochain.love
-  $ cp `which holochain` holochain-linux
-  $ cp `which hc` hc-linux</pre>
-              <p>(or <span class='code'>holochain-darwin</span> for macOS - Windows is currently not support but will follow soon)</p>
-              <p>See <a href='https://github.com/holochain/holoscape/blob/master/README.md'>README</a></p>
+    
+      <div class="modal fade" id="binaries-modal" tabindex="-1" role="dialog" aria-labelledby="binaries-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Holoscape Error - Missing Binaries</h5>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal fade" id="passphrase-modal" tabindex="-1" role="dialog" aria-labelledby="passphrase-modal" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Unlock keystore...</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label for="passphrase">Please enter your passphrase to unlock keystores</label>
-              <input type="password" class="form-control" id="passphrase" aria-describedby="passphrase-help" placeholder="Passphrase">
-              <small id="passphrase-help" class="form-text text-muted"></small>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-            <button id="unlock-button" type="button" class="btn btn-primary">Unlock keystores</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal fade" id="network-config-modal" tabindex="-1" role="dialog" aria-labelledby="network-config-modal" aria-hidden="true">
-      <div class="modal-dialog" role="document" id="network-config-wrapper">
-        <div class="modal-content" id="network-config-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Holochain Network Configuration...</h5>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Network Type
-                </button>
-                <div class="dropdown-menu" aria-labelledby="networkType">
-                  <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
-                  <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
-                  <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
-                  <a class="dropdown-item" href="#" id="memory-type">memory</a>
-                </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <p>Holoscape needs both binaries out of the <a href="#" v-on:click="openExternal('https://github.com/holochain/holochain-rust')">holochain-rust</a> repository: <span class='code'>hc</span> and <span class='code'>holochain</span>.</p>
+                <p>Depending on the OS, it expects to find either <span class='code'>hc-linux</span> and <span class='code'>holochain-linux</span> or <span class='code'>hc-darwin</span> and <span class='code'>holochain-darwin</span> in the application directory (the root of the repository during development).</p>
+                <p>For development you can either build those yourself or get them through Holonix like this:</p>              
+  <pre>  $ nix-shell https://holochain.love
+    $ cp `which holochain` holochain-linux
+    $ cp `which hc` hc-linux</pre>
+                <p>(or <span class='code'>holochain-darwin</span> for macOS - Windows is currently not support but will follow soon)</p>
+                <p>See <a href="#" v-on:click="openExternal('https://github.com/holochain/holoscape/blob/master/README.md')">README</a></p>
               </div>
             </div>
-            <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
-              <label for="dynamo-url">Dynamodb URL</label>
-              <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
-              <small id="dynamo-url-help" class="form-text text-muted"></small>
-            </div>
-            <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-              <label for="sim2h-url">Sim2h Switch-Board URL</label>
-              <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
-              <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
-                The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
-                <p class="disclaimer">
-                  DISCLAIMER:
-                  <ul>
-                    <li>This public instance comes with no guarantee of up-time!</li>
-                    <li>This is for testing only!</li>
-                    <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
-                  </ul>
-                </p>
-                <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
-                
-                <span class="disclaimer-label">Please confirm:</span>
-                <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
-                <br>
-                <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
-              </small>
-            </div>
-            <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
-              <label for="lib3h-network-name">Network Name</label>
-              <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
-              <small id="lib3h-network-name-help" class="form-text text-muted"></small>
-              <label for="lib3h-bootstrap-url">Bootstrap Url</label>
-              <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
-              <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
-            </div>
-            <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
-            </div>
             <div class="modal-footer">
-            <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-            <button id="set-network-type-button" type="button" class="btn btn-primary" :disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</button>
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>    
+      <div class="modal fade" id="passphrase-modal" tabindex="-1" role="dialog" aria-labelledby="passphrase-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Unlock keystore...</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="passphrase">Please enter your passphrase to unlock keystores</label>
+                <input type="password" class="form-control" id="passphrase" aria-describedby="passphrase-help" placeholder="Passphrase">
+                <small id="passphrase-help" class="form-text text-muted"></small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
+              <button id="unlock-button" type="button" class="btn btn-primary">Unlock keystores</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="network-config-modal" tabindex="-1" role="dialog" aria-labelledby="network-config-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document" id="network-config-wrapper">
+          <div class="modal-content" id="network-config-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Holochain Network Configuration...</h5>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Network Type
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="networkType">
+                    <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
+                    <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
+                    <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
+                    <a class="dropdown-item" href="#" id="memory-type">memory</a>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
+                <label for="dynamo-url">Dynamodb URL</label>
+                <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
+                <small id="dynamo-url-help" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
+                <label for="sim2h-url">Sim2h Switch-Board URL</label>
+                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
+                <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
+                  The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
+                  <p class="disclaimer">
+                    DISCLAIMER:
+                    <ul>
+                      <li>This public instance comes with no guarantee of up-time!</li>
+                      <li>This is for testing only!</li>
+                      <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
+                    </ul>
+                  </p>
+                  <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
+                  
+                  <span class="disclaimer-label">Please confirm:</span>
+                  <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
+                  <br>
+                  <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
+                </small>
+              </div>
+              <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
+                <label for="lib3h-network-name">Network Name</label>
+                <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
+                <small id="lib3h-network-name-help" class="form-text text-muted"></small>
+                <label for="lib3h-bootstrap-url">Bootstrap Url</label>
+                <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
+                <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
+              </div>
+              <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
+              </div>
+              <div class="modal-footer">
+              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
+              <button id="set-network-type-button" type="button" class="btn btn-primary" :disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</button>
+            </div>
+          </div>
+        </div>
+      </div>    
+    </div>
   </div>
 
       <script>
