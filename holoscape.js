@@ -300,6 +300,9 @@ class Holoscape {
         if(level == 'error') console.error(message)
         else console.log(message)
         global.holoscape.logMessages.push({level, message})
+        while(global.holoscape.logMessages.length > 100) {
+          global.holoscape.logMessages.shift()
+        }
         if(global.holoscape.logWindow && global.holoscape.logWindow.webContents) {
           global.holoscape.logWindow.webContents.send('log', {level,message})
         }

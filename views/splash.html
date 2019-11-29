@@ -247,9 +247,12 @@
        })
 
        ipcRenderer.on('log', (event,store) => {
-           let {level, message} = store
-           message = convert.toHtml(message)
-           app.logs.push({level, message})
+          let {level, message} = store
+          message = convert.toHtml(message)
+          app.logs.push({level, message})
+          while(app.logs.length > 20) {
+            app.logs.shift()
+          }
        });
 
        ipcRenderer.on('splash-status', (event, message) => {
