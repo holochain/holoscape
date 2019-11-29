@@ -341,7 +341,11 @@
                     return
                 }
 
-                app.reduxActions[instance_id].push(signal.action)
+                let actions = app.reduxActions[instance_id]
+                actions.push(signal.action)
+                while(actions.lenght > 100) {
+                    actions.shift()
+                }
             })
 
             refresh()
