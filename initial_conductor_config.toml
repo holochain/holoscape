@@ -17,7 +17,7 @@ instances = []
 
 [logger]
 type = "debug"
-state_dump = true
+state_dump = false
 
 {{{networkConfigToml}}}
 
