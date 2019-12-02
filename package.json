@@ -9,7 +9,7 @@
     "start:dev": "DEV=true electron .",
     "build-mac": "electron-packager . Holoscape --platform=darwin --overwrite --icon=./images/HoloScape-hdpi.icns",
     "build-linux": "electron-packager . Holoscape --platform=linux --overwrite --icon=./images/HoloScape-hdpi.png",
-    "delete:app-support": "rm -rf '/Users/philipbeadle/Library/Application Support/holoscape' && rm -rf '/Users/philipbeadle/Library/Application Support/Holoscape-default'"
+    "delete:app-support": "rm -rf '$HOME/Library/Application Support/holoscape' && rm -rf '$HOME/Library/Application Support/Holoscape-default'"
   },
   "author": "Holochain Core Dev Team <devcore@holochain.org>",
   "license": "GPLv3",
@@ -33,7 +33,8 @@
     "request": "^2.88.0",
     "temp": "^0.9.0",
     "toml": "^3.0.0",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "vue-chat-scroll": "^1.3.6"
   },
   "build": {
     "appId": "org.holochain.holoscape",

@@ -46,10 +46,21 @@ app.on('window-all-closed', e => {
   if(!global.holoscape.quitting) e.preventDefault()
 })
 
+app.on('before-quit', e => {
+  if(!global.holoscape.quitting) {
+    global.holoscape.quit()
+  }
+})
+
 mb.on('ready', async () => {
   mb.tray.setImage(systemTrayIconEmpty())
   global.holoscape = new Holoscape()
   await global.holoscape.showSplashScreen()
+
+  if(!conductor.hasBinaries()) {
+    global.holoscape.splash.webContents.send('missing-binaries')
+    return
+  }
 
   if(!conductor.hasConfig()) {
       console.log("No conductor config found. Initializing...")

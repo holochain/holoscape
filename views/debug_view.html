@@ -22,8 +22,24 @@
         overflow:auto;
         background:#bbb;
       }
+      .action {
+          cursor: pointer;
+      }
       .clickFetch {
           cursor: pointer;
+      }
+      .list-group-item label {
+          color: black;
+      }
+      .badge-light, .black {
+          color: black;
+      }
+      .zome-call {
+          word-wrap: break-word;
+      }
+      .zome-call .zome-call-container {
+          word-wrap: break-word;
+          overflow: scroll;
       }
     </style>
   </head>
@@ -44,23 +60,28 @@
                 {{ instance_id }}
             </a>
         </h2>
+        <button class="btn btn-primary" v-on:click="updateStateDump(instance_id)">Update state dump</button>
+        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-dump-check" v-model="refreshDump[instance_id]">
+        <label for="sanitizeName(instance_id)-dump-check">Live refresh</label>
+        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-actions-check" v-model="updateActions[instance_id]">
+        <label for="sanitizeName(instance_id)-actions-check">Update actions</label>
+                
 
         <ul class="list-group collapse" v-bind:id="sanitizeName(instance_id)">
             <li class="list-group-item">
                 <h3>Core Actions</h3>
-                <ul class="actions">
+                
+                <ul class="actions" v-chat-scroll>
                     <li class="action" v-for="(action, index) in reduxActions[instance_id]">
                         <div>
                             <a data-toggle="collapse" 
-                                v-bind:href="'#'+sanitizeName(instance_id)+'-action-'+index" 
+                                v-on:click="showAction(action)" 
                                 role="button" aria-expanded="false" 
-                                v-bind:aria-controls="sanitizeName(instance_id)+'-action-'+index"
-                                :class="'bade badge-pill badge-' + actionTypeToBadge(action.action_type)"
+                                :class="'badge badge-pill badge-' + actionTypeToBadge(action.action_type)"
                             >
                                 {{ action.action_type }}
                             </a>
                         </div>
-                        <div v-bind:id="sanitizeName(instance_id)+'-action-'+index" class="collapse">{{ action.data }}</div>
                     </li>
                 </ul>
             </li>
@@ -77,7 +98,7 @@
                             <tbody>
                                 <tr><td>Timestamp:</td><td>{{ header.timestamp }}</td></tr>
                                 <tr><td>Sources:</td><td>{{ header.provenances.map((p)=>p[0]).join(", ") }}</td></tr>
-                                <tr><td>Header address:</td><td>{{ header.address }}</td></tr>
+                                <tr><td>Entry address:</td><td>{{ header.entry_address }}</td></tr>
                                 <tr><td>Prev. header:</td><td>{{ header.link }}</td></tr>
                             </tbody>
                         </table>
@@ -92,16 +113,28 @@
                     </a>
                 </h3>
                 <div class="collapse" v-bind:id="sanitizeName(instance_id)+'-dht'">
-                        <span>Held entries:</span>
-                        <ul>
-                            <li v-for="address in dump.held_entries">
-                                    <table class="table">
-                                        <tbody>
-                                            <tr><td>Type:</td><td>{{ contents[address] ? contents[address].type : 'fetching...' }}</td></tr>
-                                            <tr><td>Address:</td><td>{{ address }}</td></tr>
-                                        </tbody>
-                                    </table>
-                                    <div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'click to fetch' }}</div>
+                        <h4>Validation queue:</h4>
+                        <table class="table">
+                            <tbody>
+                                <tr v-for="validation in dump.queued_holding_workflows">
+                                    <td>{{validation[0].workflow}}</td>
+                                    <td>{{validation[1]}}</td>
+                                    <td>{{validation[0].entry_with_header}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Held entries:</h4>
+                        <ul class="black">
+                            <li v-for="(aspects, address) in dump.held_aspects">
+                                <ul>
+                                    <li>{{ address }}</li>
+                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].type : 'get type' }}</div></li>
+                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'get content' }}</div></li>
+                                </ul>
+                                <td></td>
+                                
+                                
+                                <td>{{aspects}}</td>
                             </li>
                         </ul>
                 </div>
@@ -112,10 +145,32 @@
                         Nucleus
                     </a>
                 </h3>
-                <table v-bind:id="sanitizeName(instance_id)+'nucleus'" class="table collapse">
+                <table v-bind:id="sanitizeName(instance_id)+'nucleus'" class="table collapse zome-call-container">
                     <tbody>
-                        <tr><td>Running zome calls:</td><td>{{ dump.running_calls }}</td></tr>
-                        <tr><td>Pending validations:</td><td>{{ dump.pending_validations }}</td></tr>
+                        <tr>
+                            <td>Queued zome calls:</td>
+                            <td><ul>
+                                <li v-for="call in dump.queued_calls" class="zome-call">
+                                {{`${call.zome_name}.${call.fn_name}(${call.parameters})`}}
+                                </li></ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Running zome calls:</td>
+                            <td><ul>
+                                <li v-for="call in dump.running_calls" class="zome-call">
+                                {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters})`}}
+                                <br>
+                                HDK calls: {{call[1]}}
+                                </li></ul>
+                            </td>
+                        <tr>
+                            <td>Zome call results:</td>
+                            <td><ul>
+                                <li v-for="call in dump.call_results" class="zome-call">
+                                {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters}) => ${JSON.stringify(call[1])}`}}
+                                </li></ul>
+                            </td>
                     </tbody>
                 </table>
             </li>
@@ -141,6 +196,9 @@
 
     <script>
         const { ipcRenderer } = require('electron')
+        const VueChatScroll = require('vue-chat-scroll')
+        Vue.use(VueChatScroll)
+        
         let configured = false
 
         ipcRenderer.on('conductor-call-set', () => {
@@ -153,9 +211,22 @@
 
             const refresh = () => {
               call('debug/running_instances')().then((instances)=>{
-                  instances.map((instance_id) => app.updateStateDump(instance_id))
+                  instances.map((instance_id) => {
+                      app.updateStateDump(instance_id)
+                      Vue.set(app.updateActions, instance_id, false)
+                      Vue.set(app.refreshDump, instance_id, false)
+                      app.instances.push(instance_id)
+                    })
                 })
             }
+
+            setInterval(() => {
+                for(let instance of app.instances) {
+                    if(app.refreshDump[instance]) {
+                        app.updateStateDump(instance)
+                    }
+                }
+            }, 1500)
 
             const fetch_cas = async (address, instance_id) => {
                 return await call('debug/fetch_cas')({instance_id, address})
@@ -190,10 +261,14 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                  instances: [],  
                   reduxActions: {},  
                   stateDumps: {},
-                  contents:{},
+                  refreshDump: {},
+                  contents: {},
+                  updateActions: {},
                   updateStateDump: (instance_id) => {
+                      console.log(`Update state dump with: ${instance_id}`)
                       call('debug/state_dump')({instance_id})
                         .then((dump) => {
                             console.log("Got state dump: ", dump)
@@ -215,7 +290,7 @@
                           case "ReturnValidationResult": return "secondary"
                           case "Commit": return "success"
                           case "Publish": return "success"
-                          case "Hold": return "danger"
+                          case "HoldAspect": return "danger"
                           case "Query": return "light"
                           case "RespondQuery": return "dark"
                           case "HandleQuery": return "light"
@@ -233,6 +308,9 @@
                         .split('$').join('-')
                         .toLowerCase()
                     return name
+                  },
+                  showAction: (action) => {
+                      window.alert(JSON.stringify(action))
                   }
                 }
             })
@@ -252,17 +330,22 @@
                     // Ignoring non-trace signals
                     return
                 }
+                if(!app.reduxActions[instance_id]) {
+                    Vue.set(app.reduxActions, instance_id, [])
+                }
+                if(!app.updateActions[instance_id]) {
+                    return
+                }
                 if(!signal.action) {
                     console.log("Got strange trace signal without 'action' property:", params)
                     return
                 }
 
-                if(!app.reduxActions[instance_id]) {
-                    Vue.set(app.reduxActions, instance_id, [])
+                let actions = app.reduxActions[instance_id]
+                actions.push(signal.action)
+                while(actions.lenght > 100) {
+                    actions.shift()
                 }
-
-                app.reduxActions[instance_id].push(signal.action)
-                app.updateStateDump(instance_id)
             })
 
             refresh()

@@ -41,6 +41,9 @@
         let {level, message} = store
         message = convert.toHtml(message)
         app.logs.push({level, message})
+        while(app.logs.length > 100) {
+            app.logs.shift()
+          }
       });
 
     </script>

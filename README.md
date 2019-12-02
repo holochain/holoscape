@@ -43,19 +43,16 @@ Holoscape needs both binaries ouf the [holochain-rust](https://github.com/holoch
 
 Depending on the OS, it expects to find either `hc-linux` and `holochain-linux` or `hc-darwin` and `holochain-darwin` in the application directory (the root of the repository during development).
 
-For development you can either build those yourself or get them through Holonix like this:
+For development you can either build those yourself or get them through nix-shell like this:
 
 ``` shell
-$ nix-shell https://holochain.love
-$ cp `which holochain` holochain-linux
-$ cp `which hc` hc-linux
+$ nix-shell https://github.com/holochain/holoscape/archive/develop.tar.gz --run holoscape
 ```
-(or `holochain-darwin` for macOS - Windows is currently not support but will follow soon)
 
-Don't forget to install all node dependencies:
-``` shell
-npm install
-```
+To flush all holoscape data with the nix shell:
+
+```shell
+$ nix-shell https://github.com/holochain/holoscape/archive/develop.tar.gz --run holoscape-flush
 
 ## Run for development
 ```
