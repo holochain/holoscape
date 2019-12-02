@@ -46,6 +46,12 @@ app.on('window-all-closed', e => {
   if(!global.holoscape.quitting) e.preventDefault()
 })
 
+app.on('before-quit', e => {
+  if(!global.holoscape.quitting) {
+    global.holoscape.quit()
+  }
+})
+
 mb.on('ready', async () => {
   mb.tray.setImage(systemTrayIconEmpty())
   global.holoscape = new Holoscape()

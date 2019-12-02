@@ -286,7 +286,7 @@ class Holoscape {
         { type: 'separator' },
         { label: 'Install hApp...', click: ()=>this.installBundleWindow.show() },
         { type: 'separator' },
-        { label: 'Quit', click: ()=>{this.shutdownConductor(); this.quitting=true; mb.app.quit()} }
+        { label: 'Quit', click: ()=> this.quit() }
       ])
       mb.tray.setToolTip('HoloScape')
       mb.tray.setContextMenu(contextMenu)
@@ -398,6 +398,12 @@ class Holoscape {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()
       })
+    }
+
+    quit() {
+      this.shutdownConductor()
+      this.quitting=true
+      mb.app.quit()
     }
   }
 
