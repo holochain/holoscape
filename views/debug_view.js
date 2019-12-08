@@ -117,7 +117,28 @@ ipcRenderer.on('conductor-call-set', () => {
             { text: 'Timestamp', value: 'timestamp' },
             { text: 'Provenances', value: 'provenances' },
           ],
+          heldHeaders: [
+            {
+                text: 'Entry Address',
+                align: 'left',
+                sortable: false,
+                value: 'address',
+            },
+            {
+                text: 'Type',
+                align: 'left',
+                sortable: false,
+                value: 'type',
+            },
+            {
+                text: 'Content',
+                align: 'left',
+                sortable: false,
+                value: 'content',
+            },
+          ],
           chainSearch: '',
+          heldSearch: '',
           updateStateDump: (instance_id) => {
               console.log(`Update state dump with: ${instance_id}`)
               call('debug/state_dump')({instance_id})

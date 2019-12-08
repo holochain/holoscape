@@ -98,13 +98,14 @@
                         caption="Source Chain"
                         :headers="chainHeaders"
                     :items="dump.source_chain"
-                    :search="chainSearch"
-                    show-expand
-                    class="elevation-1"
-                    item-key="entry_address"
-                >
-                    <template v-slot:top>
-                        <v-toolbar flat>
+                        :search="chainSearch"
+                        show-expand
+                        class="elevation-1"
+                        item-key="entry_address"
+                        disable-sort
+                    >
+                        <template v-slot:top>
+                            <v-toolbar flat>
                             <v-text-field
                             v-model="chainSearch"
                             append-icon="search"
@@ -147,19 +148,40 @@
                             </tbody>
                         </table>
                         <h4>Held entries:</h4>
-                        <ul class="black">
-                            <li v-for="(aspects, address) in dump.held_aspects">
-                                <ul>
-                                    <li>{{ address }}</li>
-                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].type : 'get type' }}</div></li>
-                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'get content' }}</div></li>
-                                </ul>
-                                <td></td>
-                                
-                                
-                                <td>{{aspects}}</td>
-                            </li>
-                        </ul>
+                        <v-data-table
+                            :headers="heldHeaders"
+                            :items="Object.keys(dump.held_aspects).map((address) => {
+                                return {address, aspects: dump.held_aspects[address]};
+                              })"
+                            :search="heldSearch"
+                            show-expand
+                            class="elevation-1"
+                            item-key="address"
+                            disable-sort
+                        >
+                            <template v-slot:top>
+                                <v-toolbar flat>
+                                    <v-text-field
+                                    v-model="heldSearch"
+                                    append-icon="search"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                    ></v-text-field>
+                                </v-toolbar>
+                            </template>
+                            <template v-slot:item.type="{ item }">
+                                    <div :class="{clickFetch: contents[item.address]==undefined}" v-on:click="updateContent(item.address, instance_id)" role="alert">{{ contents[item.address] ? contents[item.address].type : 'get type' }}</div>
+                            </template>
+                            <template v-slot:item.content="{ item }">
+                                    <div :class="{clickFetch: contents[item.address]==undefined}" v-on:click="updateContent(item.address, instance_id)" role="alert">{{ contents[item.address] ? contents[item.address].content : 'get content' }}</div>
+                            </template>
+                            <template v-slot:expanded-item="{ headers, item }">
+                                <td :colspan="headers.length">
+                                    {{ item.aspects }}
+                                </td>
+                            </template>
+                        </v-data-table>
                 </div>
             </li>
             <li class="list-group-item">
