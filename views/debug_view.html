@@ -61,10 +61,10 @@
             </a>
         </h2>
         <button class="btn btn-primary" v-on:click="updateStateDump(instance_id)">Update state dump</button>
-        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-dump-check" v-model="refreshDump[instance_id]">
-        <label for="sanitizeName(instance_id)-dump-check">Live refresh</label>
-        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-actions-check" v-model="updateActions[instance_id]">
-        <label for="sanitizeName(instance_id)-actions-check">Update actions</label>
+        <input type="checkbox" v-bind:id="sanitizeName(instance_id)+'-dump-check'" v-model="refreshDump[instance_id]">
+        <label v-bind:for="sanitizeName(instance_id)+'-dump-check'">Live refresh</label>
+        <input type="checkbox" v-bind:id="sanitizeName(instance_id)+'-actions-check'" v-model="updateActions[instance_id]">
+        <label v-bind:for="sanitizeName(instance_id)+'-actions-check'">Update actions</label>
                 
 
         <ul class="list-group collapse" v-bind:id="sanitizeName(instance_id)">
