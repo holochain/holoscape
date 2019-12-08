@@ -1,11 +1,7 @@
 import { ipcRenderer } from 'electron'
-//import Vue from 'vue'
-//import path from 'path'
-//const vuetifyPluginPath = path.join(__dirname, 'plugins', 'vuetify')
-//import vuetify from '../plugins/vuetify'
 import Vue from 'vue'
 import VueChatScroll from 'vue-chat-scroll'
-import Vuetify, {VDataTable, VApp, VContainer} from 'vuetify/lib'
+import Vuetify, {VDataTable, VApp, VContainer, VChip, VToolbarTitle, VSpacer, VTextField} from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
 Vue.use(VueChatScroll)
@@ -13,7 +9,11 @@ Vue.use(Vuetify,  {
     components: {
       VApp,
       VDataTable,
-      VContainer
+      VContainer,
+      VChip,
+      VToolbarTitle, 
+      VSpacer, 
+      VTextField
     },
     directives: {
       Ripple,
@@ -33,16 +33,8 @@ Vue.use(Vuetify,  {
         },
       },
 })
-/*
-const App = {
-    template: '#app-template',
-    data: () => ({
-      //
-    })
-  }
-  */
 
- const vuetifyOptions = { theme: {dark:true}}
+const vuetifyOptions = { theme: {dark:true}}
 
 let configured = false
 
@@ -104,23 +96,7 @@ ipcRenderer.on('conductor-call-set', () => {
     }
 
     var app = new Vue({
-        vuetify: new Vuetify(vuetifyOptions)/*{
-          icons: {
-            iconfont: 'md',  // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
-          },
-          theme: {
-            dark: false,
-          },
-          themes: {
-            light: {
-              primary: "#4682b4",
-              secondary: "#b0bec5",
-              accent: "#8c9eff",
-              error: "#b71c1c",
-            },
-          }
-        })*/,
-        //render: h => h(App),
+        vuetify: new Vuetify(vuetifyOptions),
         data: {
           instances: [],  
           reduxActions: {},  
@@ -137,6 +113,7 @@ ipcRenderer.on('conductor-call-set', () => {
                 value: 'entry_type',
             },
             { text: 'Address', value: 'entry_address' },
+            { text: '', value: 'data-table-expand' },
             { text: 'Timestamp', value: 'timestamp' },
             { text: 'Provenances', value: 'provenances' },
           ],

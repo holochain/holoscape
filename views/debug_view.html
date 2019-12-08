@@ -93,10 +93,37 @@
                     </a>
                 </h3>
                 <v-data-table
+                    caption="Source Chain"
                     :headers="chainHeaders"
                     :items="dump.source_chain"
                     :search="chainSearch"
+                    show-expand
+                    class="elevation-1"
+                    item-key="entry_address"
                 >
+                    <template v-slot:top>
+                        <v-toolbar flat>
+                            <v-text-field
+                            v-model="chainSearch"
+                            append-icon="search"
+                            label="Search"
+                            single-line
+                            hide-details
+                            ></v-text-field>
+                        </v-toolbar>
+                    </template>
+                    <template v-slot:item.entry_type="{ item }">
+                        <v-chip v-if="typeof item.entry_type == 'string'" color="light-blue" >{{ item.entry_type }}</v-chip>
+                        <v-chip v-if="typeof item.entry_type == 'object'" color="green" >{{ item.entry_type['App'] }}</v-chip>
+                    </template>
+                    <template v-slot:item.provenances="{ item }">
+                        <span>{{ item.provenances.map((p)=>p[0]) }}</span>
+                    </template>
+                    <template v-slot:expanded-item="{ headers, item }">
+                        <td :colspan="headers.length">
+                            <div :class="{clickFetch: contents[item.entry_address]==undefined}" v-on:click="updateContent(item.entry_address, instance_id)">{{ contents[item.entry_address] ? contents[item.entry_address].content : 'click to fetch' }}</div>
+                        </td>
+                    </template>
                 </v-data-table>
                 <div v-bind:id="sanitizeName(instance_id)+'-source-chain'" class="card collapse" v-for="header in dump.source_chain">
                     <div class="card-body">
