@@ -61,7 +61,7 @@
       <div><span>agents:</span><span>{{ agents }}</span></div>
       -->
       <ul class="list-group">
-      <li class="list-group-item" v-for="(dump, instance_id, index) in stateDumps">
+      <li class="list-group-item" v-for="instance_id in instances">
         <h2>
             <a data-toggle="collapse" v-bind:href="'#'+sanitizeName(instance_id)" role="button" aria-expanded="false" v-bind:aria-controls="sanitizeName(instance_id)">
                 {{ instance_id }}
@@ -103,7 +103,7 @@
                     <v-data-table
                         caption="Source Chain"
                         :headers="chainHeaders"
-                        :items="dump.source_chain"
+                        :items="sourceChains[instance_id]"
                         :search="chainSearch"
                         show-expand
                         class="elevation-1"
@@ -112,13 +112,13 @@
                     >
                         <template v-slot:top>
                             <v-toolbar flat>
-                            <v-text-field
-                            v-model="chainSearch"
-                            append-icon="search"
-                            label="Search"
-                            single-line
-                            hide-details
-                            ></v-text-field>
+                                <v-text-field
+                                v-model="chainSearch"
+                                append-icon="search"
+                                label="Search"
+                                single-line
+                                hide-details
+                                ></v-text-field>
                             </v-toolbar>
                         </template>
                         <template v-slot:item.entry_type="{ item }">
@@ -146,7 +146,7 @@
                         <h4>Validation queue:</h4>
                         <v-data-table
                             :headers="queueHeaders"
-                            :items="Object.keys(dump.queued_holding_workflows).map((i) => {
+                            :items="Object.keys(validationQueues[instance_id]).map((i) => {
                                 return {
                                     address: i.pending.entry_with_header.header.entry_address,
                                     workflow: i.pending.workflow,
@@ -185,8 +185,8 @@
                         <h4>Held entries:</h4>
                         <v-data-table
                             :headers="heldHeaders"
-                            :items="Object.keys(dump.held_aspects).map((address) => {
-                                return {address, aspects: dump.held_aspects[address]};
+                            :items="Object.keys(holdingMaps[instance_id]).map((address) => {
+                                return {address, aspects: holdingMaps[instance_id][address]};
                               })"
                             :search="heldSearch"
                             show-expand
@@ -230,7 +230,7 @@
                         <tr>
                             <td>Queued zome calls:</td>
                             <td><ul>
-                                <li v-for="call in dump.queued_calls" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].queued_calls" class="zome-call">
                                 {{`${call.zome_name}.${call.fn_name}(${call.parameters})`}}
                                 </li></ul>
                             </td>
@@ -238,7 +238,7 @@
                         <tr>
                             <td>Running zome calls:</td>
                             <td><ul>
-                                <li v-for="call in dump.running_calls" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].running_calls" class="zome-call">
                                 {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters})`}}
                                 <br>
                                 HDK calls: {{call[1]}}
@@ -247,7 +247,7 @@
                         <tr>
                             <td>Zome call results:</td>
                             <td><ul>
-                                <li v-for="call in dump.call_results" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].call_results" class="zome-call">
                                 {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters}) => ${JSON.stringify(call[1])}`}}
                                 </li></ul>
                             </td>
@@ -262,9 +262,9 @@
                 </h3>
                 <table v-bind:id="sanitizeName(instance_id)+'network'" class="table collapse">
                     <tbody>
-                        <tr><td>Queries:</td><td>{{ dump.query_flows }}</td></tr>
-                        <tr><td>Validation Package Requests:</td><td>{{ dump.validation_package_flows }}</td></tr>
-                        <tr><td>Direct message sessions:</td><td>{{ dump.direct_message_flows }}</td></tr>
+                        <tr><td>Queries:</td><td>{{ stateDumps[instance_id].query_flows }}</td></tr>
+                        <tr><td>Validation Package Requests:</td><td>{{ stateDumps[instance_id].validation_package_flows }}</td></tr>
+                        <tr><td>Direct message sessions:</td><td>{{ stateDumps[instance_id].direct_message_flows }}</td></tr>
                     </tbody>
                 </table>
             </li>

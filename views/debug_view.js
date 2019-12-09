@@ -50,6 +50,9 @@ ipcRenderer.on('conductor-call-set', () => {
       call('debug/running_instances')().then((instances)=>{
           instances.map((instance_id) => {
               app.updateStateDump(instance_id)
+              app.updateSourceChain(instance_id)
+              app.updateHeldAspects(instance_id)
+              app.updateValidationQueues(instance_id)
               Vue.set(app.updateActions, instance_id, false)
               Vue.set(app.refreshDump, instance_id, false)
               app.instances.push(instance_id)
@@ -101,6 +104,9 @@ ipcRenderer.on('conductor-call-set', () => {
           instances: [],  
           reduxActions: {},  
           stateDumps: {},
+          sourceChains: {},
+          holdingMaps: {},
+          validationQueues: {},
           refreshDump: {},
           contents: {},
           updateActions: {},
@@ -169,7 +175,7 @@ ipcRenderer.on('conductor-call-set', () => {
           heldSearch: '',
           updateStateDump: (instance_id) => {
               console.log(`Update state dump with: ${instance_id}`)
-              call('debug/state_dump')({instance_id})
+              call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_holding_workflows: false})
                 .then((dump) => {
                     console.log("Got state dump: ", dump)
                     Vue.set(app.stateDumps, instance_id, dump)
@@ -177,6 +183,45 @@ ipcRenderer.on('conductor-call-set', () => {
                 .catch((error) => {
                     console.log("Error getting dump:", error)
                 })
+          },
+          updateSourceChain: (instance_id) => {
+            console.log(`Update source chain state dump with: ${instance_id}`)
+            call('debug/state_dump')({instance_id, source_chain: true, held_aspects: false, queued_holding_workflows: false})
+              .then((dump) => {
+                  console.log("Got state dump: ", dump)
+                  Vue.set(app.sourceChains, instance_id, dump.source_chain)
+                  //dump.source_chain = undefined
+                  //Vue.set(app.stateDumps, instance_id, dump)
+              })
+              .catch((error) => {
+                  console.log("Error getting dump:", error)
+              })
+          },
+          updateHeldAspects: (instance_id) => {
+            console.log(`Update state dump with: ${instance_id}`)
+            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: true, queued_holding_workflows: false})
+              .then((dump) => {
+                  console.log("Got holding map state dump: ", dump)
+                  Vue.set(app.holdingMaps, instance_id, dump.held_aspects)
+                  //dump.held_aspects = undefined
+                  //Vue.set(app.stateDumps, instance_id, dump)
+              })
+              .catch((error) => {
+                  console.log("Error getting dump:", error)
+              })
+          },
+          updateValidationQueues: (instance_id) => {
+            console.log(`Update state dump with: ${instance_id}`)
+            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_caqueued_holding_workflowslls: true})
+              .then((dump) => {
+                  console.log("Got validation queue state dump: ", dump)
+                  Vue.set(app.validationQueues, instance_id, dump.queued_calls)
+                  //dump.held_aspects = undefined
+                  //Vue.set(app.stateDumps, instance_id, dump)
+              })
+              .catch((error) => {
+                  console.log("Error getting dump:", error)
+              })
           },
           refresh: refresh,
           fetch_cas,
@@ -236,6 +281,23 @@ ipcRenderer.on('conductor-call-set', () => {
             // Ignoring non-trace signals
             return
         }
+
+        switch(signal.action.action_type) {
+            case "Commit":
+                app.updateSourceChain(instance_id)
+                break
+            case "HoldAspect":
+                app.updateHeldAspects(instance_id)
+                break
+            case "QueueHoldingWorkflow":
+            case "RemoveQueuedHoldingWorkflow":
+                app.updateValidationQueues(instance_id)
+                break
+            default:
+                app.updateStateDump(instance_id)
+                break
+        }
+
         if(!app.reduxActions[instance_id]) {
             Vue.set(app.reduxActions, instance_id, [])
         }
