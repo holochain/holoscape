@@ -65,7 +65,7 @@ module.exports = {
       } else if (process.platform === "linux") {
         if (process.env.HOLOSCAPE_FLAME_GRAPH==="yes")
         {
-          run = spawn("perf", ["record","--call-graph","dwarf","-g","timeout","180s",path.join(__dirname, "./holochain-linux"),"-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
+          run = spawn("perf", ["record","--call-graph","dwarf",path.join(__dirname, "./holochain-linux"),"-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
         }
         else
         {
