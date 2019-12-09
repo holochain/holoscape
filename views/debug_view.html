@@ -138,15 +138,44 @@
                 </h3>
                 <div class="collapse" v-bind:id="sanitizeName(instance_id)+'-dht'">
                         <h4>Validation queue:</h4>
-                        <table class="table">
-                            <tbody>
-                                <tr v-for="validation in dump.queued_holding_workflows">
-                                    <td>{{validation[0].workflow}}</td>
-                                    <td>{{validation[1]}}</td>
-                                    <td>{{validation[0].entry_with_header}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <v-data-table
+                            :headers="queueHeaders"
+                            :items="Object.keys(dump.queued_holding_workflows).map((i) => {
+                                return {
+                                    address: i.pending.entry_with_header.header.entry_address,
+                                    workflow: i.pending.workflow,
+                                    dependencies: i.pending.dependencies,
+                                    entry_with_header: i.pending.entry_with_header,
+                                    timeout: i.timeout
+                                };
+                            })"
+                            :search="queueSearch"
+                            show-expand
+                            class="elevation-1"
+                            item-key="address"
+                            disable-sort
+                        >
+                            <template v-slot:top>
+                                <v-toolbar flat>
+                                    <v-text-field
+                                    v-model="queueSearch"
+                                    append-icon="search"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                    ></v-text-field>
+                                </v-toolbar>
+                            </template>
+                            <template v-slot:item.timeout="{ item }">
+                                    <span v-if="item.timeout">{{item.timeout.delay}}</span>
+                                    <span v-if="!item.timeout">n/a</span>
+                            </template>
+                            <template v-slot:expanded-item="{ headers, item }">
+                                <td :colspan="headers.length">
+                                    {{ item.entry_with_header }}
+                                </td>
+                            </template>
+                        </v-data-table>
                         <h4>Held entries:</h4>
                         <v-data-table
                             :headers="heldHeaders"

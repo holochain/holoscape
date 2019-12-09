@@ -117,6 +117,33 @@ ipcRenderer.on('conductor-call-set', () => {
             { text: 'Timestamp', value: 'timestamp' },
             { text: 'Provenances', value: 'provenances' },
           ],
+          queueHeaders: [
+            {
+                text: 'Entry Address',
+                align: 'left',
+                sortable: false,
+                value: 'address',
+            },
+            { text: '', value: 'data-table-expand' },
+            {
+                text: 'Workflow Type',
+                align: 'left',
+                sortable: false,
+                value: 'type',
+            },
+            {
+                text: 'Delay',
+                align: 'left',
+                sortable: false,
+                value: 'content',
+            },
+            {
+                text: 'Dependencies',
+                align: 'left',
+                sortable: false,
+                value: 'content',
+            },
+          ],
           heldHeaders: [
             {
                 text: 'Entry Address',
@@ -138,6 +165,7 @@ ipcRenderer.on('conductor-call-set', () => {
             },
           ],
           chainSearch: '',
+          queueSearch: '',
           heldSearch: '',
           updateStateDump: (instance_id) => {
               console.log(`Update state dump with: ${instance_id}`)
