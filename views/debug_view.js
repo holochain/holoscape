@@ -249,7 +249,7 @@ ipcRenderer.on('conductor-call-set', () => {
 
         let actions = app.reduxActions[instance_id]
         actions.push(signal.action)
-        while(actions.lenght > 100) {
+        while(actions.length > 100) {
             actions.shift()
         }
     })
