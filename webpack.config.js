@@ -50,4 +50,5 @@ module.exports = {
       'vue$': 'vue/dist/vue.esm.js'
     }
   },
+  devtool: 'eval-source-map'
 };
