@@ -120,7 +120,7 @@
                             <v-chip v-if="typeof item.entry_type == 'object'" color="teal" >{{ item.entry_type['App'] }}</v-chip>
                         </template>
                         <template v-slot:item.provenances="{ item }">
-                            <span>{{ item.provenances.map((p)=>p[0]) }}</span>
+                            <span>{{ item.provenances.map((p)=>p[0]).join(', ') }}</span>
                     </template>
                     <template v-slot:expanded-item="{ headers, item }">
                         <td :colspan="headers.length">
