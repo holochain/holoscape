@@ -53,20 +53,12 @@ ipcRenderer.on('conductor-call-set', () => {
               app.updateSourceChain(instance_id)
               app.updateHeldAspects(instance_id)
               app.updateValidationQueues(instance_id)
-              Vue.set(app.updateActions, instance_id, false)
-              Vue.set(app.refreshDump, instance_id, false)
-              app.instances.push(instance_id)
+              if(!app.instances.includes(instance_id)) {
+                app.instances.push(instance_id)
+              }
             })
         })
     }
-
-    setInterval(() => {
-        for(let instance of app.instances) {
-            if(app.refreshDump[instance]) {
-                app.updateStateDump(instance)
-            }
-        }
-    }, 1500)
 
     const fetch_cas = async (address, instance_id) => {
         return await call('debug/fetch_cas')({instance_id, address})
@@ -107,9 +99,7 @@ ipcRenderer.on('conductor-call-set', () => {
           sourceChains: {},
           holdingMaps: {},
           validationQueues: {},
-          refreshDump: {},
           contents: {},
-          updateActions: {},
           stats: {},
           chainHeaders: [
             {
@@ -267,8 +257,10 @@ ipcRenderer.on('conductor-call-set', () => {
             return
         }
         if(signal.signal_type == "Stats") {
-            
-            app.stats = signal.instance_stats
+            if(JSON.stringify(signal.instance_stats) != JSON.stringify(app.stats)) {
+                console.log("updating stats")
+                app.stats = signal.instance_stats
+            }
             return
         }
 
@@ -301,9 +293,7 @@ ipcRenderer.on('conductor-call-set', () => {
         if(!app.reduxActions[instance_id]) {
             Vue.set(app.reduxActions, instance_id, [])
         }
-        if(!app.updateActions[instance_id]) {
-            return
-        }
+
         if(!signal.action) {
             console.log("Got strange trace signal without 'action' property:", params)
             return
