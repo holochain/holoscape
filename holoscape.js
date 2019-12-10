@@ -15,6 +15,7 @@ class Holoscape {
     happUiController;
 
     /// Window references for built-in views:
+    mainWindow;
     splash;
     logWindow;
     configWindow;
@@ -142,6 +143,29 @@ class Holoscape {
           that.splash.hide()
         }
       });
+    }
+
+    createMainWindow() {
+      let window = new BrowserWindow({
+        width:1000,
+        height:800,
+        webPreferences: {
+          nodeIntegration: true
+        },
+        show: true,
+        icon: systemTrayIconFull(),
+      })
+      window.loadURL(path.join('file://', __dirname, 'views/main_window.html'))
+      setupWindowDevProduction(window)
+
+      let holoscape = this
+      window.on('close', (event) => {
+        if(!holoscape.quitting) event.preventDefault();
+        window.hide();
+        holoscape.updateTrayMenu()
+      })
+
+      this.mainWindow = window
     }
 
     createLogWindow() {
@@ -388,6 +412,7 @@ class Holoscape {
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()
         this.splash.hide()
+        this.createMainWindow()
         setTimeout(() => {
           this.configWindow.webContents.send('conductor-call-set')
           this.uiConfigWindow.webContents.send('conductor-call-set')

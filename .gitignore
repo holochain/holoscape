@@ -9,3 +9,5 @@ Holoscape-linux-x64
 Holoscape-darwin-x64
 
 views/debug_view.dist.js
+
+views/main_window.dist.js

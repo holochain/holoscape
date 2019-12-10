@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <title>Holoscape - The Personal Holochain Agent</title>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>require('popper.js');</script>
+    <script>require('bootstrap');</script>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+      .modal-spinner {
+        margin: 20px;
+      }
+      .actions {
+        max-height:420px;
+        overflow:auto;
+        background:#bbb;
+      }
+      .action {
+          cursor: pointer;
+      }
+      .clickFetch {
+          cursor: pointer;
+      }
+      .list-group-item label {
+          color: black;
+      }
+      .badge-light, .black {
+          color: black;
+      }
+      .zome-call {
+          word-wrap: break-word;
+      }
+      .zome-call .zome-call-container {
+          word-wrap: break-word;
+          overflow: scroll;
+      }
+      .light-blue-background {
+          background: lightblue !important;
+      }
+      .light-green-background {
+          background: lightgreen !important;
+      }
+      .content {
+          margin-left: 300px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app">
+        <v-app>
+            <v-navigation-drawer app fixed permanent width="300">
+                <v-list-item>
+                    <v-list-item-content>
+                        <v-list-item-title class="title">
+                            Installed hApps
+                        </v-list-item-title>
+                        <v-list-item-subtitle>
+                            Click name to open hApp
+                        </v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-divider></v-divider>
+                <v-list
+                    dense
+                    nav
+                >
+                    <v-list-item
+                        v-for="(ui, name) in installedUIs"
+                        :key="name"
+                        link
+                    >                
+                        <v-list-item-content>
+                            <v-list-item-title>{{ name }}</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+            
+            <v-app-bar app>
+                <!-- -->
+            </v-app-bar>
+            
+            <!-- Sizes your content based upon application components -->
+            <v-content class="content">
+            
+            </v-content>
+            
+            <v-footer app>
+                <!-- -->
+            </v-footer>
+        </v-app>
+    </div>
+
+    <script type="text/javascript" src="main_window.dist.js"></script>
+  </body>
+</html>
