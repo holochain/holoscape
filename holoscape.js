@@ -58,8 +58,8 @@ class Holoscape {
 
     showSplashScreen() {
       let window = new BrowserWindow({
-        width:890,
-        height:635,
+        width:843,
+        height:600,
         webPreferences: {
           nodeIntegration: true
         },

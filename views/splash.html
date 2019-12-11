@@ -10,6 +10,10 @@
     <style>
      .background {
        background: linear-gradient(45deg, #1a0231f2, #00017f);
+       background-image: url(../images/splash_background.jpg);
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-position: center;
      }
 
      .header {
@@ -25,15 +29,14 @@
      }
 
      .version {
-       position: absolute;
-       top: 10px;
+       position: relative;
        right: 10px;
-       color: red;
+       color: white;
        z-index: 2;
        font-family: sans-serif;
        font-size: 30px;
-       font-weight: bold;
-       text-shadow: 0px 0px 3px #00017f;
+       font-weight: normal;
+       text-align: right;
      }
 
      .status {
@@ -46,10 +49,16 @@
        font-size: 45px;
      }
 
-     .logo {
-       position: absolute;
-       left: 50%;
-       transform: translateX(-50%);
+    .logo {
+      position: relative;
+      width: 100%;
+     }
+     #title {
+      position: absolute;
+      transform: translateY(-33%);
+      left: 37px;
+      top: 50%;
+      width: 518px;
      }
      .error {
        color: rgb(238, 153, 153);
@@ -101,15 +110,16 @@
   </head>
   <body class="background">
     <div id="app">
-      <ul id="log">
+      <!--<ul id="log">
         <li v-for="log in logs">
           <div :class="log.level" v-html="log.message">
           </div>
         </li>
-      </ul>
-      <h1 class="header">Holoscape</h1>
-      <h3 class="version">v0.0.4-alpha</h3>
-      <img class="logo" src="../images/HoloScape-mdpi.png"></img>
+      </ul>-->
+      <div id="title">
+        <img class="logo" src="../images/Holoscape_title.png"></img>
+        <h3 class="version">Version 0.0.5-alpha</h3>
+      </div>
       <div class="status">{{status}}</div>
     
       <div class="modal fade" id="binaries-modal" tabindex="-1" role="dialog" aria-labelledby="binaries-modal" aria-hidden="true">
