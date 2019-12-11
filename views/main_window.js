@@ -2,7 +2,7 @@ import { remote } from 'electron'
 import Vue from 'vue'
 import Vuetify, {
     VApp, VNavigationDrawer, VFooter, VContent, 
-    VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle,
+    VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
     VDivider} from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -12,7 +12,7 @@ Vue.use(Vuetify,  {
       VNavigationDrawer, 
       VFooter, 
       VContent,
-      VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle,
+      VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
       VDivider
     },
     directives: {
@@ -41,10 +41,12 @@ let app = new Vue({
     el: "#app",
     vuetify: new Vuetify({}),
     data: {
-        installedUIs: happUiController.installedUIs
+        installedUIs: happUiController.installedUIs,
+        activeUI: null,
     },
     methods: {
         showHappUi: (uiName) => {
+            app.activeUI = uiName
             happUiController.showHappUi(uiName)
         }
     }

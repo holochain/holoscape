@@ -57,31 +57,30 @@
     <div id="app">
         <v-app>
             <v-navigation-drawer app fixed permanent width="300">
-                <v-list-item>
-                    <v-list-item-content>
-                        <v-list-item-title class="title">
-                            Installed hApps
-                        </v-list-item-title>
-                        <v-list-item-subtitle>
-                            Click name to open hApp
-                        </v-list-item-subtitle>
-                    </v-list-item-content>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list
-                    dense
-                    nav
-                >
-                    <v-list-item
-                        v-for="(ui, name) in installedUIs"
-                        :key="name"
-                        link
-                        v-on:click="showHappUi(name)"
-                    >                
+                <v-list nav rounded>
+                    <v-list-item>
                         <v-list-item-content>
-                            <v-list-item-title>{{ name }}</v-list-item-title>
+                            <v-list-item-title class="title">
+                                Installed hApps
+                            </v-list-item-title>
+                            <v-list-item-subtitle>
+                                Click name to open hApp
+                            </v-list-item-subtitle>
                         </v-list-item-content>
                     </v-list-item>
+                    <v-divider></v-divider>
+                    <v-list-item-group v-model="activeUI" color="deep-purple">
+                        <v-list-item
+                            v-for="(ui, name) in installedUIs"
+                            :key="name"
+                            link
+                            v-on:click="showHappUi(name)"
+                        >                
+                            <v-list-item-content>
+                                <v-list-item-title>{{ name }}</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
                 </v-list>
             </v-navigation-drawer>
             
