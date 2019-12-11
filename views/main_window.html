@@ -8,6 +8,18 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <style>
+     #backdrop {
+       position: absolute;
+       left: 0;
+       right: 0;
+       top: 0;
+       bottom: 0;
+       opacity: 0.3;
+       background-image: url(../images/splash_background.jpg);
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-position: center;
+     }
       .error {
         color: red;
       }
@@ -64,6 +76,7 @@
     </style>
   </head>
   <body>
+    <div id="backdrop"></div>
 
     <div id="app">
         <v-app>
