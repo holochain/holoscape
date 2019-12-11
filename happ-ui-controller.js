@@ -276,7 +276,7 @@ class HappUiController {
 
     showView(view) {
         let mainWindowBounds = this.mainWindow.getBounds()
-        view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height})
+        view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-20})
     }
 
     hideView(view) {
