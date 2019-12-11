@@ -76,6 +76,7 @@
                         v-for="(ui, name) in installedUIs"
                         :key="name"
                         link
+                        v-on:click="showHappUi(name)"
                     >                
                         <v-list-item-content>
                             <v-list-item-title>{{ name }}</v-list-item-title>

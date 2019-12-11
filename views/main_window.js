@@ -42,6 +42,11 @@ let app = new Vue({
     vuetify: new Vuetify({}),
     data: {
         installedUIs: happUiController.installedUIs
+    },
+    methods: {
+        showHappUi: (uiName) => {
+            happUiController.showHappUi(uiName)
+        }
     }
 })
 

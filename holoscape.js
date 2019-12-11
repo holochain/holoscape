@@ -166,6 +166,7 @@ class Holoscape {
       })
 
       this.mainWindow = window
+      this.happUiController.setMainWindow(window)
     }
 
     createLogWindow() {
