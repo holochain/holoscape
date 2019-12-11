@@ -40,7 +40,8 @@ Vue.use(Vuetify,  {
 })
 
 
-const happUiController = remote.getGlobal('holoscape').happUiController
+const holoscape = remote.getGlobal('holoscape')
+const happUiController = holoscape.happUiController
 
 let app = new Vue({
     el: "#app",
@@ -51,8 +52,20 @@ let app = new Vue({
     },
     methods: {
         showHappUi: (uiName) => {
+            if(app.activeUI == uiName) {
+              return 
+            }
             app.activeUI = uiName
+            holoscape.hideViews()
             happUiController.showHappUi(uiName)
+        },
+        showHappStore: () => {
+          if(app.activeUI == "happ-store") {
+            return 
+          }
+          app.activeUI = "happ-store"
+          happUiController.hideAllHappUis()
+          holoscape.showInstallBundleView()
         }
     }
 })

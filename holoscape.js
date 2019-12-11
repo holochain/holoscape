@@ -1,4 +1,4 @@
-const { app, Menu, BrowserWindow, ipcMain, shell, dialog } = require('electron')
+const { app, Menu, BrowserWindow, BrowserView, ipcMain, shell, dialog } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
@@ -21,7 +21,9 @@ class Holoscape {
     configWindow;
     uiConfigWindow;
     debuggerWindow;
-    installBundleWindow;
+    installBundleView;
+
+    activeView;
 
     /// Conductor references (mabe move to conductor.js?)
     conductorProcess; // Handle to the return value of spawn
@@ -37,7 +39,7 @@ class Holoscape {
       this.createConfigWindow()
       this.createUiConfigWindow()
       this.createDebuggerWindow()
-      this.createInstallBundleWindow()
+      
       this.updateTrayMenu()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
@@ -54,6 +56,10 @@ class Holoscape {
           this.showHideLogs()
         }
       }, 60000)
+    }
+
+    createViews() {
+      this.createInstallBundleView()
     }
 
     showSplashScreen() {
@@ -146,6 +152,9 @@ class Holoscape {
     }
 
     createMainWindow() {
+      if(this.mainWindow) {
+        return
+      }
       let window = new BrowserWindow({
         width:1000,
         height:800,
@@ -167,6 +176,12 @@ class Holoscape {
 
       this.mainWindow = window
       this.happUiController.setMainWindow(window)
+      this.createViews()
+      this.mainWindow.on('resize', () => {
+        if(this.activeView) {
+            this.showView(this.activeView)
+        }
+      })
     }
 
     createLogWindow() {
@@ -263,27 +278,34 @@ class Holoscape {
       this.debuggerWindow = window
     }
 
-    createInstallBundleWindow() {
-      let window = new BrowserWindow({
-        width:1200,
-        height:800,
+    createInstallBundleView() {
+      let view = new BrowserView({
         webPreferences: {
           nodeIntegration: true
         },
         show: false,
         icon: systemTrayIconFull(),
       })
-      window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
-      setupWindowDevProduction(window)
+      view.webContents.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
+      //setupWindowDevProduction(window)
 
-      let holoscape = this
-      window.on('close', (event) => {
-        if(!holoscape.quitting) event.preventDefault();
-        window.hide();
-        holoscape.updateTrayMenu()
-      })
+      this.mainWindow.addBrowserView(view)
+      this.installBundleView = view
+    }
 
-      this.installBundleWindow = window
+    showInstallBundleView() {
+      this.showView(this.installBundleView)
+    }
+
+    showView(view) {
+      this.activeView = view
+      let mainWindowBounds = this.mainWindow.getBounds()
+      view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-20})
+    }
+
+    hideViews() {
+      this.activeView = null
+      this.installBundleView.setBounds({x: -200, y: 0, width: 100, height: 100})
     }
 
     updateTrayMenu(opt) {
@@ -418,7 +440,7 @@ class Holoscape {
           this.configWindow.webContents.send('conductor-call-set')
           this.uiConfigWindow.webContents.send('conductor-call-set')
           this.debuggerWindow.webContents.send('conductor-call-set')
-          this.installBundleWindow.webContents.send('conductor-call-set')
+          this.installBundleView.webContents.send('conductor-call-set')
         }, 500)
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)

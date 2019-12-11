@@ -100,6 +100,7 @@ class HappUiController {
     runningUIs = {};
     holoscape;
     mainWindow;
+    activeUI;
 
     constructor(hs) {
         this.holoscape = hs
@@ -123,10 +124,8 @@ class HappUiController {
     setMainWindow(mainWindow) {
         this.mainWindow = mainWindow
         this.mainWindow.on('resize', () => {
-            for(let viewName in this.runningUIs) {
-                let view = this.runningUIs[viewName]
-                let mainWindowBounds = this.mainWindow.getBounds()
-                view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height})
+            if(this.activeUI && this.runningUIs[this.activeUI]) {
+                this.showView(this.runningUIs[this.activeUI])
             }
         })
     }
@@ -299,6 +298,14 @@ class HappUiController {
                 let view = this.runningUIs[viewName]
                 this.hideView(view)
             }
+        }
+
+        this.activeUI = name
+    }
+
+    hideAllHappUis() {
+        for(let viewName in this.runningUIs) {
+            this.hideView(this.runningUIs[viewName])
         }
     }
 
