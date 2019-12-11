@@ -31,6 +31,7 @@ with holonix.pkgs;
   ln -sf ${holonix.holochain.holochain}/bin/holochain holochain-${target-os}
   ln -sf ${holonix.holochain.hc}/bin/hc hc-${target-os}
   ${holonix.pkgs.nodejs}/bin/npm install
+  ${holonix.pkgs.nodejs}/bin/npx webpack
   export PATH="$PATH:$( ${holonix.pkgs.nodejs}/bin/npm bin )"
   ''
   holonix.shell.shellHook
