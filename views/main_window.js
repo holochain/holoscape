@@ -3,6 +3,7 @@ import Vue from 'vue'
 import Vuetify, {
     VApp, VNavigationDrawer, VFooter, VContent, 
     VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
+    VToolbar, VToolbarTitle,
     VDivider} from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -13,6 +14,7 @@ Vue.use(Vuetify,  {
       VFooter, 
       VContent,
       VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
+      VToolbar, VToolbarTitle,
       VDivider
     },
     directives: {

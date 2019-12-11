@@ -51,10 +51,15 @@
           margin-left: 300px;
       }
       #separator {
-          float: right;
+          position: absolute;
+          top: 4px;
+          right: 0px;
+          bottom: 4px;
           width: 4;
-          height: 100%;
           background: linear-gradient(0deg,  #00ead2, #4720e3);
+      }
+      .navbar-content {
+          padding: 4px 10px 0 4px !important;
       }
     </style>
   </head>
@@ -64,7 +69,13 @@
         <v-app>
             <v-navigation-drawer app fixed permanent width="300">
                 <div id="separator"></div>
-                <v-list nav rounded>
+                <v-list nav class="navbar-content">
+                    <v-toolbar
+                        color="deep-purple accent-4"
+                        dark
+                    >
+                        <v-toolbar-title>hApps</v-toolbar-title>
+                    </v-toolbar>
                     <v-list-item>
                         <v-list-item-content>
                             <v-list-item-title class="title">
