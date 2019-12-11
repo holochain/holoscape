@@ -50,6 +50,12 @@
       .content {
           margin-left: 300px;
       }
+      #separator {
+          float: right;
+          width: 4;
+          height: 100%;
+          background: linear-gradient(0deg,  #00ead2, #4720e3);
+      }
     </style>
   </head>
   <body>
@@ -57,6 +63,7 @@
     <div id="app">
         <v-app>
             <v-navigation-drawer app fixed permanent width="300">
+                <div id="separator"></div>
                 <v-list nav rounded>
                     <v-list-item>
                         <v-list-item-content>
