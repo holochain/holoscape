@@ -67,5 +67,13 @@ module.exports = [
       filename: 'main_window.dist.js',
       path: path.resolve(__dirname, 'views'),
     }
+  },
+  {
+    ...vuetify_build,
+    entry: './views/install_bundle_view.js',
+    output: {
+      filename: 'install_bundle_view.dist.js',
+      path: path.resolve(__dirname, 'views'),
+    }
   }
 ]
