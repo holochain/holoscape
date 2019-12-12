@@ -52,6 +52,12 @@
       .install-button {
           margin: 55px 30px;
       }
+      .v-card {
+          margin: 0 10px;
+      }
+      .float-right {
+          float: right;
+      }
     </style>
   </head>
   <body>
@@ -64,19 +70,181 @@
             >
                 <v-card dark>
                     <div class="d-flex flex-no-wrap justify-space-between">
-                            <v-avatar class="ma-3" size="125" tile>
-                            <v-img :src="happ.screenshot"></v-img>
-                            </v-avatar>
-                            <div>
-                                    <v-card-title class="headline" v-text="happ.name"></v-card-title>
-                                    <v-card-subtitle v-text="happ.description"></v-card-subtitle>
-                            </div>
-                            <v-btn elevation="10" rounded color="deep-purple" dark class="install-button">
-                                    <v-icon v-text="'mdi-plus'" large dark></v-icon>
-                                    Install
-                            </v-btn>
+                        <v-avatar class="ma-3" size="125" tile>
+                        <v-img :src="happ.screenshot"></v-img>
+                        </v-avatar>
+                        <div>
+                                <v-card-title class="headline" v-text="happ.name"></v-card-title>
+                                <v-card-subtitle v-text="happ.description"></v-card-subtitle>
                         </div>
-                </v-card>
+                        <v-btn elevation="10" rounded color="deep-purple" dark class="install-button">
+                                <v-icon v-text="'mdi-plus'" large dark></v-icon>
+                                Install
+                        </v-btn>
+                    </div>
+                    <v-card-actions>
+                        <v-btn class="float-right" text @click="toggleExpandHapp(happ)">
+                            {{ expanded_happs[happ.name] ? 'Hide' : 'Show' }} bundle contents
+                            <v-icon>{{ expanded_happs[happ.name] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                        </v-btn>
+                        <v-btn v-if="happ.github" text @click="openExternal(happ.github)">Github</v-btn>    
+                    </v-card-actions>
+                </v-card>      
+                <v-expand-transition>
+                    <div v-show="expanded_happs[happ.name]">
+                        <v-card v-if="happ_bundles[happ.name]">
+                            <v-card-title class="headline">DNAs</v-card-title>
+                            <v-simple-table dense>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">DNA Hash</th>
+                                        <th scope="col">DNA Properties</th>
+                                        <!--<th scope="col">URI</th>-->
+                                        <th scope="col">file status</th>
+                                        <th scope="col">installation status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="instance in happ_bundles[happ.name].instances">
+                                        <td class="name">{{ instance.name }}</td>
+                                        <td>{{ instance.dna_hash }}<br><small v-if="instance.interpolatedDnaHash">->{{instance.interpolatedDnaHash}}</small></td>
+                                        <td class="properties-col"><span v-for="(property, name, index) in instance.dna_properties">{{name}}={{property}}</span></td>
+                                        <!--<td>{{ instance.uri }}</td>-->
+                                        <td>
+                                            <div class="badge badge-warning" v-if="instance.downloadStatus == 'pending'">
+                                                Downloading
+                                                <div class="spinner-border" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-danger" v-if="instance.error">{{instance.error}}</div>
+                                            <div class="badge badge-success" v-if="instance.downloadStatus == 'done'">Ready</div>
+                                            <div class="badge badge-danger" v-if="instance.fileError">
+                                                <div v-if="instance.fileError.hash">
+                                                    <span>{{instance.fileError.message}}</span>
+                                                    <br>
+                                                    <span>{{instance.fileError.hash}}</span>
+                                                </div>
+                                                <div v-if="!instance.fileError.hash">
+                                                    {{instance.fileError}}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
+                                            <span class="badge badge-success">Already installed</span>
+                                        </td>
+                                        <td v-if="instanceStatus[instance.id] != 'installed'">
+                                            -->
+                                        <td>
+                                            <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
+                                            <span class="badge badge-info"
+                                                v-if="!instance.installedInstanceId && (instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined))">
+                                                To be installed...
+                                            </span>
+                                            <span class="badge badge-dark" v-if="instance.installStatus=='installing'">Installing...</span>
+                                            <div class="spinner-border" role="status" v-if="instance.installStatus == 'installing'">
+                                                <span class="sr-only">Installing...</span>
+                                            </div>
+                                            <span class="badge badge-success" v-if="instance.installStatus=='installed'">Installed!</span>
+                                            <span class="badge badge-light" v-if="instance.installedInstanceId">Already installed</span>
+                                        </td>
+                                </tbody>
+                            </table>
+                            </v-simple-table>
+
+                            <div v-if="happ_bundles[happ.name] && happ_bundles[happ.name].bridges && happ_bundles[happ.name].bridges.length > 0">
+                                <v-card-title class="headline">Bridges</v-card-title>
+                                <v-simple-table dense>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">From (caller)</th>
+                                            <th scope="col">Handle</th>
+                                            <th scope="col">To (callee)</th>
+                                            <th scope="col">status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(bridge, index) in happ_bundles[happ.name].bridges">
+                                            <td>{{ instanceById(bridge.caller_id, happ_bundles[happ.name]).name }}</td>
+                                            <td>{{ bridge.handle }}</td>
+                                            <td>{{ instanceById(bridge.callee_id, happ_bundles[happ.name]).name }}</td>
+                                            <!--<td v-if="bridgeStatus[index] == 'installed'">
+                                                <span class="badge badge-success">Already installed</span>
+                                            </td>
+                                            <td v-if="bridgeStatus[index] != 'installed'">-->
+                                            <td>
+                                                <span class="badge badge-info" v-if="bridge.installStatus==undefined && !bridge.alreadyInstalled">To be installed...</span>
+                                                <span class="badge badge-dark" v-if="bridge.installStatus=='installing'">Installing...</span>
+                                                <div class="spinner-border" role="status" v-if="bridge.installStatus == 'installing'">
+                                                    <span class="sr-only">Installing...</span>
+                                                </div>
+                                                <span class="badge badge-success" v-if="bridge.installStatus=='installed'">Installed!</span>
+                                                <span class="badge badge-light" v-if="bridge.alreadyInstalled">Already installed</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </v-simple-table>
+                            </div>
+
+                            <v-card-title class="headline">UIs</v-card-title>
+                            <v-simple-table dense>
+                            <table>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Instance references</th>
+                                            <!--<th scope="col">URI</th>-->
+                                            <th scope="col">file status</th>
+                                            <th scope="col">installation status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="ui in happ_bundles[happ.name].UIs">
+                                            <td class="name">{{ ui.name }}</td>
+                                            <td>
+                                                <ul>
+                                                    <li v-for="ref in ui.instance_references">
+                                                        {{ instanceById(ref.instance_id, happ_bundles[happ.name]).name }}
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                            <!--<td>{{ ui.uri }}</td>-->
+                                            <td>
+            
+                                                <div class="badge badge-warning" v-if="ui.downloadStatus == 'pending'">
+                                                    Downloading
+                                                    <div class="spinner-border" role="status">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div>
+                                                </div>
+                                                <div class="alert alert-danger" v-if="ui.error">{{ui.error}}</div>
+                                                <div class="badge badge-success" v-if="ui.downloadStatus == 'done'">Ready</div>
+                                            </td>
+            
+                                            <td>
+                                                <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
+                                                <span class="badge badge-info"
+                                                    v-if="!ui.alreadyInstalled && (ui.downloadStatus=='pending' || (ui.downloadStatus=='done' && ui.installStatus==undefined))">
+                                                    To be installed...
+                                                </span>
+                                                <span class="badge badge-dark" v-if="ui.installStatus=='installing'">Installing...</span>
+                                                <div class="spinner-border" role="status" v-if="ui.installStatus == 'installing'">
+                                                    <span class="sr-only">Installing...</span>
+                                                </div>
+                                                <span class="badge badge-success" v-if="ui.installStatus=='installed'">Installed!</span>
+                                                <span class="badge badge-light" v-if="ui.alreadyInstalled">Already installed</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                            </table>
+                            </v-simple-table>
+                        </v-card>
+                    </div>
+                </v-expand-transition>
             </v-col>
         </v-row>
 
@@ -140,197 +308,34 @@
                   </div>
                   <div v-if="fileError" class="alert alert-danger">{{ fileError }}</div>
         </li>
-        <li v-if="bundle" class="list-group-item">
-            <h3>DNAs in this bundle</h3>
-            <table class="table">
-                  <thead class="thead-light">
-                      <tr>
-                          <th scope="col">Name</th>
-                          <th scope="col">DNA Hash</th>
-                          <th scope="col">DNA Properties</th>
-                          <!--<th scope="col">URI</th>-->
-                          <th scope="col">file status</th>
-                          <th scope="col">installation status</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <tr v-for="instance in bundle.instances">
-                          <td class="name">{{ instance.name }}</td>
-                          <td>{{ instance.dna_hash }}<br><small v-if="instance.interpolatedDnaHash">->{{instance.interpolatedDnaHash}}</small></td>
-                          <td class="properties-col"><span v-for="(property, name, index) in instance.dna_properties">{{name}}={{property}}</span></td>
-                          <!--<td>{{ instance.uri }}</td>-->
-                          <td>
-                              <div class="badge badge-warning" v-if="instance.downloadStatus == 'pending'">
-                                  Downloading
-                                  <div class="spinner-border" role="status">
-                                          <span class="sr-only">Loading...</span>
-                                  </div>
-                              </div>
-                              <div class="alert alert-danger" v-if="instance.error">{{instance.error}}</div>
-                              <div class="badge badge-success" v-if="instance.downloadStatus == 'done'">Ready</div>
-                              <div class="badge badge-danger" v-if="instance.fileError">
-                                  <div v-if="instance.fileError.hash">
-                                      <span>{{instance.fileError.message}}</span>
-                                      <br>
-                                      <span>{{instance.fileError.hash}}</span>
-                                  </div>
-                                  <div v-if="!instance.fileError.hash">
-                                      {{instance.fileError}}
-                                  </div>
-                              </div>
-                          </td>
-                          <!-- <td v-if="instanceStatus[instance.id] == 'installed'">
-                              <span class="badge badge-success">Already installed</span>
-                          </td>
-                          <td v-if="instanceStatus[instance.id] != 'installed'">
-                              -->
-                          <td>
-                              <span class="badge badge-danger" v-if="instance.downloadStatus=='error'">Can't install</span>
-                              <span class="badge badge-info"
-                                  v-if="!instance.installedInstanceId && (instance.downloadStatus=='pending' || (instance.downloadStatus=='done' && instance.installStatus==undefined))">
-                                  To be installed...
-                              </span>
-                              <span class="badge badge-dark" v-if="instance.installStatus=='installing'">Installing...</span>
-                              <div class="spinner-border" role="status" v-if="instance.installStatus == 'installing'">
-                                  <span class="sr-only">Installing...</span>
-                              </div>
-                              <span class="badge badge-success" v-if="instance.installStatus=='installed'">Installed!</span>
-                              <span class="badge badge-light" v-if="instance.installedInstanceId">Already installed</span>
-                          </td>r>
-                  </tbody>
-            </table>
-        </li>
-        <li v-if="bundle" class="list-group-item">
-              <h3>Bridges to setup</h3>
-              <table class="table">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="col">From (caller)</th>
-                            <th scope="col">Handle</th>
-                            <th scope="col">To (callee)</th>
-                            <th scope="col">status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(bridge, index) in bundle.bridges">
-                            <td>{{ instanceById(bridge.caller_id).name }}</td>
-                            <td>{{ bridge.handle }}</td>
-                            <td>{{ instanceById(bridge.callee_id).name }}</td>
-                            <!--<td v-if="bridgeStatus[index] == 'installed'">
-                                <span class="badge badge-success">Already installed</span>
-                            </td>
-                            <td v-if="bridgeStatus[index] != 'installed'">-->
-                            <td>
-                              <span class="badge badge-info" v-if="bridge.installStatus==undefined && !bridge.alreadyInstalled">To be installed...</span>
-                              <span class="badge badge-dark" v-if="bridge.installStatus=='installing'">Installing...</span>
-                              <div class="spinner-border" role="status" v-if="bridge.installStatus == 'installing'">
-                                  <span class="sr-only">Installing...</span>
-                              </div>
-                              <span class="badge badge-success" v-if="bridge.installStatus=='installed'">Installed!</span>
-                              <span class="badge badge-light" v-if="bridge.alreadyInstalled">Already installed</span>
-                            </td>
-                        </tr>
-                    </tbody>
-              </table>
-          </li>
-          <li v-if="bundle" class="list-group-item">
-                  <h3>UIs to install</h3>
-  
-                  <table class="table">
-                          <thead class="thead-light">
-                              <tr>
-                                  <th scope="col">Name</th>
-                                  <th scope="col">Instance references</th>
-                                  <!--<th scope="col">URI</th>-->
-                                  <th scope="col">file status</th>
-                                  <th scope="col">installation status</th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              <tr v-for="ui in bundle.UIs">
-                                  <td class="name">{{ ui.name }}</td>
-                                  <td>
-                                      <ul>
-                                          <li v-for="ref in ui.instance_references">
-                                              {{ instanceById(ref.instance_id).name }}
-                                          </li>
-                                      </ul>
-                                  </td>
-                                  <!--<td>{{ ui.uri }}</td>-->
-                                  <td>
-  
-                                      <div class="badge badge-warning" v-if="ui.downloadStatus == 'pending'">
-                                          Downloading
-                                          <div class="spinner-border" role="status">
-                                                  <span class="sr-only">Loading...</span>
-                                              </div>
-                                      </div>
-                                      <div class="alert alert-danger" v-if="ui.error">{{ui.error}}</div>
-                                      <div class="badge badge-success" v-if="ui.downloadStatus == 'done'">Ready</div>
-                                  </td>
-  
-                                  <td>
-                                      <span class="badge badge-danger" v-if="ui.downloadStatus=='error'">Can't install</span>
-                                      <span class="badge badge-info"
-                                          v-if="!ui.alreadyInstalled && (ui.downloadStatus=='pending' || (ui.downloadStatus=='done' && ui.installStatus==undefined))">
-                                          To be installed...
-                                      </span>
-                                      <span class="badge badge-dark" v-if="ui.installStatus=='installing'">Installing...</span>
-                                      <div class="spinner-border" role="status" v-if="ui.installStatus == 'installing'">
-                                          <span class="sr-only">Installing...</span>
-                                      </div>
-                                      <span class="badge badge-success" v-if="ui.installStatus=='installed'">Installed!</span>
-                                      <span class="badge badge-light" v-if="ui.alreadyInstalled">Already installed</span>
-                                  </td>
-                              </tr>
-                          </tbody>
-                    </table>
-  
-                  <!--
-                  <ul>
-                      <li v-for="ui in bundle.UIs">
-                          <h4>{{ ui.name }}</h4>
-                          <span>Needs access to the following instances</span>
-  
-  
-                          <div v-if="ui.ui_references && ui.ui_references.length > 0">
-                              <span>Needs access to the following UIs</span>
-                              <ul>
-                                  <li v-for="ref in ui.ui_references">
-                                      {{ ref.ui_id }}
-                                  </li>
-                              </ul>
-                          </div>
-                      </li>
-                  </ul>-->
-              </li>
-        </ul>
-        <div class="list-group-item">
-          <h3>Install with admin interface?</h3>
-          <div class="input-group">
-            <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
-          </div>
-          <h3>Select storage implementation:</h3>
-          <div class="input-group">
-             <select id="storage-impl" v-model="storageImpl">
-              <option v-for="storage in storageOpts" v-bind:value="storage">
-                  {{storage}}
-              </option>
-            </select> 
-          </div>
-        <div>
-        <div class="container" v-if="bundle">
-              <div class="row justify-content-center" v-if="success">
-                  <div class="col-7">
-                      <h2 class="alert alert-success">Bundle successfully installed!</h2>
-                  </div>
-              </div>
-              <div class="row justify-content-end">
-                  <div class="col-7">
-                      <button type="button" class="btn btn-success install-button" v-on:click="install" :disabled="!canInstall">Install</button>
-                  </div>
-              </div>
+        
+    </ul>
+    <div class="list-group-item">
+        <h3>Install with admin interface?</h3>
+        <div class="input-group">
+        <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
         </div>
+        <h3>Select storage implementation:</h3>
+        <div class="input-group">
+            <select id="storage-impl" v-model="storageImpl">
+            <option v-for="storage in storageOpts" v-bind:value="storage">
+                {{storage}}
+            </option>
+        </select> 
+        </div>
+    <div>
+    <div class="container" v-if="bundle">
+            <div class="row justify-content-center" v-if="success">
+                <div class="col-7">
+                    <h2 class="alert alert-success">Bundle successfully installed!</h2>
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-7">
+                    <button type="button" class="btn btn-success install-button" v-on:click="install" :disabled="!canInstall">Install</button>
+                </div>
+            </div>
+    </div>
     </v-app>
     </div>
 

@@ -6,14 +6,13 @@ import temp from 'temp'
 import extract from 'extract-zip'
 import getPort from 'get-port'
 import path from 'path'
-import cli from '../cli'
 import request from 'request'
 import Vue from 'vue'
 import Vuetify, {
     VApp, VContainer,
     VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
     VAvatar, VIcon, VBtn,
-    VImg,
+    VImg, VSpacer, VSimpleTable,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -21,7 +20,7 @@ Vue.use(Vuetify,  {
     components: {
         VApp, VContainer,
         VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
-        VAvatar, VIcon, VBtn, VImg,
+        VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
     },
     directives: {
       Ripple,
@@ -46,7 +45,8 @@ Vue.use(Vuetify,  {
 
 let configured = false
 console.log("root")
-const happUiController = remote.getGlobal('holoscape').happUiController
+const holoscape = remote.getGlobal('holoscape')
+const happUiController = holoscape.happUiController
 let call = remote.getGlobal('conductor_call')
 
 ipcRenderer.on('conductor-call-set', () => {
@@ -94,8 +94,17 @@ ipcRenderer.on('conductor-call-set', () => {
           used_ports: [],
           happ_index: [],
           selected_happ: undefined,
+          expanded_happs: {},
+          happ_bundles: {},
         },
         methods: {
+          toggleExpandHapp(happ) {
+            if(!this.happ_bundles[happ.name]) {
+                this.getBundleFromHappIndex(happ)
+            }  
+            app.expanded_happs[happ.name] = !app.expanded_happs[happ.name]
+            this.$forceUpdate()
+          },
           async loadBundle() {
             if(this.$refs.bundleFile.files.length > 0) {
                 app.file = this.$refs.bundleFile.files[0]
@@ -151,13 +160,13 @@ ipcRenderer.on('conductor-call-set', () => {
             console.log("Found instance:", installed_instance)
             return installed_instance.id
           },
-          async processBundle() {
+          async processBundle(bundle) {
             this.installed_agents = await call('admin/agent/list')()
             this.installed_instances = await call('admin/instance/list')()
             this.installed_dnas = await call('admin/dna/list')()
             this.installed_bridges = await call('admin/bridge/list')()
 
-              app.bundle.instances && app.bundle.instances.map((instance) => {
+              bundle.instances && bundle.instances.map((instance) => {
                 console.log("Processing instance:", instance)
                 // Here we are checking if we have an instance with the same DNA installed already.
                 // If so, we don't install it again but use the already installed instance ID.
@@ -173,7 +182,7 @@ ipcRenderer.on('conductor-call-set', () => {
 
                 if(installed_instance_id) {
                     Vue.set(instance, 'installedInstanceId', installed_instance_id)
-                    this.checkInstallReady()
+                    this.checkInstallReady(bundle)
                 } else {
                     instance.tempPath = temp.path()
                     console.log("Temp path for DNA file:", instance.tempPath)
@@ -196,7 +205,7 @@ ipcRenderer.on('conductor-call-set', () => {
                         rs.pipe(fileStream)
                         rs.on('end', () => {
                             fileStream.end()
-                            let {hash, error} = cli.hash(instance.tempPath)
+                            let {hash, error} = holoscape.hash(instance.tempPath)
                             console.log(`FOR INSTANCE ${instance.name}, got: hash = ${hash}, error = ${error}`)
                             if(error) {
                                 Vue.set(instance, 'downloadStatus', 'fileError')
@@ -216,13 +225,13 @@ ipcRenderer.on('conductor-call-set', () => {
                                     Vue.set(instance, 'installedInstanceId', installed_instance_id)
                                 }
                             }
-                            this.checkInstallReady()
+                            this.checkInstallReady(bundle)
                         })
                     })
                 }
               })
 
-              app.bundle.bridges && app.bundle.bridges.map((bridge) => {
+              bundle.bridges && bundle.bridges.map((bridge) => {
                 let caller_id = bundleInstanceIdToRealId(bridge.caller_id)
                 let callee_id = bundleInstanceIdToRealId(bridge.callee_id)
                 let handle = bridge.handle
@@ -241,11 +250,11 @@ ipcRenderer.on('conductor-call-set', () => {
 
               let installedUIs = happUiController.getInstalledUIs()
 
-              app.bundle.UIs && app.bundle.UIs.map((ui) => {
+              bundle.UIs && bundle.UIs.map((ui) => {
                 console.log("Processing UI:", ui)
                 if(ui.name in installedUIs) {
                     Vue.set(ui, 'alreadyInstalled', true)
-                    this.checkInstallReady()
+                    this.checkInstallReady(bundle)
                 } else {
                     ui.tempPath = temp.path()
                     console.log("Temp path for UI file:", ui.tempPath)
@@ -269,22 +278,25 @@ ipcRenderer.on('conductor-call-set', () => {
                         rs.on('end', () => {
                             fileStream.end()
                             Vue.set(ui, 'downloadStatus', 'done')
-                            this.checkInstallReady()
+                            this.checkInstallReady(bundle)
                         })
                     })
                 }
               })
           },
-          instanceById(instanceId) {
-            return app.bundle.instances.find((instance) => instance.id == instanceId)
+          instanceById(instanceId, bundle) {
+            if(!bundle) {
+                return
+            }
+            return bundle.instances.find((instance) => instance.id == instanceId)
           },
-          checkInstallReady() {
+          checkInstallReady(bundle) {
             console.log('checkInstallReady')
-            let all_instances_ok = app.bundle.instances.reduce((acc, instance) => {
+            let all_instances_ok = bundle.instances.reduce((acc, instance) => {
                 let instanceReady = instance.downloadStatus == 'done' || instance.installedInstanceId
                 return  instanceReady && acc
             }, true)
-            let all_uis_ok = app.bundle.UIs.reduce((acc, ui) => {
+            let all_uis_ok = bundle.UIs.reduce((acc, ui) => {
                 let uiReady = ui.downloadStatus == 'done' || ui.alreadyInstalled
                 return uiReady && acc
             }, true)
@@ -327,7 +339,7 @@ ipcRenderer.on('conductor-call-set', () => {
                 app.happ_index = body
             });
           },
-          async showContentsFromHappIndex(happMeta) {
+          async getBundleFromHappIndex(happMeta) {
               app.selected_happ = happMeta
               let {directory} = happMeta
               let bundleUrl = `https://raw.githubusercontent.com/holochain/happ-index/master/happ-resources/${directory}/bundle.toml`
@@ -336,8 +348,12 @@ ipcRenderer.on('conductor-call-set', () => {
               this.installed_bridges = await call('admin/bridge/list')()
               request(bundleUrl, { json: true }, (err, res, body) => {
                 if (err) { return console.log(err); }
-                app.bundle = toml.parse(body)
-                this.processBundle()
+                let bundle = toml.parse(body)
+                console.log("happ name:", happMeta.name)
+                console.log("bundle:", bundle)
+                app.happ_bundles[happMeta.name] = bundle
+                //this.processBundle(app.happ_bundles[happMeta.name])
+                this.$forceUpdate()
             });
           },
           deselect() {
