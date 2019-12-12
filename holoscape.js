@@ -5,7 +5,7 @@ const { connect } = require('@holochain/hc-web-client')
 const net = require('net')
 const conductor = require('./conductor.js')
 const { HappUiController, sanitizeUINameForScheme, setupWindowDevProduction } = require('./happ-ui-controller')
-
+const cli = require('./cli')
 /// This is the main controller of the whole application.
 /// There is one instance of Holoscape that gets created in main.
 /// All build-in UIs get created from here and references to the window
@@ -452,6 +452,10 @@ class Holoscape {
       this.shutdownConductor()
       this.quitting=true
       mb.app.quit()
+    }
+
+    hash(params) {
+      return cli.hash(params)
     }
   }
 
