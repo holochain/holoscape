@@ -77,10 +77,14 @@
                                 <v-card-title class="headline" v-text="happ.name"></v-card-title>
                                 <v-card-subtitle v-text="happ.description"></v-card-subtitle>
                         </div>
-                        <v-btn elevation="10" rounded color="deep-purple" dark class="install-button">
-                                <v-icon v-text="'mdi-plus'" large dark></v-icon>
+                        <v-btn elevation="10" rounded color="deep-purple" dark class="install-button" @click="install(happ)">
+                                <v-icon v-text="'mdi-plus'" dark></v-icon>
                                 Install
-                        </v-btn>
+                        </v-btn><!--
+                        <v-chip v-if="await isInstalled(happ)" elevation="10" rounded color="green" dark class="install-button">
+                                <v-icon v-text="'mdi-check'" large dark></v-icon>
+                                Installed
+                        </v-chip>-->
                     </div>
                     <v-card-actions>
                         <v-btn class="float-right" text @click="toggleExpandHapp(happ)">
@@ -242,6 +246,18 @@
                                     </tbody>
                             </table>
                             </v-simple-table>
+                            <v-card-title class="headline">Install with admin interface?</v-card-title>
+                            <div class="input-group">
+                                <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin[happ.name]">
+                            </div>
+                            <v-card-title class="headline">Select storage implementation:</v-card-title>
+                            <div class="input-group">
+                                <select id="storage-impl" v-model="storageImpl">
+                                <option v-for="storage in storageOpts" v-bind:value="storage">
+                                    {{storage}}
+                                </option>
+                            </select> 
+                            </div>
                         </v-card>
                     </div>
                 </v-expand-transition>
@@ -310,20 +326,6 @@
         </li>
         
     </ul>
-    <div class="list-group-item">
-        <h3>Install with admin interface?</h3>
-        <div class="input-group">
-        <input type="checkbox" id="admin-checkbox" v-model="installAsAdmin">
-        </div>
-        <h3>Select storage implementation:</h3>
-        <div class="input-group">
-            <select id="storage-impl" v-model="storageImpl">
-            <option v-for="storage in storageOpts" v-bind:value="storage">
-                {{storage}}
-            </option>
-        </select> 
-        </div>
-    <div>
     <div class="container" v-if="bundle">
             <div class="row justify-content-center" v-if="success">
                 <div class="col-7">

@@ -12,7 +12,7 @@ import Vuetify, {
     VApp, VContainer,
     VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
     VAvatar, VIcon, VBtn,
-    VImg, VSpacer, VSimpleTable,
+    VImg, VSpacer, VSimpleTable, VChip,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -21,6 +21,7 @@ Vue.use(Vuetify,  {
         VApp, VContainer,
         VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
         VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
+        VChip,
     },
     directives: {
       Ripple,
@@ -78,14 +79,13 @@ ipcRenderer.on('conductor-call-set', () => {
         vuetify: new Vuetify({}),
         data: {
           tab: 'happ-store',
-          canInstall: false,
-          installAsAdmin: false,
+          installAsAdmin: {},
           storageOpts: ['lmdb', 'file', 'pickle', 'memory'],
-          storageImpl: 'lmdb',
+          storageImpl: {},
           file: undefined,
           fileError: undefined,
           bundle: undefined,
-          canInstall: false,
+          canInstall: {},
           success: false,
           installed_agents: [],
           installed_instances: [],
@@ -96,8 +96,20 @@ ipcRenderer.on('conductor-call-set', () => {
           selected_happ: undefined,
           expanded_happs: {},
           happ_bundles: {},
+          installed_bundles: holoscape.installLog,
         },
         methods: {
+          async isInstalled(happ) {
+              return false
+              let key = JSON.stringify(happ)
+              let bundle = this.installed_bundles[key]
+              if(!bundle) return false
+              if(!this.happ_bundles[happ.name]) {
+                await this.getBundleFromHappIndex(happ)
+              }
+              if(!this.happ_bundles[happ.name]) return false
+              return JSON.stringify(this.happ_bundles[happ.name]) == JSON.stringify(bundle)
+          },
           toggleExpandHapp(happ) {
             if(!this.happ_bundles[happ.name]) {
                 this.getBundleFromHappIndex(happ)
@@ -166,7 +178,9 @@ ipcRenderer.on('conductor-call-set', () => {
             this.installed_dnas = await call('admin/dna/list')()
             this.installed_bridges = await call('admin/bridge/list')()
 
-              bundle.instances && bundle.instances.map((instance) => {
+            let instance_promises
+            if(!bundle.instances) instance_promises = [Promise.resolve()]
+            else instance_promises = bundle.instances.map(async (instance) => {
                 console.log("Processing instance:", instance)
                 // Here we are checking if we have an instance with the same DNA installed already.
                 // If so, we don't install it again but use the already installed instance ID.
@@ -196,10 +210,11 @@ ipcRenderer.on('conductor-call-set', () => {
                         parts[0] = `file://${path.dirname(bundlePath)}`
                         uri = parts.join('/')
                     }
-                    getUri(uri, (err, rs) => {
+                    await new Promise((resolve) => { getUri(uri, (err, rs) => {
                         if(err) {
                             Vue.set(instance, 'error', err.message)
                             Vue.set(instance, 'downloadStatus', 'error')
+                            resolve()
                             return
                         }
                         rs.pipe(fileStream)
@@ -226,8 +241,9 @@ ipcRenderer.on('conductor-call-set', () => {
                                 }
                             }
                             this.checkInstallReady(bundle)
+                            resolve()
                         })
-                    })
+                    })})
                 }
               })
 
@@ -250,7 +266,9 @@ ipcRenderer.on('conductor-call-set', () => {
 
               let installedUIs = happUiController.getInstalledUIs()
 
-              bundle.UIs && bundle.UIs.map((ui) => {
+              let ui_promises
+              if(!bundle.UIs) ui_promises = [Promise.resolve()]
+              else ui_promises = bundle.UIs.map(async (ui) => {
                 console.log("Processing UI:", ui)
                 if(ui.name in installedUIs) {
                     Vue.set(ui, 'alreadyInstalled', true)
@@ -268,10 +286,11 @@ ipcRenderer.on('conductor-call-set', () => {
                         uri = parts.join('/')
                     }
                     console.log("Trying to get URI:", uri)
-                    getUri(uri, (err, rs) => {
+                    await new Promise((resolve) => { getUri(uri, (err, rs) => {
                         if(err) {
                             Vue.set(ui, 'error', err.message)
                             Vue.set(ui, 'downloadStatus', 'error')
+                            resolve()
                             return
                         }
                         rs.pipe(fileStream)
@@ -279,11 +298,14 @@ ipcRenderer.on('conductor-call-set', () => {
                             fileStream.end()
                             Vue.set(ui, 'downloadStatus', 'done')
                             this.checkInstallReady(bundle)
+                            resolve()
                         })
-                    })
+                    })})
                 }
               })
               this.$forceUpdate()
+              let all_promises = instance_promises.concat(ui_promises)
+              await Promise.all(all_promises)
           },
           instanceById(instanceId, bundle) {
             if(!bundle) {
@@ -303,36 +325,60 @@ ipcRenderer.on('conductor-call-set', () => {
             }, true)
             console.log('instances ok', all_instances_ok)
             console.log('UIs ok', all_uis_ok)
-            app.canInstall = all_instances_ok && all_uis_ok
+            app.canInstall[JSON.stringify(bundle)] = all_instances_ok && all_uis_ok
             this.$forceUpdate()
           },
-          async install() {
-            for(instance of app.bundle.instances) {
+          async install(happ) {
+            let name = happ.name  
+            if(!app.happ_bundles[name]) {
+                await this.getBundleFromHappIndex(happ)
+            }
+            if(!app.happ_bundles[name]) {
+                console.log("Error getting bundle!")
+                return
+            }
+            let bundle = app.happ_bundles[name]
+            console.log("canInstall during intall:", JSON.stringify(app.canInstall))
+            if(!app.canInstall[JSON.stringify(bundle)]) {
+                console.log("Can't install bundle with errors")
+                app.expanded_happs[name] = true
+                app.$forceUpdate()
+                return
+            }
+            for(let instance of bundle.instances) {
                 if(instance.installedInstanceId) continue
                 Vue.set(instance, 'installStatus', 'installing')
                 await installInstance(instance)
                 Vue.set(instance, 'installStatus', 'installed')
+                app.$forceUpdate()
             }
 
-            for(bridge of app.bundle.bridges) {
+            for(let bridge of bundle.bridges) {
                 if(bridge.alreadyInstalled) continue
                 Vue.set(bridge, 'installStatus', 'installing')
                 await addBridge(bridge)
                 Vue.set(bridge, 'installStatus', 'installed')
+                app.$forceUpdate()
             }
 
-            for(ui of app.bundle.UIs) {
+            for(let ui of bundle.UIs) {
                 if(ui.alreadyInstalled) continue
                 Vue.set(ui, 'installStatus', 'installing')
-                await installUi(ui)
+                let admin = app.installAsAdmin[name] ? true : false
+                await installUi(ui, admin, bundle)
                 Vue.set(ui, 'installStatus', 'installed')
+                app.$forceUpdate()
             }
+
+            let key = JSON.stringify(app.happ_index[name])
+            holoscape.installLog[key] = bundle
+            holoscape.saveInstallLog()
+            app.$forceUpdate()
 
             app.canInstall = false,
             app.file = undefined,
             app.fileError = undefined,
             app.bundle = undefined,
-            app.canInstall = false
             app.success = true
           },
           getHappIndex() {
@@ -348,15 +394,22 @@ ipcRenderer.on('conductor-call-set', () => {
               this.installed_instances = await call('admin/instance/list')()
               this.installed_dnas = await call('admin/dna/list')()
               this.installed_bridges = await call('admin/bridge/list')()
-              request(bundleUrl, { json: true }, (err, res, body) => {
-                if (err) { return console.log(err); }
-                let bundle = toml.parse(body)
-                console.log("happ name:", happMeta.name)
-                console.log("bundle:", bundle)
-                app.happ_bundles[happMeta.name] = bundle
-                this.processBundle(app.happ_bundles[happMeta.name])
-                this.$forceUpdate()
-            });
+              await new Promise((resolve)=> {
+                request(bundleUrl, { json: true }, async (err, res, body) =>  {
+                    if (err) { return console.log(err); }
+                    console.log("Got from github:", body)
+                    let bundle = toml.parse(body)
+                    console.log("happ name:", happMeta.name)
+                    console.log("bundle:", bundle)
+                    app.happ_bundles[happMeta.name] = bundle
+                    if(!this.storageImpl[happMeta.name]) {
+                        this.storageImpl[happMeta.name] = this.storageOpts[0]
+                    }
+                    await this.processBundle(app.happ_bundles[happMeta.name])
+                    this.$forceUpdate()
+                    resolve()
+                  })
+              })
           },
           deselect() {
               app.bundle = undefined
@@ -409,10 +462,10 @@ ipcRenderer.on('conductor-call-set', () => {
         console.log('Instance started')
     }
 
-    const bundleInstanceIdToRealId = (id) => {
+    const bundleInstanceIdToRealId = (id, bundle) => {
         // If the specified instance was installed before we have to make sure that use that id.
         // Otherwise the ID we've setup when installing a new instance is the name:
-        let bundleInstance = app.bundle.instances.find((instance)=>instance.id==id)
+        let bundleInstance = bundle.instances.find((instance)=>instance.id==id)
         return bundleInstance.installedInstanceId ? bundleInstance.installedInstanceId : bundleInstance.name
     }
 
@@ -436,7 +489,7 @@ ipcRenderer.on('conductor-call-set', () => {
         }
     }
 
-    const installUi = async (ui) => {
+    const installUi = async (ui, admin, bundle) => {
       console.log(JSON.stringify(ui))
         let extractedPath = temp.path()
         console.log(`Extracting ${ui.name} to ${extractedPath}`)
@@ -453,14 +506,13 @@ ipcRenderer.on('conductor-call-set', () => {
         console.log(`Creating interface for ${ui.name}`)
         let id = `${ui.name}-interface`
         let type = 'websocket'
-        let admin = app.installAsAdmin
         let port = await getPort({port: getPort.makeRange(nextMinPort(), 31000)})
         app.used_ports.push(port)
         await call('admin/interface/add')({id,admin,type,port})
 
-        for(ref of ui.instance_references) {
+        for(let ref of ui.instance_references) {
             console.log(`Applying UI -> instance reference: ${JSON.stringify(ref)}`)
-            let instance_id = bundleInstanceIdToRealId(ref.instance_id)
+            let instance_id = bundleInstanceIdToRealId(ref.instance_id, bundle)
             let interface_id = id
             let alias = ref.ui_handle
             console.log(`Adding instance '${instance_id}' to interface '${interface_id}'`)
