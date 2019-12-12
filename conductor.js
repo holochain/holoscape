@@ -63,7 +63,15 @@ module.exports = {
       } else if (process.platform === "darwin") {
         run = spawn(path.join(__dirname, "./holochain-darwin"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
       } else if (process.platform === "linux") {
-        run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
+        if (process.env.HOLOSCAPE_FLAME_GRAPH==="yes")
+        {
+          run = spawn("perf", ["record","--call-graph","dwarf",path.join(__dirname, "./holochain-linux"),"-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
+        }
+        else
+        {
+          run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
+        }
+        
       }
       else {
         log('error', "unsupported platform: "+process.platform)
