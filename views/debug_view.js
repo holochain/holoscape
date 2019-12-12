@@ -251,19 +251,20 @@ ipcRenderer.on('conductor-call-set', () => {
     }).$mount('#app')
 
     ipcRenderer.on('hc-signal', (event, params) => {
-        let { signal, instance_id } = params
-        if(!signal) {
-            console.log("Got strange signal without 'signal' property:", params)
-            return
-        }
-        if(signal.signal_type == "Stats") {
-            if(JSON.stringify(signal.instance_stats) != JSON.stringify(app.stats)) {
+        let { signal, instance_id, instance_stats } = params
+        if(instance_stats) {
+            if(JSON.stringify(instance_stats) != JSON.stringify(app.stats)) {
                 console.log("updating stats")
-                app.stats = signal.instance_stats
+                app.stats = instance_stats
             }
             return
         }
 
+        if(!signal) {
+            console.log("Got strange signal without 'signal' property:", params)
+            return
+        }
+        
         if(!instance_id) {
             console.log("Got strange signal without 'instance_id' property:", params)
             return
