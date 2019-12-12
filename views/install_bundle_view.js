@@ -283,6 +283,7 @@ ipcRenderer.on('conductor-call-set', () => {
                     })
                 }
               })
+              this.$forceUpdate()
           },
           instanceById(instanceId, bundle) {
             if(!bundle) {
@@ -303,6 +304,7 @@ ipcRenderer.on('conductor-call-set', () => {
             console.log('instances ok', all_instances_ok)
             console.log('UIs ok', all_uis_ok)
             app.canInstall = all_instances_ok && all_uis_ok
+            this.$forceUpdate()
           },
           async install() {
             for(instance of app.bundle.instances) {
@@ -352,7 +354,7 @@ ipcRenderer.on('conductor-call-set', () => {
                 console.log("happ name:", happMeta.name)
                 console.log("bundle:", bundle)
                 app.happ_bundles[happMeta.name] = bundle
-                //this.processBundle(app.happ_bundles[happMeta.name])
+                this.processBundle(app.happ_bundles[happMeta.name])
                 this.$forceUpdate()
             });
           },
