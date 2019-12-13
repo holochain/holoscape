@@ -13,6 +13,7 @@ import Vuetify, {
     VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
     VAvatar, VIcon, VBtn,
     VImg, VSpacer, VSimpleTable, VChip,
+    VProgressCircular,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -21,7 +22,7 @@ Vue.use(Vuetify,  {
         VApp, VContainer,
         VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
         VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
-        VChip,
+        VChip, VProgressCircular,
     },
     directives: {
       Ripple,
@@ -83,9 +84,7 @@ ipcRenderer.on('conductor-call-set', () => {
           storageImpl: {},
           file: undefined,
           fileError: undefined,
-          bundle: undefined,
           canInstall: {},
-          success: false,
           installed_agents: [],
           installed_instances: [],
           installed_dnas: [],
@@ -97,6 +96,8 @@ ipcRenderer.on('conductor-call-set', () => {
           happ_bundles: {},
           installed_bundles: holoscape.installLog,
           is_installed: {},
+          currently_installing: undefined,
+          install_progress: undefined,
         },
         methods: {
           async isInstalled(happ) {
@@ -340,11 +341,17 @@ ipcRenderer.on('conductor-call-set', () => {
           },
           async install(happ) {
             let name = happ.name  
+            app.currently_installing = name
+            app.install_progress = 0
+            app.$forceUpdate()
+            
             if(!app.happ_bundles[name]) {
                 await this.getBundleFromHappIndex(happ)
             }
             if(!app.happ_bundles[name]) {
                 console.log("Error getting bundle!")
+                app.currently_installing = undefined
+                app.$forceUpdate()
                 return
             }
             let bundle = app.happ_bundles[name]
@@ -352,45 +359,52 @@ ipcRenderer.on('conductor-call-set', () => {
             if(!app.canInstall[JSON.stringify(bundle)]) {
                 console.log("Can't install bundle with errors")
                 app.expanded_happs[name] = true
+                app.currently_installing = undefined
                 app.$forceUpdate()
                 return
             }
-            for(let instance of bundle.instances) {
+            app.install_progress = 1
+            for(let i in bundle.instances) {
+                let instance = bundle.instances[i]
                 if(instance.installedInstanceId) continue
                 Vue.set(instance, 'installStatus', 'installing')
                 await installInstance(instance)
                 Vue.set(instance, 'installStatus', 'installed')
+                app.install_progress = 50 / bundle.instances.length * (i+1)
                 app.$forceUpdate()
             }
 
-            for(let bridge of bundle.bridges) {
+            for(let i in bundle.bridges) {
+                let bridge = bundle.bridges[i]
                 if(bridge.alreadyInstalled) continue
                 Vue.set(bridge, 'installStatus', 'installing')
-                await addBridge(bridge)
+                await addBridge(bridge, bundle)
                 Vue.set(bridge, 'installStatus', 'installed')
+                app.install_progress = 50 + (10 / bundle.bridges.length * (i+1))
                 app.$forceUpdate()
             }
 
-            for(let ui of bundle.UIs) {
+            for(let i in bundle.UIs) {
+                let ui = bundle.UIs[i]
                 if(ui.alreadyInstalled) continue
                 Vue.set(ui, 'installStatus', 'installing')
                 let admin = app.installAsAdmin[name] ? true : false
                 await installUi(ui, admin, bundle)
                 Vue.set(ui, 'installStatus', 'installed')
+                app.install_progress = 60 + (40 / bundle.UIs.length * (i+1))
                 app.$forceUpdate()
             }
 
+            app.install_progress = 100
             let key = JSON.stringify(happ)
             holoscape.addToInstallLog(key, bundle)
             app.installed_bundles = holoscape.installLog
             Vue.set(app.is_installed, name, true)
             app.$forceUpdate()
 
-            app.canInstall = false,
-            app.file = undefined,
-            app.fileError = undefined,
-            app.bundle = undefined,
-            app.success = true
+            app.currently_installing = undefined
+            app.file = undefined
+            app.fileError = undefined
           },
           getHappIndex() {
             request('https://raw.githubusercontent.com/holochain/happ-index/master/index.json', { json: true }, async (err, res, body) => {
@@ -536,4 +550,5 @@ ipcRenderer.on('conductor-call-set', () => {
     }
 
     window.app = app
+    window.happUiController = happUiController
     app.getHappIndex()

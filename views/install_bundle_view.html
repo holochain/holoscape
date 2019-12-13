@@ -78,13 +78,33 @@
                                 <v-card-subtitle v-text="happ.description"></v-card-subtitle>
                         </div>
                         <div class="install-button">
-                            <v-btn v-if="!is_installed[happ.name]" elevation="10" rounded color="deep-purple" dark @click="install(happ)">
-                                <v-icon v-text="'mdi-plus'" dark></v-icon>
+                            <v-btn 
+                                v-if="!is_installed[happ.name] && currently_installing != happ.name" 
+                                :disabled="currently_installing" 
+                                elevation="10" 
+                                rounded 
+                                color="deep-purple" 
+                                dark 
+                                @click="install(happ)"
+                            >
+                                <v-icon v-if="currently_installing != happ.name" v-text="'mdi-plus'" dark></v-icon>
                                 Install
                             </v-btn>
                             <v-chip v-if="is_installed[happ.name]" color="green" dark>
                                     <v-icon v-text="'mdi-check'" dark></v-icon>
                                     Installed
+                            </v-chip>
+
+                            <v-chip v-if="currently_installing == happ.name" color="deep-purple" dark>
+                                Installing...
+                                <v-progress-circular
+                                    :size="28"
+                                    :width="2"
+                                    :value="install_progress"
+                                    :indeterminate="install_progress == 0"
+                                    color="cyan lighten-4"
+                                >
+                                </v-progress-circular>
                             </v-chip>
                         </div>
                         
@@ -329,18 +349,6 @@
         </li>
         
     </ul>
-    <div class="container" v-if="bundle">
-            <div class="row justify-content-center" v-if="success">
-                <div class="col-7">
-                    <h2 class="alert alert-success">Bundle successfully installed!</h2>
-                </div>
-            </div>
-            <div class="row justify-content-end">
-                <div class="col-7">
-                    <button type="button" class="btn btn-success install-button" v-on:click="install" :disabled="!canInstall">Install</button>
-                </div>
-            </div>
-    </div>
     </v-app>
     </div>
 
