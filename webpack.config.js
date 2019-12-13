@@ -75,5 +75,13 @@ module.exports = [
       filename: 'install_bundle_view.dist.js',
       path: path.resolve(__dirname, 'views'),
     }
+  },
+  {
+    ...vuetify_build,
+    entry: './views/splash.js',
+    output: {
+      filename: 'splash.dist.js',
+      path: path.resolve(__dirname, 'views'),
+    }
   }
 ]
