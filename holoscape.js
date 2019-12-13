@@ -377,7 +377,7 @@ class Holoscape {
           if(this.quitting) return
           this.debuggerWindow.webContents.send('hc-signal', params)
           //console.log(JSON.stringify(params))
-          if (params.signal.name === 'switch_view') {
+          if (params.signal && params.signal.name === 'switch_view') {
             const { view, location } = JSON.parse(params.signal.arguments)
             console.log('Open ' + view + ' for ' + location)
             this.happUiController.showAndRiseUI(view, `${location}`)

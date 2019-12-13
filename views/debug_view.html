@@ -2,11 +2,12 @@
   <head>
     <title>Holoscape instance debug view</title>
     <script>window.$ = window.jQuery = require('jquery');</script>
-    <script>const Vue = require('vue/dist/vue.common');</script>
     <script>require('popper.js');</script>
     <script>require('bootstrap');</script>
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="common.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
     <style>
       .error {
         color: red;
@@ -41,31 +42,28 @@
           word-wrap: break-word;
           overflow: scroll;
       }
+      .light-blue-background {
+          background: lightblue !important;
+      }
+      .light-green-background {
+          background: lightgreen !important;
+      }
     </style>
   </head>
   <body>
 
     <div id="app" class="container">
       <h1> Holoscape instance debug view</h1>
-      <!--
-      <div><span>DNAs:</span><span>{{ dnas }}</span></div>
-      <div><span>Instances:</span><span>{{ instances }}</span></div>
-      <div><span>Interfaces:</span><span>{{ interfaces }}</span></div>
-      <div><span>agents:</span><span>{{ agents }}</span></div>
-      -->
       <ul class="list-group">
-      <li class="list-group-item" v-for="(dump, instance_id, index) in stateDumps">
+      <li class="list-group-item" v-for="instance_id in instances">
         <h2>
             <a data-toggle="collapse" v-bind:href="'#'+sanitizeName(instance_id)" role="button" aria-expanded="false" v-bind:aria-controls="sanitizeName(instance_id)">
                 {{ instance_id }}
             </a>
         </h2>
-        <button class="btn btn-primary" v-on:click="updateStateDump(instance_id)">Update state dump</button>
-        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-dump-check" v-model="refreshDump[instance_id]">
-        <label for="sanitizeName(instance_id)-dump-check">Live refresh</label>
-        <input type="checkbox" v-bind:id="sanitizeName(instance_id)-actions-check" v-model="updateActions[instance_id]">
-        <label for="sanitizeName(instance_id)-actions-check">Update actions</label>
-                
+        <div>Holding entries/aspects: <span class="badge badge-primary">{{stats[instance_id].number_held_entries}}/{{stats[instance_id].number_held_aspects}}</span></div>
+        <div>Pending validations: <span class="badge badge-primary">{{stats[instance_id].number_pending_validations}}</span></div>
+        <div>Running zome calls: <span class="badge badge-primary">{{stats[instance_id].number_running_zome_calls}}</span></div>
 
         <ul class="list-group collapse" v-bind:id="sanitizeName(instance_id)">
             <li class="list-group-item">
@@ -91,19 +89,41 @@
                         Source Chain
                     </a>
                 </h3>
-                <div v-bind:id="sanitizeName(instance_id)+'-source-chain'" class="card collapse" v-for="header in dump.source_chain">
-                    <div class="card-body">
-                        <h5 class="card-title">{{header.entry_type}} - {{header.entry_address}}</h5>
-                        <table class="table">
-                            <tbody>
-                                <tr><td>Timestamp:</td><td>{{ header.timestamp }}</td></tr>
-                                <tr><td>Sources:</td><td>{{ header.provenances.map((p)=>p[0]).join(", ") }}</td></tr>
-                                <tr><td>Entry address:</td><td>{{ header.entry_address }}</td></tr>
-                                <tr><td>Prev. header:</td><td>{{ header.link }}</td></tr>
-                            </tbody>
-                        </table>
-                        <div class="alert alert-dark" role="alert" :class="{clickFetch: contents[header.entry_address]==undefined}" v-on:click="updateContent(header.entry_address, instance_id)">{{ contents[header.entry_address] ? contents[header.entry_address].content : 'click to fetch' }}</div>
-                    </div>
+
+                <div v-bind:id="sanitizeName(instance_id)+'-source-chain'" class="card collapse">
+                    <v-data-table
+                        caption="Source Chain"
+                        :headers="chainHeaders"
+                        :items="sourceChains[instance_id]"
+                        :search="chainSearch"
+                        show-expand
+                        class="elevation-1"
+                        item-key="entry_address"
+                        disable-sort
+                    >
+                        <template v-slot:top>
+                            <v-toolbar flat>
+                                <v-text-field
+                                v-model="chainSearch"
+                                label="Search"
+                                single-line
+                                hide-details
+                                ></v-text-field>
+                            </v-toolbar>
+                        </template>
+                        <template v-slot:item.entry_type="{ item }">
+                            <v-chip v-if="typeof item.entry_type == 'string'" class="light-blue-background" >{{ item.entry_type }}</v-chip>
+                            <v-chip v-if="typeof item.entry_type == 'object'" class="light-green-background" >{{ item.entry_type['App'] }}</v-chip>
+                        </template>
+                        <template v-slot:item.provenances="{ item }">
+                            <span>{{ item.provenances.map((p)=>p[0]).join(', ') }}</span>
+                    </template>
+                    <template v-slot:expanded-item="{ headers, item }">
+                        <td :colspan="headers.length">
+                            <div :class="{clickFetch: contents[item.entry_address]==undefined}" v-on:click="updateContent(item.entry_address, instance_id)">{{ contents[item.entry_address] ? contents[item.entry_address].content : 'click to fetch' }}</div>
+                            </td>
+                        </template>
+                    </v-data-table>
                 </div>
             </li>
             <li class="list-group-item">
@@ -114,29 +134,77 @@
                 </h3>
                 <div class="collapse" v-bind:id="sanitizeName(instance_id)+'-dht'">
                         <h4>Validation queue:</h4>
-                        <table class="table">
-                            <tbody>
-                                <tr v-for="validation in dump.queued_holding_workflows">
-                                    <td>{{validation[0].workflow}}</td>
-                                    <td>{{validation[1]}}</td>
-                                    <td>{{validation[0].entry_with_header}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <v-data-table
+                            :headers="queueHeaders"
+                            :items="Object.keys(validationQueues[instance_id]).map((i) => {
+                                return {
+                                    address: i.pending.entry_with_header.header.entry_address,
+                                    workflow: i.pending.workflow,
+                                    dependencies: i.pending.dependencies,
+                                    entry_with_header: i.pending.entry_with_header,
+                                    timeout: i.timeout
+                                };
+                            })"
+                            :search="queueSearch"
+                            show-expand
+                            class="elevation-1"
+                            item-key="address"
+                            disable-sort
+                        >
+                            <template v-slot:top>
+                                <v-toolbar flat>
+                                    <v-text-field
+                                    v-model="queueSearch"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                    ></v-text-field>
+                                </v-toolbar>
+                            </template>
+                            <template v-slot:item.timeout="{ item }">
+                                    <span v-if="item.timeout">{{item.timeout.delay}}</span>
+                                    <span v-if="!item.timeout">n/a</span>
+                            </template>
+                            <template v-slot:expanded-item="{ headers, item }">
+                                <td :colspan="headers.length">
+                                    {{ item.entry_with_header }}
+                                </td>
+                            </template>
+                        </v-data-table>
                         <h4>Held entries:</h4>
-                        <ul class="black">
-                            <li v-for="(aspects, address) in dump.held_aspects">
-                                <ul>
-                                    <li>{{ address }}</li>
-                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].type : 'get type' }}</div></li>
-                                    <li><div class="alert alert-dark" :class="{clickFetch: contents[address]==undefined}" v-on:click="updateContent(address, instance_id)" role="alert">{{ contents[address] ? contents[address].content : 'get content' }}</div></li>
-                                </ul>
-                                <td></td>
-                                
-                                
-                                <td>{{aspects}}</td>
-                            </li>
-                        </ul>
+                        <v-data-table
+                            :headers="heldHeaders"
+                            :items="Object.keys(holdingMaps[instance_id]).map((address) => {
+                                return {address, aspects: holdingMaps[instance_id][address]};
+                              })"
+                            :search="heldSearch"
+                            show-expand
+                            class="elevation-1"
+                            item-key="address"
+                            disable-sort
+                        >
+                            <template v-slot:top>
+                                <v-toolbar flat>
+                                    <v-text-field
+                                    v-model="heldSearch"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                    ></v-text-field>
+                                </v-toolbar>
+                            </template>
+                            <template v-slot:item.type="{ item }">
+                                    <div :class="{clickFetch: contents[item.address]==undefined}" v-on:click="updateContent(item.address, instance_id)" role="alert">{{ contents[item.address] ? contents[item.address].type : 'get type' }}</div>
+                            </template>
+                            <template v-slot:item.content="{ item }">
+                                    <div :class="{clickFetch: contents[item.address]==undefined}" v-on:click="updateContent(item.address, instance_id)" role="alert">{{ contents[item.address] ? contents[item.address].content : 'get content' }}</div>
+                            </template>
+                            <template v-slot:expanded-item="{ headers, item }">
+                                <td :colspan="headers.length">
+                                    {{ item.aspects }}
+                                </td>
+                            </template>
+                        </v-data-table>
                 </div>
             </li>
             <li class="list-group-item">
@@ -150,7 +218,7 @@
                         <tr>
                             <td>Queued zome calls:</td>
                             <td><ul>
-                                <li v-for="call in dump.queued_calls" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].queued_calls" class="zome-call">
                                 {{`${call.zome_name}.${call.fn_name}(${call.parameters})`}}
                                 </li></ul>
                             </td>
@@ -158,7 +226,7 @@
                         <tr>
                             <td>Running zome calls:</td>
                             <td><ul>
-                                <li v-for="call in dump.running_calls" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].running_calls" class="zome-call">
                                 {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters})`}}
                                 <br>
                                 HDK calls: {{call[1]}}
@@ -167,7 +235,7 @@
                         <tr>
                             <td>Zome call results:</td>
                             <td><ul>
-                                <li v-for="call in dump.call_results" class="zome-call">
+                                <li v-for="call in stateDumps[instance_id].call_results" class="zome-call">
                                 {{`${call[0].zome_name}.${call[0].fn_name}(${call[0].parameters}) => ${JSON.stringify(call[1])}`}}
                                 </li></ul>
                             </td>
@@ -182,9 +250,9 @@
                 </h3>
                 <table v-bind:id="sanitizeName(instance_id)+'network'" class="table collapse">
                     <tbody>
-                        <tr><td>Queries:</td><td>{{ dump.query_flows }}</td></tr>
-                        <tr><td>Validation Package Requests:</td><td>{{ dump.validation_package_flows }}</td></tr>
-                        <tr><td>Direct message sessions:</td><td>{{ dump.direct_message_flows }}</td></tr>
+                        <tr><td>Queries:</td><td>{{ stateDumps[instance_id].query_flows }}</td></tr>
+                        <tr><td>Validation Package Requests:</td><td>{{ stateDumps[instance_id].validation_package_flows }}</td></tr>
+                        <tr><td>Direct message sessions:</td><td>{{ stateDumps[instance_id].direct_message_flows }}</td></tr>
                     </tbody>
                 </table>
             </li>
@@ -194,165 +262,7 @@
       <button type="button" class="btn btn-primary" v-on:click="refresh()">Refresh instances</button>
     </div>
 
-    <script>
-        const { ipcRenderer } = require('electron')
-        const VueChatScroll = require('vue-chat-scroll')
-        Vue.use(VueChatScroll)
-        
-        let configured = false
-
-        ipcRenderer.on('conductor-call-set', () => {
-            if(configured) return
-            configured = true
-
-            const remote = require('electron').remote
-            const happUiController = remote.getGlobal('holoscape').happUiController
-            const call = remote.getGlobal('conductor_call')
-
-            const refresh = () => {
-              call('debug/running_instances')().then((instances)=>{
-                  instances.map((instance_id) => {
-                      app.updateStateDump(instance_id)
-                      Vue.set(app.updateActions, instance_id, false)
-                      Vue.set(app.refreshDump, instance_id, false)
-                      app.instances.push(instance_id)
-                    })
-                })
-            }
-
-            setInterval(() => {
-                for(let instance of app.instances) {
-                    if(app.refreshDump[instance]) {
-                        app.updateStateDump(instance)
-                    }
-                }
-            }, 1500)
-
-            const fetch_cas = async (address, instance_id) => {
-                return await call('debug/fetch_cas')({instance_id, address})
-            }
-
-            const updateContent = async (address, instance_id) => {
-                Vue.set(app.contents, address, await fetch_cas(address, instance_id))
-            }
-
-            const syntaxHighlight = (json) => {
-                if (typeof json != 'string') {
-                    json = JSON.stringify(json, undefined, 2);
-                }
-                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-                    var cls = 'number';
-                    if (/^"/.test(match)) {
-                        if (/:$/.test(match)) {
-                            cls = 'key';
-                        } else {
-                            cls = 'string';
-                        }
-                    } else if (/true|false/.test(match)) {
-                        cls = 'boolean';
-                    } else if (/null/.test(match)) {
-                        cls = 'null';
-                    }
-                    return '<span class="' + cls + '">' + match + '</span>';
-                });
-            }
-
-            var app = new Vue({
-                el: '#app',
-                data: {
-                  instances: [],  
-                  reduxActions: {},  
-                  stateDumps: {},
-                  refreshDump: {},
-                  contents: {},
-                  updateActions: {},
-                  updateStateDump: (instance_id) => {
-                      console.log(`Update state dump with: ${instance_id}`)
-                      call('debug/state_dump')({instance_id})
-                        .then((dump) => {
-                            console.log("Got state dump: ", dump)
-                            Vue.set(app.stateDumps, instance_id, dump)
-                        })
-                        .catch((error) => {
-                            console.log("Error getting dump:", error)
-                        })
-                  },
-                  refresh: refresh,
-                  fetch_cas,
-                  updateContent,
-                  syntaxHighlight,
-                  actionTypeToBadge: (actionType) => {
-                      switch(actionType) {
-                          case "SignalZomeFunctionCall": return "info"
-                          case "ReturnZomeFunctionResult": return "info"
-                          case "ReturnValidationPackage": return "secondary"
-                          case "ReturnValidationResult": return "secondary"
-                          case "Commit": return "success"
-                          case "Publish": return "success"
-                          case "HoldAspect": return "danger"
-                          case "Query": return "light"
-                          case "RespondQuery": return "dark"
-                          case "HandleQuery": return "light"
-                          case "QueryTimeout": return "warning"
-                          default: return "primary"
-                      }
-                  },
-                  sanitizeName: (name) => {
-                    name = name
-                        .split('_').join('-')
-                        .split(' ').join('-')
-                        .split('&').join('-')
-                        .split('#').join('-')
-                        .split('.').join('-')
-                        .split('$').join('-')
-                        .toLowerCase()
-                    return name
-                  },
-                  showAction: (action) => {
-                      window.alert(JSON.stringify(action))
-                  }
-                }
-            })
-
-            ipcRenderer.on('hc-signal', (event, params) => {
-                let { signal, instance_id } = params
-                if(!signal) {
-                    console.log("Got strange signal without 'signal' property:", params)
-                    return
-                }
-                if(!instance_id) {
-                    console.log("Got strange signal without 'instance_id' property:", params)
-                    return
-                }
-
-                if(signal.signal_type != "Trace") {
-                    // Ignoring non-trace signals
-                    return
-                }
-                if(!app.reduxActions[instance_id]) {
-                    Vue.set(app.reduxActions, instance_id, [])
-                }
-                if(!app.updateActions[instance_id]) {
-                    return
-                }
-                if(!signal.action) {
-                    console.log("Got strange trace signal without 'action' property:", params)
-                    return
-                }
-
-                let actions = app.reduxActions[instance_id]
-                actions.push(signal.action)
-                while(actions.lenght > 100) {
-                    actions.shift()
-                }
-            })
-
-            refresh()
-            window.app = app
-            window.call = call
-        })
-    </script>
+    <script type="text/javascript" src="debug_view.dist.js"></script>
 
 
 
