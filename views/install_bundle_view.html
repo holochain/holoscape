@@ -77,14 +77,17 @@
                                 <v-card-title class="headline" v-text="happ.name"></v-card-title>
                                 <v-card-subtitle v-text="happ.description"></v-card-subtitle>
                         </div>
-                        <v-btn v-if="!is_installed[happ.name]" elevation="10" rounded color="deep-purple" dark class="install-button" @click="install(happ)">
+                        <div class="install-button">
+                            <v-btn v-if="!is_installed[happ.name]" elevation="10" rounded color="deep-purple" dark @click="install(happ)">
                                 <v-icon v-text="'mdi-plus'" dark></v-icon>
                                 Install
-                        </v-btn>
-                        <v-chip v-if="is_installed[happ.name]" elevation="10" rounded color="green" dark class="install-button">
-                                <v-icon v-text="'mdi-check'" large dark></v-icon>
-                                Installed
-                        </v-chip>
+                            </v-btn>
+                            <v-chip v-if="is_installed[happ.name]" color="green" dark>
+                                    <v-icon v-text="'mdi-check'" dark></v-icon>
+                                    Installed
+                            </v-chip>
+                        </div>
+                        
                     </div>
                     <v-card-actions>
                         <v-btn class="float-right" text @click="toggleExpandHapp(happ)">
