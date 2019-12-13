@@ -192,6 +192,7 @@ class HappUiController {
             that.installedUIs[name] = {installDir}
             that.saveUIinfo()
             that.holoscape.updateTrayMenu()
+            that.holoscape.notifyNewHapp(name, that.installedUIs[name])
         })
         .catch((err) => {
             dialog.showErrorBox('Holoscape', JSON.stringify(err))

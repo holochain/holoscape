@@ -77,7 +77,6 @@ class Holoscape {
     addToInstallLog(key, bundle) {
       this.installLog[key] = bundle
       this.saveInstallLog()
-      this.mainWindow.webContents.send('update-happs', {})
     }
 
     saveInstallLog() {
@@ -482,6 +481,10 @@ class Holoscape {
 
     hash(params) {
       return cli.hash(params)
+    }
+
+    notifyNewHapp(name, ui) {
+      this.mainWindow.webContents.send('happ-added', {name, ui})
     }
   }
 

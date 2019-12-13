@@ -66,15 +66,14 @@ let app = new Vue({
           app.activeUI = "happ-store"
           happUiController.hideAllHappUis()
           holoscape.showInstallBundleView()
-        },
-        updateHapps() {
-          app.installedUIs = happUiController.getInstalledUIs()
         }
     }
 })
 
-ipcRenderer.on('update-happs', () => {
-  app.updateHapps()
+ipcRenderer.on('happ-added', (event, params) => {
+  let {name, ui} = params
+  Vue.set(app.installedUIs, name, ui)
 })
 
 window.app = app
+window.happUiController = remote.getGlobal('holoscape').happUiController
