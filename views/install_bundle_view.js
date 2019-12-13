@@ -3,7 +3,7 @@ import toml from 'toml'
 import fs from 'fs'
 import getUri from 'get-uri'
 import temp from 'temp'
-import extract from 'extract-zip'
+import AdmZip from 'adm-zip'
 import getPort from 'get-port'
 import path from 'path'
 import request from 'request'
@@ -509,12 +509,8 @@ ipcRenderer.on('conductor-call-set', () => {
       console.log(JSON.stringify(ui))
         let extractedPath = temp.path()
         console.log(`Extracting ${ui.name} to ${extractedPath}`)
-        await new Promise((resolve, reject)=>{
-            extract(ui.tempPath, {dir: extractedPath}, (err)=>{
-                if(err) reject(err)
-                else resolve()
-            })
-        })
+        var zip = new AdmZip(ui.tempPath)
+        zip.extractAllTo(extractedPath)
         console.log(`Extraction done. Installing UI...`)
         await happUiController.installUIFromPath(extractedPath, ui.name)
         console.log(`Done`)
