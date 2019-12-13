@@ -60,7 +60,6 @@ ipcRenderer.on('conductor-call-set', () => {
     const interpolateProperties = (properties, variables) => {
         console.log(`Interpolating DNA hash with properties: ${JSON.stringify(properties)}`)
         let {agent_id} = variables
-        properties = instance.dna_properties
         for(let name in properties) {
             properties[name] = properties[name].replace("${AGENT_ID}", agent_id)
         }
