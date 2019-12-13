@@ -6,6 +6,18 @@ const net = require('net')
 const conductor = require('./conductor.js')
 const { HappUiController, sanitizeUINameForScheme, setupWindowDevProduction } = require('./happ-ui-controller')
 const cli = require('./cli')
+
+function installLogFile(){
+  return path.join(conductor.rootConfigPath(), 'installed_happ_bundles.json')
+}
+
+function loadInstallLog() {
+  if(!fs.existsSync(installLogFile())) {
+      return {}
+  } else {
+      return JSON.parse(fs.readFileSync(installLogFile()))
+  }
+}
 /// This is the main controller of the whole application.
 /// There is one instance of Holoscape that gets created in main.
 /// All build-in UIs get created from here and references to the window
@@ -33,7 +45,11 @@ class Holoscape {
     logMessages = [];
     quitting = false;
 
+    /// hApp bundle install log
+    installLog;
+
     async init() {
+      this.installLog = loadInstallLog()
       this.happUiController = new HappUiController(this)
       this.createLogWindow()
       this.createConfigWindow()
@@ -56,6 +72,16 @@ class Holoscape {
           this.showHideLogs()
         }
       }, 60000)
+    }
+
+    addToInstallLog(key, bundle) {
+      this.installLog[key] = bundle
+      this.saveInstallLog()
+      this.mainWindow.webContents.send('update-happs', {})
+    }
+
+    saveInstallLog() {
+      fs.writeFileSync(installLogFile(), JSON.stringify(this.installLog))
     }
 
     createViews() {

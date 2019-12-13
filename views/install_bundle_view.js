@@ -97,18 +97,29 @@ ipcRenderer.on('conductor-call-set', () => {
           expanded_happs: {},
           happ_bundles: {},
           installed_bundles: holoscape.installLog,
+          is_installed: {},
         },
         methods: {
           async isInstalled(happ) {
-              return false
               let key = JSON.stringify(happ)
-              let bundle = this.installed_bundles[key]
-              if(!bundle) return false
+              let installed = this.installed_bundles[key]
+              if(!installed) return false
               if(!this.happ_bundles[happ.name]) {
                 await this.getBundleFromHappIndex(happ)
               }
               if(!this.happ_bundles[happ.name]) return false
-              return JSON.stringify(this.happ_bundles[happ.name]) == JSON.stringify(bundle)
+
+              return true
+              // TODO: compare the content of the bundles.
+              // The below doesn't work because we stick transient installation info into the bundle
+              // object which will be included in the persisted version - that is why we can't easily check
+              // for equality here.
+              // The real fix is to clean up this mess and pull out a component that is handling exactly one 
+              // bundle and don't store install info in the bundle but component properties....
+              let downloaded = this.happ_bundles[happ.name]
+              return JSON.stringify(downloaded.instances) == JSON.stringify(installed.instances) &&
+                JSON.stringify(downloaded.bridges) == JSON.stringify(installed.bridges) &&
+                JSON.stringify(downloaded.UIs) == JSON.stringify(installed.UIs)
           },
           toggleExpandHapp(happ) {
             if(!this.happ_bundles[happ.name]) {
@@ -370,9 +381,10 @@ ipcRenderer.on('conductor-call-set', () => {
                 app.$forceUpdate()
             }
 
-            let key = JSON.stringify(app.happ_index[name])
-            holoscape.installLog[key] = bundle
-            holoscape.saveInstallLog()
+            let key = JSON.stringify(happ)
+            holoscape.addToInstallLog(key, bundle)
+            app.installed_bundles = holoscape.installLog
+            Vue.set(app.is_installed, name, true)
             app.$forceUpdate()
 
             app.canInstall = false,
@@ -382,9 +394,13 @@ ipcRenderer.on('conductor-call-set', () => {
             app.success = true
           },
           getHappIndex() {
-            request('https://raw.githubusercontent.com/holochain/happ-index/master/index.json', { json: true }, (err, res, body) => {
+            request('https://raw.githubusercontent.com/holochain/happ-index/master/index.json', { json: true }, async (err, res, body) => {
                 if (err) { return console.log(err); }
                 app.happ_index = body
+                for(let happ of app.happ_index) {
+                    app.is_installed[happ.name] = await app.isInstalled(happ)
+                }
+                app.$forceUpdate()
             });
           },
           async getBundleFromHappIndex(happMeta) {

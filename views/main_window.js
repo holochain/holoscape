@@ -1,4 +1,4 @@
-import { remote } from 'electron'
+import { remote, ipcRenderer } from 'electron'
 import Vue from 'vue'
 import Vuetify, {
     VApp, VNavigationDrawer, VFooter, VContent, 
@@ -66,8 +66,15 @@ let app = new Vue({
           app.activeUI = "happ-store"
           happUiController.hideAllHappUis()
           holoscape.showInstallBundleView()
+        },
+        updateHapps() {
+          app.installedUIs = happUiController.getInstalledUIs()
         }
     }
+})
+
+ipcRenderer.on('update-happs', () => {
+  app.updateHapps()
 })
 
 window.app = app
