@@ -28,7 +28,7 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "@holochain/hc-web-client": "^0.5.0",
+    "@holochain/hc-web-client": "^0.5.1",
     "@iarna/toml": "^2.2.3",
     "adm-zip": "^0.4.13",
     "ansi-to-html": "^0.6.11",
