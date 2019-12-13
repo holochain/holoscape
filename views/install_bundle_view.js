@@ -69,7 +69,7 @@ ipcRenderer.on('conductor-call-set', () => {
 
     const interpolateDnaHash = (instance, variables) => {
         instance.dna_properties = (instance.dna_properties, variables)
-        let {hash, error} = cli.hash(instance.tempPath, instance.dna_properties)
+        let {hash, error} = holoscape.hash(instance.tempPath, instance.dna_properties)
         Vue.set(instance, 'interpolatedDnaHash', hash)
         return {hash, error}
     }
@@ -156,7 +156,7 @@ ipcRenderer.on('conductor-call-set', () => {
                 // we have to try all combinations of agent ids and dnas to see if we have the specified
                 // installed installed already:
                 console.log(`Checking combinations with all agents: ${JSON.stringify(this.installed_agents)}`)
-                for(agent of this.installed_agents) {
+                for(let agent of this.installed_agents) {
                     console.log(`Checking combinations with agent: ${agent}`)
                     let dna_hash = instance.dna_hash
                     if(instance.dna_properties) {
@@ -259,8 +259,8 @@ ipcRenderer.on('conductor-call-set', () => {
               })
 
               bundle.bridges && bundle.bridges.map((bridge) => {
-                let caller_id = bundleInstanceIdToRealId(bridge.caller_id)
-                let callee_id = bundleInstanceIdToRealId(bridge.callee_id)
+                let caller_id = bundleInstanceIdToRealId(bridge.caller_id, bundle)
+                let callee_id = bundleInstanceIdToRealId(bridge.callee_id, bundle)
                 let handle = bridge.handle
                 console.log("Checking if bridge is already there:", {caller_id, callee_id, handle})
                 if(app.installed_bridges.find((b)=>{
@@ -487,11 +487,11 @@ ipcRenderer.on('conductor-call-set', () => {
 
     window.bundleInstanceIdToRealId = bundleInstanceIdToRealId
 
-    const addBridge = async (bridge) => {
+    const addBridge = async (bridge, bundle) => {
         console.log('Adding bridge:', bridge)
         let {handle, caller_id, callee_id} = bridge
-        caller_id = bundleInstanceIdToRealId(caller_id)
-        callee_id = bundleInstanceIdToRealId(callee_id)
+        caller_id = bundleInstanceIdToRealId(caller_id, bundle)
+        callee_id = bundleInstanceIdToRealId(callee_id, bundle)
         await call('admin/bridge/add')({handle, caller_id, callee_id})
         console.log('Bridge added')
     }
