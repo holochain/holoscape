@@ -90,7 +90,7 @@
                         <v-toolbar-title>hApps</v-toolbar-title>
                     </v-toolbar>
                     <v-list-item-group v-model="activeUI" color="deep-purple">
-                        <v-list-item key="happ-store">
+                        <v-list-item key="'happ-store'" v-on:click="showHappStore()">
                             <v-icon v-text="'mdi-plus'" large color="deep-purple" dark></v-icon>
                             <v-list-item-content>
                                 <v-list-item-title class="title">
