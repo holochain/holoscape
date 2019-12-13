@@ -320,8 +320,9 @@ class HappUiController {
 
     async showAndRiseUI(name, location) {
         this.ensureWindowFor(name).then((window)=>{
-          window.show()
-          window.focus()
+          this.hideAllHappUis()
+          this.showHappUi(name)
+          this.holoscape.notifyUiActivated(name)
           console.log(window)
           const uiRootDir = this.installedUIs[name].installDir
           const uiSubDir = path.basename(uiRootDir)

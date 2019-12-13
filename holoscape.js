@@ -486,6 +486,10 @@ class Holoscape {
     notifyNewHapp(name, ui) {
       this.mainWindow.webContents.send('happ-added', {name, ui})
     }
+
+    notifyUiActivated(name) {
+      this.mainWindow.webContents.send('ui-activated', {name})
+    }
   }
 
 const systemTrayIconFull = () => {

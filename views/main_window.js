@@ -75,5 +75,11 @@ ipcRenderer.on('happ-added', (event, params) => {
   Vue.set(app.installedUIs, name, ui)
 })
 
+ipcRenderer.on('ui-activated', (event, params) => {
+  let {name} = params
+  app.activeUI = Object.keys(app.installedUIs).indexOf(name) + 1
+  app.$forceUpdate()
+})
+
 window.app = app
 window.happUiController = remote.getGlobal('holoscape').happUiController
