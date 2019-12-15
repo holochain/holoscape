@@ -10,6 +10,7 @@ import Vuetify, {
     VImg, VSpacer, VSimpleTable, VChip,
     VProgressCircular,
     VDialog, VForm, VTextField,
+    VStepper, VStepperStep, VStepperContent,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -20,6 +21,7 @@ Vue.use(Vuetify,  {
         VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
         VChip, VProgressCircular,
         VDialog, VForm, VTextField,
+        VStepper, VStepperStep, VStepperContent,
     },
     directives: {
       Ripple,
@@ -55,6 +57,7 @@ let app = new Vue({
         network_modal: false,
         passphrase: "",
         show_passphrase: false,
+        intro: 1,
     },
     methods: {
         openExternal(url) {

@@ -185,64 +185,106 @@
 
           <v-dialog v-model="network_modal" persistent max-width="590">
             <v-card>
-              <v-card-title class="headline">Holochain Network Configuration...</v-card-title>
+              <v-card-title class="headline">Welcome to Holoscape and Holochain</v-card-title>
               <v-card-text>
-                <div class="modal-body">
-                  <div class="form-group">
-                    <div class="dropdown">
-                      <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Network Type
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="networkType">
-                        <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
-                        <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
-                        <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
-                        <a class="dropdown-item" href="#" id="memory-type">memory</a>
+
+                <v-stepper v-model="intro">
+                  <v-stepper-step
+                    key="1-step"
+                    :complete="intro > 1"
+                    step="1"
+                    :editable="false"
+                  >
+                    What is this?
+                  </v-stepper-step>
+                  <v-stepper-content
+                    key="1-step"
+                    step="1"
+                  >
+                    <v-card
+                      class="mb-12"
+                      color="grey lighten-1"
+                      height="200px"
+                    ></v-card>
+        
+                    <v-btn
+                      color="primary"
+                      @click="intro = 2"
+                    >
+                      Continue
+                    </v-btn>
+                  </v-stepper-content>
+                  <v-stepper-step
+                    key="2-step"
+                    :complete="intro > 2"
+                    step="2"
+                    :editable="false"
+                  >
+                    Confirm alpha status
+                  </v-stepper-step>
+                  <v-stepper-content
+                    key="1-step"
+                    step="1"
+                  >
+                  <v-card-text>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Network Type
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="networkType">
+                          <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
+                          <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
+                          <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
+                          <a class="dropdown-item" href="#" id="memory-type">memory</a>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
-                    <label for="dynamo-url">Dynamodb URL</label>
-                    <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
-                    <small id="dynamo-url-help" class="form-text text-muted"></small>
-                  </div>
-                  <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-                    <label for="sim2h-url">Sim2h Switch-Board URL</label>
-                    <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
-                    <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
-                      The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
-                      <p class="disclaimer">
-                        DISCLAIMER:
-                        <ul>
-                          <li>This public instance comes with no guarantee of up-time!</li>
-                          <li>This is for testing only!</li>
-                          <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
-                        </ul>
-                      </p>
-                      <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
-                      
-                      <span class="disclaimer-label">Please confirm:</span>
-                      <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
-                      <br>
-                      <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
-                    </small>
-                  </div>
-                  <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
-                    <label for="lib3h-network-name">Network Name</label>
-                    <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
-                    <small id="lib3h-network-name-help" class="form-text text-muted"></small>
-                    <label for="lib3h-bootstrap-url">Bootstrap Url</label>
-                    <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
-                    <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
-                  </div>
-                  <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
-                  </div>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="red accent-4" text @click="quit()">Quit</v-btn>
-                <v-btn color="teal" text @click="network_config_submit() = false":disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</v-btn>
-              </v-card-actions>
+                    <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
+                      <label for="dynamo-url">Dynamodb URL</label>
+                      <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
+                      <small id="dynamo-url-help" class="form-text text-muted"></small>
+                    </div>
+                    <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
+                      <label for="sim2h-url">Sim2h Switch-Board URL</label>
+                      <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
+                      <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
+                        The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
+                        <p class="disclaimer">
+                          DISCLAIMER:
+                          <ul>
+                            <li>This public instance comes with no guarantee of up-time!</li>
+                            <li>This is for testing only!</li>
+                            <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
+                          </ul>
+                        </p>
+                        <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
+                        
+                        <span class="disclaimer-label">Please confirm:</span>
+                        <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
+                        <br>
+                        <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
+                      </small>
+                    </div>
+                    <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
+                      <label for="lib3h-network-name">Network Name</label>
+                      <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
+                      <small id="lib3h-network-name-help" class="form-text text-muted"></small>
+                      <label for="lib3h-bootstrap-url">Bootstrap Url</label>
+                      <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
+                      <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
+                    </div>
+                    <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
+                    </div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="red accent-4" text @click="quit()">Quit</v-btn>
+                  <v-btn color="teal" text @click="network_config_submit() = false":disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</v-btn>
+                </v-card-actions>
+                  </v-stepper-content>
+                </v-stepper>
             </v-card>
           </v-dialog>
         </v-content>
