@@ -33,7 +33,7 @@ module.exports = {
         let { stdout, stderr, error } = spawnSync(
             executablePath(), 
             params,
-            {cwd: rootConfigPath}
+            {cwd: __dirname}
         )
         stderr = stderr.toString()
         stdout = stdout.toString()
