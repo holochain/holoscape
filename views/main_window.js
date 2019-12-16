@@ -4,8 +4,8 @@ import Vuetify, {
     VApp, VNavigationDrawer, VFooter, VContent, 
     VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
     VToolbar, VToolbarTitle,
-    VDivider,
-    VIcon
+    VDivider, VTooltip,
+    VIcon, VSpacer, VProgressCircular, VChip,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -18,7 +18,8 @@ Vue.use(Vuetify,  {
       VList, VListItem, VListItemContent, VListItemTitle, VListItemSubtitle, VListItemGroup,
       VToolbar, VToolbarTitle,
       VDivider,
-      VIcon,
+      VIcon, VSpacer, VProgressCircular,
+      VChip, VTooltip,
     },
     directives: {
       Ripple,
@@ -49,6 +50,7 @@ let app = new Vue({
     data: {
         installedUIs: happUiController.installedUIs,
         activeUI: null,
+        instance_stats: {},
     },
     methods: {
         showHappUi: (uiName) => {
@@ -78,6 +80,11 @@ ipcRenderer.on('happ-added', (event, params) => {
 ipcRenderer.on('ui-activated', (event, params) => {
   let {name} = params
   app.activeUI = Object.keys(app.installedUIs).indexOf(name) + 1
+  app.$forceUpdate()
+})
+
+ipcRenderer.on('instance-stats', (event, instance_stats) => {
+  app.instance_stats = instance_stats
   app.$forceUpdate()
 })
 

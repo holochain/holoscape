@@ -80,7 +80,7 @@
 
     <div id="app">
         <v-app>
-            <v-navigation-drawer app fixed permanent width="300">
+            <v-navigation-drawer fixed permanent width="300">
                 <div id="separator"></div>
                 <v-list nav class="navbar-content">
                     <v-toolbar
@@ -127,8 +127,20 @@
             
             </v-content>
             
-            <v-footer app>
-                <!-- -->
+            <v-footer app fixed color="blue-grey">
+                <v-spacer></v-spacer>
+                <v-tooltip top v-for="stats, instance_id in instance_stats">
+                    <template v-slot:activator="{ on }">
+                      <v-chip  color="cyan lighten-4" v-on="on">
+                        {{instance_id}}: {{stats.number_held_entries}}[{{stats.number_held_aspects}}]
+                        <v-progress-circular v-if="stats.number_pending_validations > 0"
+                            indeterminate width="1" color="deep-purple"
+                            >{{stats.number_pending_validations}}</v-progress-circular>
+                      </v-chip>
+                    </template>
+                    <span>DNA stats: DNA-id: held entries [held aspects] / items in validation queue</span>
+                  </v-tooltip>
+                
             </v-footer>
         </v-app>
     </div>

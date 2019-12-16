@@ -348,7 +348,7 @@ class Holoscape {
     showView(view) {
       this.activeView = view
       let mainWindowBounds = this.mainWindow.getBounds()
-      view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-20})
+      view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-70})
     }
 
     hideViews() {
@@ -469,6 +469,9 @@ class Holoscape {
         onSignal((params) => {
           if(this.quitting) return
           this.debuggerWindow.webContents.send('hc-signal', params)
+          if(params.instance_stats) {
+            this.mainWindow.webContents.send('instance-stats', params.instance_stats)
+          }
           //console.log(JSON.stringify(params))
           if (params.signal && params.signal.name === 'switch_view') {
             const { view, location } = JSON.parse(params.signal.arguments)
