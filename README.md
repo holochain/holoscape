@@ -39,7 +39,7 @@ $ cd holoscape
 # Run all commands for this project while cd'd in this directory
 ```
 
-Holoscape needs both binaries ouf the [holochain-rust](https://github.com/holochain/holochain-rust) repository: `hc` and `holochain`.
+Holoscape needs both binaries out of the [holochain-rust](https://github.com/holochain/holochain-rust) repository: `hc` and `holochain`.
 
 Depending on the OS, it expects to find either `hc-linux` and `holochain-linux` or `hc-darwin` and `holochain-darwin` in the application directory (the root of the repository during development).
 
@@ -53,13 +53,14 @@ To flush all holoscape data with the nix shell:
 
 ```shell
 $ nix-shell https://github.com/holochain/holoscape/archive/develop.tar.gz --run holoscape-flush
+```
 
 ## Run for development
 ```
 npm start
 ```
 
-### Personas
+## Personas
 Persona's allow you to run multiple instances of Holoscape.  This is useful for a few reasons:
 - Networks: Because each Holoscape instance is configured to communicate over one network, you can use this run instances on different networks.
 - Testing: this makes it easy to spin up multiple nodes on the same network for testing purposes.
