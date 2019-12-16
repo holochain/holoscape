@@ -10,7 +10,8 @@ import Vuetify, {
     VImg, VSpacer, VSimpleTable, VChip,
     VProgressCircular,
     VDialog, VForm, VTextField,
-    VStepper, VStepperStep, VStepperContent,
+    VStepper, VStepperStep, VStepperContent, VStepperItems, VStepperHeader,
+    VSelect,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -21,7 +22,8 @@ Vue.use(Vuetify,  {
         VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
         VChip, VProgressCircular,
         VDialog, VForm, VTextField,
-        VStepper, VStepperStep, VStepperContent,
+        VStepper, VStepperStep, VStepperContent, VStepperHeader, VStepperItems,
+        VSelect,
     },
     directives: {
       Ripple,
@@ -51,6 +53,7 @@ let app = new Vue({
         logs: require('electron').remote.getGlobal('holoscape').logMessages,
         network_type: "sim2h",
         sim2h_url: 'wss://sim2h.holochain.org:9000',
+        dynamo_url: 'http://localhost:8000',
         disclaimer: false,
         missing_binaries_modal: false,
         passphrase_modal: false,
@@ -58,6 +61,7 @@ let app = new Vue({
         passphrase: "",
         show_passphrase: false,
         intro: 1,
+        advanced: false,
     },
     methods: {
         openExternal(url) {
@@ -69,10 +73,10 @@ let app = new Vue({
             }
             switch(config.type) {
                 case "sim1h":
-                    config.dynamo_url = $('#dynamo-url').val()
+                    config.dynamo_url = this.dynamo_url
                     break;
                 case "sim2h":
-                    config.sim2h_url = $('#sim2h-url').val()
+                    config.sim2h_url = this.sim2h_url
                     break;
                 case "lib3h":
                     config.network_id = {nickname: $('#lib3h-network-name').val()}
@@ -123,7 +127,6 @@ ipcRenderer.on('missing-binaries', (event, message) => {
 // Network config management
 ipcRenderer.on('request-network-config', (event, message) => {
    app.network_type = 'sim2h'
-   $('#sim2h-url').val("wss://sim2h.holochain.org:9000")
    app.network_modal = true
 })
 
