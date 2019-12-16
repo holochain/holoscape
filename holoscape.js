@@ -246,6 +246,11 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
       setupWindowDevProduction(window)
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('config-window-initialized', ()=>{
+          resolve()
+        })
+      })
 
       let holoscape = this
       window.on('close', (event) => {
@@ -270,6 +275,12 @@ class Holoscape {
       window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
       setupWindowDevProduction(window)
 
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('ui-config-window-initialized', ()=>{
+          resolve()
+        })
+      })
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
@@ -293,6 +304,12 @@ class Holoscape {
       window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
       setupWindowDevProduction(window)
 
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('debug-window-initialized', ()=>{
+          resolve()
+        })
+      })
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
@@ -312,7 +329,13 @@ class Holoscape {
         icon: systemTrayIconFull(),
       })
       view.webContents.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
-      //setupWindowDevProduction(window)
+      //setupWindowDevProduction(view)
+
+      view.initialized = new Promise((resolve) => {
+        ipcMain.on('install-window-initialized', ()=>{
+          resolve()
+        })
+      })
 
       this.mainWindow.addBrowserView(view)
       this.installBundleView = view
@@ -459,12 +482,11 @@ class Holoscape {
         this.updateTrayMenu()
         this.splash.hide()
         this.createMainWindow()
-        setTimeout(() => {
-          this.configWindow.webContents.send('conductor-call-set')
-          this.uiConfigWindow.webContents.send('conductor-call-set')
-          this.debuggerWindow.webContents.send('conductor-call-set')
-          this.installBundleView.webContents.send('conductor-call-set')
-        }, 500)
+
+        for(let window of [this.configWindow, this.uiConfigWindow, this.debuggerWindow, this.installBundleView]) {
+          window.initialized.then(() => window.webContents.send('conductor-call-set'))
+        }
+
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()
