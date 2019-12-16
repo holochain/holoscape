@@ -348,7 +348,8 @@ class Holoscape {
     showView(view) {
       this.activeView = view
       let mainWindowBounds = this.mainWindow.getBounds()
-      view.setBounds({x: 300, y: 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-70})
+
+      view.setBounds({x: 300, y: process.platform === "darwin" ? 21 : 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-66})
     }
 
     hideViews() {
