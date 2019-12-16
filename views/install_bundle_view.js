@@ -552,3 +552,4 @@ ipcRenderer.on('conductor-call-set', () => {
     window.app = app
     window.happUiController = happUiController
     app.getHappIndex()
+    ipcRenderer.send('install-window-initialized')
