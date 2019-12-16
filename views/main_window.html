@@ -131,7 +131,7 @@
                 <v-spacer></v-spacer>
                 <v-tooltip top v-for="stats, instance_id in instance_stats">
                     <template v-slot:activator="{ on }">
-                      <v-chip  color="cyan lighten-4" v-on="on">
+                      <v-chip  color="cyan lighten-4" v-on="on" @click="showDebugView()">
                         {{instance_id}}: {{stats.number_held_entries}}[{{stats.number_held_aspects}}]
                         <v-progress-circular v-if="stats.number_pending_validations > 0"
                             indeterminate width="1" color="deep-purple"

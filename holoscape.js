@@ -310,6 +310,10 @@ class Holoscape {
         })
       })
 
+      ipcMain.on('show-debug-view', () => {
+        window.show()
+      })
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();

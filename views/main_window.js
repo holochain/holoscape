@@ -68,6 +68,9 @@ let app = new Vue({
           app.activeUI = "happ-store"
           happUiController.hideAllHappUis()
           holoscape.showInstallBundleView()
+        },
+        showDebugView: () => {
+          ipcRenderer.send('show-debug-view')
         }
     }
 })
