@@ -195,8 +195,8 @@
               <v-divider></v-divider>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue-grey" @click="quit">Quit</v-btn>
-                <v-btn class="deep-purple" @click="pass_submit()">Unlock keystores</v-btn>
+                <v-btn color="blue-grey" @click="quit" dark>Quit</v-btn>
+                <v-btn class="deep-purple" @click="pass_submit()" dark>Unlock keystores</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -342,14 +342,14 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue-grey" @click="quit()">Quit</v-btn>
+                <v-btn color="blue-grey" @click="quit()" dark>Quit</v-btn>
                 <v-btn v-if="intro == 1" color="primary" @click="intro = 2">
                   Ok, got it!
                 </v-btn>
                 <v-btn v-if="intro == 2" color="primary" :disabled="!disclaimer" @click="intro = 3">
                   Continue
                 </v-btn>
-                <v-btn v-if="intro == 3" color="deep-purple" @click="network_config_submit() = false">Finish setup</v-btn>
+                <v-btn v-if="intro == 3" color="deep-purple" @click="network_config_submit() = false" dark>Finish setup</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
