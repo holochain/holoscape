@@ -5,13 +5,13 @@ import $ from 'jquery'
 import Vue from 'vue'
 import Vuetify, {
     VApp, VContainer,
-    VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
+    VRow, VCol, VCard, VCardTitle, VCardSubtitle, VCardText, VCardActions,
     VAvatar, VIcon, VBtn,
     VImg, VSpacer, VSimpleTable, VChip,
     VProgressCircular,
     VDialog, VForm, VTextField,
     VStepper, VStepperStep, VStepperContent, VStepperItems, VStepperHeader,
-    VSelect,
+    VSelect, VDivider,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
 
@@ -23,7 +23,7 @@ Vue.use(Vuetify,  {
         VChip, VProgressCircular,
         VDialog, VForm, VTextField,
         VStepper, VStepperStep, VStepperContent, VStepperHeader, VStepperItems,
-        VSelect,
+        VSelect, VDivider, VCardText, VCardActions,
     },
     directives: {
       Ripple,

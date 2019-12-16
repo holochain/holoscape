@@ -176,31 +176,28 @@
 
           <v-dialog v-model="passphrase_modal" persistent>
             <v-card>
-              <v-form>
-                <v-card-title class="headline">Passphrase needed to unlock keystore</v-card-title>
-                <v-divider></v-divider>
-                <v-card-text>
-                
-                  <v-text-field
-                    v-model="passphrase"
-                    :append-icon="show_passphrase ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show_passphrase ? 'text' : 'password'"
-                    name="password"
-                    label="Please enter your passphrase to unlock keystores"
-                    single-line
-                    full-width
-                    
-                    clearable
-                    @click:append="show_passphrase = !show_passphrase"
-                  ></v-text-field>
-                
-                </v-card-text>
-                <v-divider></v-divider>
-                <v-card-actions>
-                  <v-btn class="deep-purple" color="teal" @click="pass_submit()">Unlock keystores</v-btn>
-                  <v-btn color="blue-grey" @click="quit">Quit</v-btn>
-                </v-card-actions>
-              </v-form>
+              <v-card-title class="headline">Passphrase needed to unlock keystore</v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+              
+                <v-text-field
+                  v-model="passphrase"
+                  :append-icon="show_passphrase ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show_passphrase ? 'text' : 'password'"
+                  name="password"
+                  label="Please enter your passphrase"
+                  single-line
+                  solo
+                  @click:append="show_passphrase = !show_passphrase"
+                ></v-text-field>
+              
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-grey" @click="quit">Quit</v-btn>
+                <v-btn class="deep-purple" @click="pass_submit()">Unlock keystores</v-btn>
+              </v-card-actions>
             </v-card>
           </v-dialog>
 
