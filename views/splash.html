@@ -1,15 +1,23 @@
 <html>
   <head>
     <title>Holoscape conductor log</title>
-    <script> window.$ = window.jQuery = require('jquery'); </script>
-    <script>window.$ = window.jQuery = require('jquery');</script>
-    <script>const Vue = require('vue/dist/vue.common');</script>
     <script>require('popper.js');</script>
     <script>require('bootstrap');</script>
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <style>
-     .background {
+     #background {
+       position: absolute;
        background: linear-gradient(45deg, #1a0231f2, #00017f);
+       background-image: url(../images/splash_background.jpg);
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-position: center;
+       top: 0;
+       right: 0;
+       bottom: 0;
+       left: 0;
      }
 
      .header {
@@ -25,31 +33,36 @@
      }
 
      .version {
-       position: absolute;
-       top: 10px;
+       position: relative;
        right: 10px;
-       color: red;
+       color: white;
        z-index: 2;
        font-family: sans-serif;
        font-size: 30px;
-       font-weight: bold;
-       text-shadow: 0px 0px 3px #00017f;
+       font-weight: normal;
+       text-align: right;
      }
 
      .status {
        position: absolute;
-       left: 30px;
+       right: 30px;
        bottom: 20px;
        color: white;
        z-index: 1;
        font-family: sans-serif;
-       font-size: 45px;
+       font-size: 30px;
      }
 
-     .logo {
-       position: absolute;
-       left: 50%;
-       transform: translateX(-50%);
+    .logo {
+      position: relative;
+      width: 100%;
+     }
+     #title {
+      position: absolute;
+      transform: translateY(-33%);
+      left: 37px;
+      top: 50%;
+      width: 518px;
      }
      .error {
        color: rgb(238, 153, 153);
@@ -97,243 +110,254 @@
      .clearfix {
        overflow: auto;
      }
+     .float-right {
+       float: right;
+     }
+     .scroll {
+       overflow-y: scroll;
+     }
+    </style>
+    <style>
+        @media only screen and (max-width: 959px)
+        {
+            .v-stepper__label {
+                display: flex !important;
+                margin-left: 15px;
+            }
+        }
+        @media only screen and (min-width: 959px)
+        {
+            .v-stepper__label {
+                display: flex !important;
+                margin-left: 7px;
+            }
+        }
     </style>
   </head>
-  <body class="background">
+  <body>
     <div id="app">
-      <ul id="log">
+      <!--<ul id="log">
         <li v-for="log in logs">
           <div :class="log.level" v-html="log.message">
           </div>
         </li>
-      </ul>
-      <h1 class="header">Holoscape</h1>
-      <h3 class="version">v0.0.4-alpha</h3>
-      <img class="logo" src="../images/HoloScape-mdpi.png"></img>
-      <div class="status">{{status}}</div>
-    
-      <div class="modal fade" id="binaries-modal" tabindex="-1" role="dialog" aria-labelledby="binaries-modal" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Holoscape Error - Missing Binaries</h5>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
+      </ul>-->
+      <v-app>
+        <v-content id="background">
+          <div id="title">
+            <img class="logo" src="../images/Holoscape_title.png"></img>
+            <h3 class="version">Version 0.0.5-alpha</h3>
+          </div>
+          <div class="status">{{status}}</div>
+        
+          <v-dialog v-model="missing_binaries_modal" persistent max-width="590">
+            <v-card>
+              <v-card-title class="headline">Holoscape Error - Missing Binaries</v-card-title>
+              <v-divider dark></v-divider>
+              <v-card-text>
+                <v-container>
                 <p>Holoscape needs both binaries out of the <a href="#" v-on:click="openExternal('https://github.com/holochain/holochain-rust')">holochain-rust</a> repository: <span class='code'>hc</span> and <span class='code'>holochain</span>.</p>
                 <p>Depending on the OS, it expects to find either <span class='code'>hc-linux</span> and <span class='code'>holochain-linux</span> or <span class='code'>hc-darwin</span> and <span class='code'>holochain-darwin</span> in the application directory (the root of the repository during development).</p>
                 <p>For development you can either build those yourself or get them through Holonix like this:</p>              
-  <pre>  $ nix-shell https://holochain.love
+    <pre>$ nix-shell https://holochain.love
     $ cp `which holochain` holochain-linux
     $ cp `which hc` hc-linux</pre>
                 <p>(or <span class='code'>holochain-darwin</span> for macOS - Windows is currently not supported but will follow soon)</p>
                 <p>See <a href="#" v-on:click="openExternal('https://github.com/holochain/holoscape/blob/master/README.md')">README</a></p>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal fade" id="passphrase-modal" tabindex="-1" role="dialog" aria-labelledby="passphrase-modal" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Unlock keystore...</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="passphrase">Please enter your passphrase to unlock keystores</label>
-                <input type="password" class="form-control" id="passphrase" aria-describedby="passphrase-help" placeholder="Passphrase">
-                <small id="passphrase-help" class="form-text text-muted"></small>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-              <button id="unlock-button" type="button" class="btn btn-primary">Unlock keystores</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal fade" id="network-config-modal" tabindex="-1" role="dialog" aria-labelledby="network-config-modal" aria-hidden="true">
-        <div class="modal-dialog" role="document" id="network-config-wrapper">
-          <div class="modal-content" id="network-config-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Holochain Network Configuration...</h5>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="networkType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Network Type
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="networkType">
-                    <a class="dropdown-item" href="#" id="sim1h-type">sim1h</a>
-                    <a class="dropdown-item" href="#" id="sim2h-type">sim2h</a>
-                    <a class="dropdown-item" href="#" id="lib3h-type">lib3h</a>
-                    <a class="dropdown-item" href="#" id="memory-type">memory</a>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
-                <label for="dynamo-url">Dynamodb URL</label>
-                <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
-                <small id="dynamo-url-help" class="form-text text-muted"></small>
-              </div>
-              <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
-                <label for="sim2h-url">Sim2h Switch-Board URL</label>
-                <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
-                <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
-                  The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
-                  <p class="disclaimer">
-                    DISCLAIMER:
-                    <ul>
-                      <li>This public instance comes with no guarantee of up-time!</li>
-                      <li>This is for testing only!</li>
-                      <li>Network traffic might be logged and stored for the purpose fo debugging Holochain during this alpha test phase!</li>
-                    </ul>
-                  </p>
-                  <p>You can read more about sim2h <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">here.</a></p>
+              </v-container>
+              </v-card-text>
+              <v-divider dark></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="red accent-4" text @click="quit">Quit</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog v-model="passphrase_modal" persistent>
+            <v-card>
+              <v-card-title class="headline">Passphrase needed to unlock keystore</v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+              
+                <v-text-field
+                  v-model="passphrase"
+                  :append-icon="show_passphrase ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show_passphrase ? 'text' : 'password'"
+                  name="password"
+                  label="Please enter your passphrase"
+                  single-line
+                  solo
+                  @click:append="show_passphrase = !show_passphrase"
+                ></v-text-field>
+              
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-grey" @click="quit" dark>Quit</v-btn>
+                <v-btn class="deep-purple" @click="pass_submit()" dark>Unlock keystores</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog v-model="network_modal" persistent max-width="700" height="450px">
+            <v-card>
+              <v-card-title class="headline">Welcome to Holoscape and Holochain</v-card-title>
+              <v-card-text>
+                
+                <v-stepper v-model="intro">
+                  <v-stepper-header>
+                    <v-stepper-step
+                      key="1-step"
+                      :complete="intro > 1"
+                      step="1"
+                      :editable="false"
+                    >
+                      What is this?
+                    </v-stepper-step>
+                    <v-divider></v-divider>
+                    <v-stepper-step
+                      key="2-step"
+                      :complete="intro > 2"
+                      step="2"
+                      :editable="false"
+                    >
+                      Confirm alpha status
+                    </v-stepper-step>
+                    <v-divider></v-divider>
+                    <v-stepper-step
+                      key="3-step"
+                      :complete="intro > 3"
+                      step="3"
+                      :editable="false"
+                    >
+                      Advanced
+                    </v-stepper-step>
+                  </v-stepper-header>
+                  <v-stepper-items>
+                    <v-stepper-content
+                      key="1-step"
+                      step="1"
+                    >
+                      <v-card class="scroll" height="260px" flat>
+                        <v-card-title class="headline">What is this?</v-card-title>
+                        <v-divider></v-divider>
+                        <v-card-text>
+                          <p>
+                            Holoscape is a complete Holochain run-time and deployment for end-users.
+                            It includes Holochain binaries and everything needed to quickly get started, automatically setup
+                            a full, local Holochain node and start using Holochain apps.
+                          </p>
+                          <p>
+                            Holoscape is the graphical user interface to your local Holochain node - the Conductor.
+                            Typically, Holochain networks, i.e. DNAs, are meant to be small micro-services, and hApps to be
+                            bundles of several DNAs that bridge to each other (= use functionality of each other) with additional GUIs.
+                            This is the reason for a Holochain Conductor that runs several DNAs on the local machine for the same user.
+                          </p>
+                          <p>
+                            Holoscape manages the Conductor and the installation of DNAs and provides a run-time for the graphical user interfaces
+                            of hApps.
+                          </p>
+                        </v-card-text>
+                      </v-card>
+                    </v-stepper-content>
+
+                    <v-stepper-content
+                      key="2-step"
+                      step="2"
+                    >
+                      <v-card class="scroll" height="260px" flat>
+                        <v-card-title class="headline">Confirm alpha status</v-card-title>
+                        <v-divider></v-divider>
+                        <v-card-text>
+                          <p>
+                            Please note that both Holochain as well as Holoscape are not yet meant to be used in a production
+                            context!
+                          </p>
+                          <p>
+                            We want to see some more testing and real-world usage to find and iron-out potential bugs.
+                            In order to help with that the current default network implemenation <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">Sim2h</a>
+                            can be configured to store a centrally held log of all the data that is transmitted between nodes.
+                            When needed, this feature will be used to analyse and diagnose potential problems.
+                          </p>
+                          <p>
+                            <strong>Please confirm:</strong>
+                            <input type="checkbox" id="checkbox" v-model="disclaimer">
+                            <label for="checkbox">
+                              <i>"I understand this is alpha software and with the default network configuration entry contents might be stored centrally for debugging purposes." </i>
+                            </label>
+                          </p>
+                        </v-card-text>
+                      </v-card>
+                    </v-stepper-content>
                   
-                  <span class="disclaimer-label">Please confirm:</span>
-                  <label for="checkbox">I have understood that this is an early alpha test release and that all entry data might be logged for debugging purposes.</label>
-                  <br>
-                  <input class="disclaimer-checkbox" type="checkbox" id="checkbox" v-model="disclaimer">
-                </small>
-              </div>
-              <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
-                <label for="lib3h-network-name">Network Name</label>
-                <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
-                <small id="lib3h-network-name-help" class="form-text text-muted"></small>
-                <label for="lib3h-bootstrap-url">Bootstrap Url</label>
-                <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
-                <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
-              </div>
-              <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
-              </div>
-              <div class="modal-footer">
-              <button id="quit-button" type="button" class="btn btn-secondary quit-button" data-dismiss="modal">Quit</button>
-              <button id="set-network-type-button" type="button" class="btn btn-primary" :disabled="!disclaimer && network_type=='sim2h' && sim2h_url=='wss://sim2h.holochain.org:9000'">Set Network Type</button>
-            </div>
-          </div>
-        </div>
-      </div>    
+                    
+                    <v-stepper-content
+                      key="2-step"
+                      step="3"
+                    >
+                    <v-card class="scroll" height="260px" flat>
+                      
+                      <v-card-text>
+                        <p>
+                          This is it! You can go ahead and click <i>Finish setup</i> below.
+                          <br>
+                          If you know what you're doing you can change some advanced settings first.
+                        </p>
+                        <v-btn color="primary" @click="advanced=!advanced">{{advanced ? 'Hide advanced settings' : 'Show advanced settings'}}</v-btn>
+                        <p>
+                        <div v-if="advanced">
+                            <div class="dropdown">
+                              <v-select :items="['sim1h', 'sim2h', 'memory']" label="Network Type" v-model="network_type" outlined></v-select>
+                            </div>
+                          <div class="form-group" id="network-config-sim1h" v-if="network_type==='sim1h'">
+                            <label for="dynamo-url">Dynamodb URL</label>
+                            <input type="input" class="form-control" id="dynamo-url" aria-describedby="dynamo-url-help" placeholder="http://localhost:8000">
+                            <small id="dynamo-url-help" class="form-text text-muted"></small>
+                          </div>
+                          <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
+                            <label for="sim2h-url">Sim2h Switch-Board URL</label>
+                            <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
+                            <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
+                              The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
+                            </small>
+                          </div>
+                          <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
+                            <label for="lib3h-network-name">Network Name</label>
+                            <input type="input" class="form-control" id="lib3h-network-name" aria-describedby="lib3h-network-name-help" placeholder="holochain-testnet">
+                            <small id="lib3h-network-name-help" class="form-text text-muted"></small>
+                            <label for="lib3h-bootstrap-url">Bootstrap Url</label>
+                            <input type="input" class="form-control" id="lib3h-bootstrap-url" aria-describedby="lib3h-bootstrap-url-help" placeholder="wss://">
+                            <small id="lib3h-bootstrap-url-help" class="form-text text-muted">optional url of a boostrap node</small>
+                          </div>
+                          <div class="form-group" id="network-config-memory" v-if="network_type==='memory'">
+                          </div>
+                        </div>
+                      </v-card-text>
+                    </v-card>  
+                    </v-stepper-content>
+                  </v-stepper-items>
+                </v-stepper>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-grey" @click="quit()" dark>Quit</v-btn>
+                <v-btn v-if="intro == 1" color="primary" @click="intro = 2">
+                  Ok, got it!
+                </v-btn>
+                <v-btn v-if="intro == 2" color="primary" :disabled="!disclaimer" @click="intro = 3">
+                  Continue
+                </v-btn>
+                <v-btn v-if="intro == 3" color="deep-purple" @click="network_config_submit() = false" dark>Finish setup</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-content>
+      </v-app>    
     </div>
   </div>
 
-      <script>
-       const { ipcRenderer, shell } = require('electron')
-       var Convert = require('ansi-to-html');
-       var convert = new Convert({newline: true});
-
-       var app = new Vue({
-           el: '#app',
-           data: {
-               status: "Initializing...",
-               logs: require('electron').remote.getGlobal('holoscape').logMessages,
-               network_type: "sim2h",
-               sim2h_url: 'wss://sim2h.holochain.org:9000',
-               disclaimer: false,
-           },
-           methods: {
-              openExternal(url) {
-                  shell.openExternal(url)
-              }
-           }
-       })
-
-       ipcRenderer.on('log', (event,store) => {
-          let {level, message} = store
-          message = convert.toHtml(message)
-          app.logs.push({level, message})
-          while(app.logs.length > 20) {
-            app.logs.shift()
-          }
-       });
-
-       ipcRenderer.on('splash-status', (event, message) => {
-           console.log(message)
-           app.status = message
-       });
-
-       const cancel = () => {
-           ipcRenderer.send('quit')
-       }
-
-       //-------------------------------------------------------------------
-       // Binaries check
-       ipcRenderer.on('missing-binaries', (event, message) => {
-          $('#splash-window').hide()
-          $('#binaries-modal').modal()
-       })
-
-       //-------------------------------------------------------------------
-       // Network config management
-       ipcRenderer.on('request-network-config', (event, message) => {
-          app.network_type = 'sim2h'
-          $('#sim2h-url').val("wss://sim2h.holochain.org:9000")
-          $('#network-config-modal').modal()
-       })
-       const network_config_submit = () => {
-           let config = {
-               type: app.network_type
-           }
-           switch(config.type) {
-               case "sim1h":
-                   config.dynamo_url = $('#dynamo-url').val()
-                   break;
-               case "sim2h":
-                   config.sim2h_url = $('#sim2h-url').val()
-                   break;
-               case "lib3h":
-                   config.network_id = {nickname: $('#lib3h-network-name').val()}
-                   const bootstrap = $('#lib3h-bootstrap-url').val()
-                   let nodes = []
-                   if (bootstrap != "") {
-                       nodes = [bootstrap]
-                   }
-                   config.bootstrap_nodes = nodes
-                   break;
-           }
-           ipcRenderer.send('network-config-set', config)
-           $('#network-config-modal').modal('hide')
-       }
-
-       $('#set-network-type-button').click(network_config_submit)
-
-       $('#sim1h-type').click(()=>{app.network_type="sim1h"})
-       $('#sim2h-type').click(()=>{app.network_type="sim2h"})
-       $('#lib3h-type').click(()=>{app.network_type="lib3h"})
-       $('#memory-type').click(()=>{app.network_type="memory"})
-
-       //-------------------------------------------------------------------
-       // Passphrase management
-       ipcRenderer.on('request-passphrase', (event, message) => {
-           $('#passphrase-modal').modal()
-       })
-
-       const pass_submit = () => {
-           ipcRenderer.send('passphrase-set', $('#passphrase').val())
-           $('#passphrase-modal').modal('hide')
-       }
-
-       $('#unlock-button').click(pass_submit)
-       $('.quit-button').click(cancel)
-
-       $('#passphrase').on('keyup', (event) => {
-           if (event.keyCode === 13) {
-               submit()
-           }
-
-           if (event.keyCode === 27) {
-               cancel()
-           }
-       })
-
-      </script>
-  </body>
+  <script type="text/javascript" src="splash.dist.js"></script>
+</body>
 </html>

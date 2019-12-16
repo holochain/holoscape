@@ -1,11 +1,23 @@
-const { app, Menu, BrowserWindow, ipcMain, shell, dialog } = require('electron')
+const { app, Menu, BrowserWindow, BrowserView, ipcMain, shell, dialog } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const { connect } = require('@holochain/hc-web-client')
 const net = require('net')
 const conductor = require('./conductor.js')
 const { HappUiController, sanitizeUINameForScheme, setupWindowDevProduction } = require('./happ-ui-controller')
+const cli = require('./cli')
 
+function installLogFile(){
+  return path.join(conductor.rootConfigPath(), 'installed_happ_bundles.json')
+}
+
+function loadInstallLog() {
+  if(!fs.existsSync(installLogFile())) {
+      return {}
+  } else {
+      return JSON.parse(fs.readFileSync(installLogFile()))
+  }
+}
 /// This is the main controller of the whole application.
 /// There is one instance of Holoscape that gets created in main.
 /// All build-in UIs get created from here and references to the window
@@ -15,12 +27,15 @@ class Holoscape {
     happUiController;
 
     /// Window references for built-in views:
+    mainWindow;
     splash;
     logWindow;
     configWindow;
     uiConfigWindow;
     debuggerWindow;
-    installBundleWindow;
+    installBundleView;
+
+    activeView;
 
     /// Conductor references (mabe move to conductor.js?)
     conductorProcess; // Handle to the return value of spawn
@@ -30,13 +45,17 @@ class Holoscape {
     logMessages = [];
     quitting = false;
 
+    /// hApp bundle install log
+    installLog;
+
     async init() {
+      this.installLog = loadInstallLog()
       this.happUiController = new HappUiController(this)
       this.createLogWindow()
       this.createConfigWindow()
       this.createUiConfigWindow()
       this.createDebuggerWindow()
-      this.createInstallBundleWindow()
+      
       this.updateTrayMenu()
       this.splash.webContents.send('splash-status', "Booting conductor...")
       this.bootConductor()
@@ -55,10 +74,23 @@ class Holoscape {
       }, 60000)
     }
 
+    addToInstallLog(key, bundle) {
+      this.installLog[key] = bundle
+      this.saveInstallLog()
+    }
+
+    saveInstallLog() {
+      fs.writeFileSync(installLogFile(), JSON.stringify(this.installLog))
+    }
+
+    createViews() {
+      this.createInstallBundleView()
+    }
+
     showSplashScreen() {
       let window = new BrowserWindow({
-        width:890,
-        height:635,
+        width:843,
+        height:600,
         webPreferences: {
           nodeIntegration: true
         },
@@ -144,6 +176,39 @@ class Holoscape {
       });
     }
 
+    createMainWindow() {
+      if(this.mainWindow) {
+        return
+      }
+      let window = new BrowserWindow({
+        width:1000,
+        height:800,
+        webPreferences: {
+          nodeIntegration: true
+        },
+        show: true,
+        icon: systemTrayIconFull(),
+      })
+      window.loadURL(path.join('file://', __dirname, 'views/main_window.html'))
+      setupWindowDevProduction(window)
+
+      let holoscape = this
+      window.on('close', (event) => {
+        if(!holoscape.quitting) event.preventDefault();
+        window.hide();
+        holoscape.updateTrayMenu()
+      })
+
+      this.mainWindow = window
+      this.happUiController.setMainWindow(window)
+      this.createViews()
+      this.mainWindow.on('resize', () => {
+        if(this.activeView) {
+            this.showView(this.activeView)
+        }
+      })
+    }
+
     createLogWindow() {
       let window = new BrowserWindow({
         width:1000,
@@ -181,6 +246,11 @@ class Holoscape {
       })
       window.loadURL(path.join('file://', __dirname, 'views/conductor_config.html'))
       setupWindowDevProduction(window)
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('config-window-initialized', ()=>{
+          resolve()
+        })
+      })
 
       let holoscape = this
       window.on('close', (event) => {
@@ -205,6 +275,12 @@ class Holoscape {
       window.loadURL(path.join('file://', __dirname, 'views/ui_config.html'))
       setupWindowDevProduction(window)
 
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('ui-config-window-initialized', ()=>{
+          resolve()
+        })
+      })
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
@@ -228,6 +304,16 @@ class Holoscape {
       window.loadURL(path.join('file://', __dirname, 'views/debug_view.html'))
       setupWindowDevProduction(window)
 
+      window.initialized = new Promise((resolve) => {
+        ipcMain.on('debug-window-initialized', ()=>{
+          resolve()
+        })
+      })
+
+      ipcMain.on('show-debug-view', () => {
+        window.show()
+      })
+
       let holoscape = this
       window.on('close', (event) => {
         if(!holoscape.quitting) event.preventDefault();
@@ -238,27 +324,41 @@ class Holoscape {
       this.debuggerWindow = window
     }
 
-    createInstallBundleWindow() {
-      let window = new BrowserWindow({
-        width:1200,
-        height:800,
+    createInstallBundleView() {
+      let view = new BrowserView({
         webPreferences: {
           nodeIntegration: true
         },
         show: false,
         icon: systemTrayIconFull(),
       })
-      window.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
-      setupWindowDevProduction(window)
+      view.webContents.loadURL(path.join('file://', __dirname, 'views/install_bundle_view.html'))
+      //setupWindowDevProduction(view)
 
-      let holoscape = this
-      window.on('close', (event) => {
-        if(!holoscape.quitting) event.preventDefault();
-        window.hide();
-        holoscape.updateTrayMenu()
+      view.initialized = new Promise((resolve) => {
+        ipcMain.on('install-window-initialized', ()=>{
+          resolve()
+        })
       })
 
-      this.installBundleWindow = window
+      this.mainWindow.addBrowserView(view)
+      this.installBundleView = view
+    }
+
+    showInstallBundleView() {
+      this.showView(this.installBundleView)
+    }
+
+    showView(view) {
+      this.activeView = view
+      let mainWindowBounds = this.mainWindow.getBounds()
+
+      view.setBounds({x: 300, y: process.platform === "darwin" ? 21 : 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-66})
+    }
+
+    hideViews() {
+      this.activeView = null
+      this.installBundleView.setBounds({x: -200, y: 0, width: 100, height: 100})
     }
 
     updateTrayMenu(opt) {
@@ -279,12 +379,10 @@ class Holoscape {
         { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
       ])
       const contextMenu = Menu.buildFromTemplate([
-        { label: 'hApps', type: 'submenu', submenu: happMenu },
+        { label: 'Show Holoscape', click: ()=>this.mainWindow.show() },
         { type: 'separator' },
         { label: 'Settings-'+conductor.persona(), type: 'submenu', submenu: settingsMenu },
         { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
-        { type: 'separator' },
-        { label: 'Install hApp...', click: ()=>this.installBundleWindow.show() },
         { type: 'separator' },
         { label: 'Quit', click: ()=> this.quit() }
       ])
@@ -376,6 +474,9 @@ class Holoscape {
         onSignal((params) => {
           if(this.quitting) return
           this.debuggerWindow.webContents.send('hc-signal', params)
+          if(params.instance_stats) {
+            this.mainWindow.webContents.send('instance-stats', params.instance_stats)
+          }
           //console.log(JSON.stringify(params))
           if (params.signal && params.signal.name === 'switch_view') {
             const { view, location } = JSON.parse(params.signal.arguments)
@@ -388,12 +489,12 @@ class Holoscape {
         mb.tray.setImage(systemTrayIconFull())
         this.updateTrayMenu()
         this.splash.hide()
-        setTimeout(() => {
-          this.configWindow.webContents.send('conductor-call-set')
-          this.uiConfigWindow.webContents.send('conductor-call-set')
-          this.debuggerWindow.webContents.send('conductor-call-set')
-          this.installBundleWindow.webContents.send('conductor-call-set')
-        }, 500)
+        this.createMainWindow()
+
+        for(let window of [this.configWindow, this.uiConfigWindow, this.debuggerWindow, this.installBundleView]) {
+          window.initialized.then(() => window.webContents.send('conductor-call-set'))
+        }
+
       }).catch((error)=> {
         console.error('Holoscape could not connect to conductor', error)
         global.holoscape.checkConductorConnection()
@@ -404,6 +505,18 @@ class Holoscape {
       this.shutdownConductor()
       this.quitting=true
       mb.app.quit()
+    }
+
+    hash(params) {
+      return cli.hash(params)
+    }
+
+    notifyNewHapp(name, ui) {
+      this.mainWindow.webContents.send('happ-added', {name, ui})
+    }
+
+    notifyUiActivated(name) {
+      this.mainWindow.webContents.send('ui-activated', {name})
     }
   }
 

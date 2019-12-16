@@ -1,8 +1,8 @@
 const { spawnSync } = require('child_process')
 const path = require('path')
-const { remote } = require('electron')
+//const { remote } = require('electron')
 
-const rootConfigPath = remote.getGlobal('rootConfigPath')
+const rootConfigPath = global.rootConfigPath
 
 function executablePath() {
     let executable;
@@ -33,13 +33,15 @@ module.exports = {
         let { stdout, stderr, error } = spawnSync(
             executablePath(), 
             params,
-            {cwd: rootConfigPath}
+            {cwd: __dirname}
         )
         stderr = stderr.toString()
         stdout = stdout.toString()
         console.log("CLI: got results:")
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
+
+
 
         if(error) {
             console.log('Error executing hc:', error)

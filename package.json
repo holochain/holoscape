@@ -30,6 +30,7 @@
   "dependencies": {
     "@holochain/hc-web-client": "^0.5.1",
     "@iarna/toml": "^2.2.3",
+    "adm-zip": "^0.4.13",
     "ansi-to-html": "^0.6.11",
     "bootstrap": "^4.3.1",
     "extract-zip": "^1.6.7",

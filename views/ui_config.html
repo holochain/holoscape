@@ -63,7 +63,8 @@
     <script>
 
         let configured = false
-        require('electron').ipcRenderer.on('conductor-call-set', () => {
+        let ipcRenderer = require('electron').ipcRenderer
+        ipcRenderer.on('conductor-call-set', () => {
             if(configured) return
             configured = true
 
@@ -108,6 +109,8 @@
 
             refresh()
         })
+
+        ipcRenderer.send('ui-config-window-initialized')
     </script>
 
 

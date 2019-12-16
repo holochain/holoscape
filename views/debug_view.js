@@ -311,3 +311,5 @@ ipcRenderer.on('conductor-call-set', () => {
     window.app = app
     window.call = call
 })
+
+ipcRenderer.send('debug-window-initialized')

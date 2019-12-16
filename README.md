@@ -7,8 +7,8 @@
 
 A complete end-user deployment of a Holochain conductor with UI for administration and a run-time for hApp UIs.
 
-![](images/Splash_screenshot.png)
-![](images/Conductor_config_view_screenshot.png)
+![](images/Splash_screenshot-0.0.5.png)
+![](images/MainWindow_screenshot-0.0.5.png)
 
 ## Why?
 

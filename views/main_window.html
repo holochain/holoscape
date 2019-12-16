@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <title>Holoscape - The Personal Holochain Agent</title>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>require('popper.js');</script>
+    <script>require('bootstrap');</script>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+     #backdrop {
+       position: absolute;
+       left: 0;
+       right: 0;
+       top: 0;
+       bottom: 0;
+       opacity: 0.3;
+       background-image: url(../images/splash_background.jpg);
+       background-size: cover;
+       background-repeat: no-repeat;
+       background-position: center;
+     }
+      .error {
+        color: red;
+      }
+      .info {
+        color: blue;
+      }
+      .modal-spinner {
+        margin: 20px;
+      }
+      .actions {
+        max-height:420px;
+        overflow:auto;
+        background:#bbb;
+      }
+      .action {
+          cursor: pointer;
+      }
+      .clickFetch {
+          cursor: pointer;
+      }
+      .list-group-item label {
+          color: black;
+      }
+      .badge-light, .black {
+          color: black;
+      }
+      .zome-call {
+          word-wrap: break-word;
+      }
+      .zome-call .zome-call-container {
+          word-wrap: break-word;
+          overflow: scroll;
+      }
+      .light-blue-background {
+          background: lightblue !important;
+      }
+      .light-green-background {
+          background: lightgreen !important;
+      }
+      .content {
+          margin-left: 300px;
+      }
+      #separator {
+          position: absolute;
+          top: 4px;
+          right: 0px;
+          bottom: 4px;
+          width: 4;
+          background: linear-gradient(0deg,  #00ead2, #4720e3);
+      }
+      .navbar-content {
+          padding: 4px 10px 0 4px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="backdrop"></div>
+
+    <div id="app">
+        <v-app>
+            <v-navigation-drawer fixed permanent width="300">
+                <div id="separator"></div>
+                <v-list nav class="navbar-content">
+                    <v-toolbar
+                        color="deep-purple accent-4"
+                        dark
+                    >
+                        <v-toolbar-title>hApps</v-toolbar-title>
+                    </v-toolbar>
+                    <v-list-item-group v-model="activeUI" color="deep-purple">
+                        <v-list-item key="'happ-store'" v-on:click="showHappStore()">
+                            <v-icon v-text="'mdi-plus'" large color="deep-purple" dark></v-icon>
+                            <v-list-item-content>
+                                <v-list-item-title class="title">
+                                    hApp Store
+                                </v-list-item-title>
+                                <v-list-item-subtitle>
+                                    Click here to install new hApps
+                                </v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+
+                        <v-divider></v-divider>
+                        
+                        <v-list-item
+                            v-for="(ui, name) in installedUIs"
+                            :key="name"
+                            link
+                            v-on:click="showHappUi(name)"
+                        >                
+                            <v-list-item-content>
+                                <v-list-item-title>{{ name }}</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+            </v-navigation-drawer>
+            
+            <v-app-bar app>
+                <!-- -->
+            </v-app-bar>
+            
+            <!-- Sizes your content based upon application components -->
+            <v-content class="content">
+            
+            </v-content>
+            
+            <v-footer app fixed color="blue-grey">
+                <v-spacer></v-spacer>
+                <v-tooltip bottom v-for="stats, instance_id in instance_stats">
+                    <template v-slot:activator="{ on }">
+                      <v-chip  color="cyan lighten-4" v-on="on" @click="showDebugView()">
+                        {{instance_id}}: {{stats.number_held_entries}}[{{stats.number_held_aspects}}]
+                        <v-progress-circular v-if="stats.number_pending_validations > 0"
+                            indeterminate width="1" color="deep-purple"
+                            >{{stats.number_pending_validations}}</v-progress-circular>
+                      </v-chip>
+                    </template>
+                    <span>DNA stats: DNA-id: held entries [held aspects] / items in validation queue</span>
+                  </v-tooltip>
+                
+            </v-footer>
+        </v-app>
+    </div>
+
+    <script type="text/javascript" src="main_window.dist.js"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-const { BrowserWindow, dialog, protocol, session, ipcMain } = require('electron')
+const { BrowserView, dialog, protocol, session, ipcMain } = require('electron')
 const { ncp } = require('ncp')
 const fs = require('fs')
 const path = require('path')
@@ -99,6 +99,8 @@ class HappUiController {
     installedUIs = {};
     runningUIs = {};
     holoscape;
+    mainWindow;
+    activeUI;
 
     constructor(hs) {
         this.holoscape = hs
@@ -119,6 +121,15 @@ class HappUiController {
         })
     }
 
+    setMainWindow(mainWindow) {
+        this.mainWindow = mainWindow
+        this.mainWindow.on('resize', () => {
+            if(this.activeUI && this.runningUIs[this.activeUI]) {
+                this.showView(this.runningUIs[this.activeUI])
+            }
+        })
+    }
+
     createUiMenuTemplate() {
         let menuTemplate = []
 
@@ -130,7 +141,7 @@ class HappUiController {
 
             menuTemplate.push({
                 label: uiName,
-                click: ()=>this.showHideUI(uiName),
+                //click: ()=>this.showHideUI(uiName),
                 type: 'checkbox',
                 checked: visible
             })
@@ -181,6 +192,7 @@ class HappUiController {
             that.installedUIs[name] = {installDir}
             that.saveUIinfo()
             that.holoscape.updateTrayMenu()
+            that.holoscape.notifyNewHapp(name, that.installedUIs[name])
         })
         .catch((err) => {
             dialog.showErrorBox('Holoscape', JSON.stringify(err))
@@ -236,9 +248,7 @@ class HappUiController {
             return
         }
 
-        let window = new BrowserWindow({
-            width:890,
-            height:535,
+        let view = new BrowserView({
             webPreferences: {
                 nodeIntegration: true,
                 title: name,
@@ -246,40 +256,58 @@ class HappUiController {
                 preload: path.join(__dirname, 'happ-ui-preload.js')
             },
         })
-        window.uiName = name
+        this.mainWindow.addBrowserView(view)
+        view.uiName = name
 
         const windowURL = `${HAPP_SCHEME}://${uiSubDir}/`
-        console.log('Created window. Loading', windowURL)
+        console.log('Created view. Loading', windowURL)
 
-        window.loadURL(windowURL)
-        setupWindowDevProduction(window)
+        view.webContents.loadURL(windowURL)
+        //setupWindowDevProduction(view)
         let holoscape = this.holoscape
-        window.on('close', (event) => {
+        view.on('close', (event) => {
             if(!holoscape.quitting) event.preventDefault();
-            window.hide();
+            view.hide();
             holoscape.updateTrayMenu()
         })
 
-        this.runningUIs[name] = window
+        this.runningUIs[name] = view
     }
 
-    showHideUI(name) {
-        let window = this.runningUIs[name]
-        if(!window) {
+    showView(view) {
+        let mainWindowBounds = this.mainWindow.getBounds()
+        view.setBounds({x: 300, y: process.platform === "darwin" ? 22 : 0, width: mainWindowBounds.width-300, height: mainWindowBounds.height-66})
+    }
+
+    hideView(view) {
+        view.setBounds({x: -200, y: 0, width: 100, height: 100})
+    }
+
+    showHappUi(name) {
+        let view = this.runningUIs[name]
+        if(!view) {
             this.createUI(name).then(() => {
-                window = this.runningUIs[name]
-                window.show()
+                view = this.runningUIs[name]
+                this.showView(view)
             })
-            return
+        } else {
+            this.showView(view)
         }
 
-        // if(window.isVisible()) {
-        //     window.hide()
-        // } else {
-        //     window.show()
-        // }
-        window.show()
-        this.holoscape.updateTrayMenu()
+        for(let viewName in this.runningUIs) {
+            if(viewName != name) {
+                let view = this.runningUIs[viewName]
+                this.hideView(view)
+            }
+        }
+
+        this.activeUI = name
+    }
+
+    hideAllHappUis() {
+        for(let viewName in this.runningUIs) {
+            this.hideView(this.runningUIs[viewName])
+        }
     }
 
     async ensureWindowFor(name) {
@@ -292,8 +320,9 @@ class HappUiController {
 
     async showAndRiseUI(name, location) {
         this.ensureWindowFor(name).then((window)=>{
-          window.show()
-          window.focus()
+          this.hideAllHappUis()
+          this.showHappUi(name)
+          this.holoscape.notifyUiActivated(name)
           console.log(window)
           const uiRootDir = this.installedUIs[name].installDir
           const uiSubDir = path.basename(uiRootDir)

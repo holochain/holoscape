@@ -137,3 +137,4 @@ ipcRenderer.on('conductor-call-set', () => {
   configured = true
 })
 
+ipcRenderer.send('config-window-initialized')
