@@ -129,7 +129,7 @@
             
             <v-footer app fixed color="blue-grey">
                 <v-spacer></v-spacer>
-                <v-tooltip top v-for="stats, instance_id in instance_stats">
+                <v-tooltip bottom v-for="stats, instance_id in instance_stats">
                     <template v-slot:activator="{ on }">
                       <v-chip  color="cyan lighten-4" v-on="on" @click="showDebugView()">
                         {{instance_id}}: {{stats.number_held_entries}}[{{stats.number_held_aspects}}]
