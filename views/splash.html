@@ -201,7 +201,7 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog v-model="network_modal" persistent max-width="690" height="450px">
+          <v-dialog v-model="network_modal" persistent max-width="700" height="450px">
             <v-card>
               <v-card-title class="headline">Welcome to Holoscape and Holochain</v-card-title>
               <v-card-text>
@@ -240,7 +240,7 @@
                       key="1-step"
                       step="1"
                     >
-                      <v-card class="mb-12 scroll" height="280px" flat>
+                      <v-card class="scroll" height="260px" flat>
                         <v-card-title class="headline">What is this?</v-card-title>
                         <v-divider></v-divider>
                         <v-card-text>
@@ -260,21 +260,14 @@
                             of hApps.
                           </p>
                         </v-card-text>
-                        <v-card-actions>
-                          
-                        </v-card-actions>
                       </v-card>
-                      <v-btn color="blue-grey" @click="quit()">Quit</v-btn>            
-                      <v-btn color="primary" @click="intro = 2">
-                        Ok, got it!
-                      </v-btn>
                     </v-stepper-content>
 
                     <v-stepper-content
                       key="2-step"
                       step="2"
                     >
-                      <v-card class="mb-12 scroll" height="280px" flat>
+                      <v-card class="scroll" height="260px" flat>
                         <v-card-title class="headline">Confirm alpha status</v-card-title>
                         <v-divider></v-divider>
                         <v-card-text>
@@ -296,12 +289,7 @@
                             </label>
                           </p>
                         </v-card-text>
-                        <v-divider></v-divider>
                       </v-card>
-                      <v-btn color="blue-grey" @click="quit()">Quit</v-btn>
-                      <v-btn color="primary" :disabled="!disclaimer" @click="intro = 3">
-                        Continue
-                      </v-btn>
                     </v-stepper-content>
                   
                     
@@ -309,7 +297,7 @@
                       key="2-step"
                       step="3"
                     >
-                    <v-card class="mb-12 scroll" height="280px" flat>
+                    <v-card class="scroll" height="260px" flat>
                       
                       <v-card-text>
                         <p>
@@ -348,13 +336,21 @@
                         </div>
                       </v-card-text>
                     </v-card>  
-                    <v-btn color="blue-grey" @click="quit()">Quit</v-btn>
-                        <v-btn color="deep-purple" @click="network_config_submit() = false">Finish setup</v-btn>
                     </v-stepper-content>
                   </v-stepper-items>
                 </v-stepper>
               </v-card-text>
-              
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-grey" @click="quit()">Quit</v-btn>
+                <v-btn v-if="intro == 1" color="primary" @click="intro = 2">
+                  Ok, got it!
+                </v-btn>
+                <v-btn v-if="intro == 2" color="primary" :disabled="!disclaimer" @click="intro = 3">
+                  Continue
+                </v-btn>
+                <v-btn v-if="intro == 3" color="deep-purple" @click="network_config_submit() = false">Finish setup</v-btn>
+              </v-card-actions>
             </v-card>
           </v-dialog>
         </v-content>
