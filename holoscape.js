@@ -54,7 +54,9 @@ class Holoscape {
       this.createLogWindow()
       this.createConfigWindow()
       this.createUiConfigWindow()
-      this.createDebuggerWindow()
+      ipcMain.on('show-debug-view', () => {
+        this.showDebuggerWindow()
+      })
       
       this.updateTrayMenu()
       this.splash.webContents.send('splash-status', "Booting conductor...")
@@ -305,20 +307,17 @@ class Holoscape {
       setupWindowDevProduction(window)
 
       window.initialized = new Promise((resolve) => {
-        ipcMain.on('debug-window-initialized', ()=>{
+        ipcMain.once('debug-window-initialized', ()=>{
+          if(global.conductor_call) {
+            window.webContents.send('conductor-call-set')
+          }
           resolve()
         })
       })
 
-      ipcMain.on('show-debug-view', () => {
-        window.show()
-      })
-
       let holoscape = this
       window.on('close', (event) => {
-        if(!holoscape.quitting) event.preventDefault();
-        window.hide();
-        holoscape.updateTrayMenu()
+        holoscape.debuggerWindow = undefined
       })
 
       this.debuggerWindow = window
@@ -373,7 +372,7 @@ class Holoscape {
         { label: 'Reveal config directory', click: ()=>shell.openItem(conductor.rootConfigPath()) },
       ])
       const conductorMenu = Menu.buildFromTemplate([
-        { label: 'Debug view', type: 'checkbox', checked: this.debuggerWindow.isVisible(), click: ()=>this.showHideDebuggerWindow() },
+        { label: 'Debug view', click: ()=>this.showDebuggerWindow() },
         { label: 'Show conductor log window', type: 'checkbox', checked: this.logWindow.isVisible(), click: ()=>this.showHideLogs() },
         { label: 'Shutdown conductor', visible: this.conductorProcess!=null, click: ()=>this.shutdownConductor() },
         { label: 'Boot conductor', visible: this.conductorProcess==null, click: ()=>this.bootConductor() },
@@ -460,12 +459,11 @@ class Holoscape {
       }
     }
 
-    showHideDebuggerWindow() {
-      if(this.debuggerWindow.isVisible()) {
-        this.debuggerindow.hide()
-      } else {
-        this.debuggerWindow.show()
+    showDebuggerWindow() {
+      if(!this.debuggerWindow) {
+        this.createDebuggerWindow()
       }
+      this.debuggerWindow.show()
     }
 
     connectConductor() {
@@ -473,7 +471,9 @@ class Holoscape {
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           if(this.quitting) return
-          this.debuggerWindow.webContents.send('hc-signal', params)
+          if(this.debuggerWindow) {
+            this.debuggerWindow.webContents.send('hc-signal', params)
+          }
           if(params.instance_stats) {
             this.mainWindow.webContents.send('instance-stats', params.instance_stats)
           }
