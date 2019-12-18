@@ -136,19 +136,19 @@ ipcRenderer.on('conductor-call-set', () => {
                 text: 'Workflow Type',
                 align: 'left',
                 sortable: false,
-                value: 'type',
+                value: 'workflow',
             },
             {
                 text: 'Delay',
                 align: 'left',
                 sortable: false,
-                value: 'content',
+                value: 'timeout',
             },
             {
                 text: 'Dependencies',
                 align: 'left',
                 sortable: false,
-                value: 'content',
+                value: 'dependencies',
             },
           ],
           heldHeaders: [
@@ -213,10 +213,10 @@ ipcRenderer.on('conductor-call-set', () => {
           },
           updateValidationQueues: (instance_id) => {
             //console.log(`Update state dump with: ${instance_id}`)
-            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_caqueued_holding_workflowslls: true})
+            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_holding_workflows: true})
               .then((dump) => {
                   //console.log("Got validation queue state dump: ", dump)
-                  Vue.set(app.validationQueues, instance_id, dump.queued_calls)
+                  Vue.set(app.validationQueues, instance_id, dump.queued_holding_workflows)
                   //dump.held_aspects = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
               })

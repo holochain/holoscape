@@ -136,7 +136,7 @@
                         <h4>Validation queue:</h4>
                         <v-data-table
                             :headers="queueHeaders"
-                            :items="Object.keys(validationQueues[instance_id]).map((i) => {
+                            :items="validationQueues[instance_id].map((i) => {
                                 return {
                                     address: i.pending.entry_with_header.header.entry_address,
                                     workflow: i.pending.workflow,
