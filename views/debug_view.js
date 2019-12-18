@@ -3,6 +3,7 @@ import Vue from 'vue'
 import VueChatScroll from 'vue-chat-scroll'
 import Vuetify, {VDataTable, VApp, VContainer, VChip, VToolbarTitle, VSpacer, VTextField} from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
+import _ from 'underscore'
 
 Vue.use(VueChatScroll)
 Vue.use(Vuetify,  {
@@ -37,6 +38,12 @@ Vue.use(Vuetify,  {
 const vuetifyOptions = { theme: {dark:true}}
 
 let configured = false
+let single_instance = undefined
+
+ipcRenderer.on('set-single-instance', (event, instance_id) => {
+    console.log("single instance:", instance_id)
+    single_instance = instance_id
+})
 
 ipcRenderer.on('conductor-call-set', () => {
     if(configured) return
@@ -48,7 +55,11 @@ ipcRenderer.on('conductor-call-set', () => {
 
     const refresh = () => {
       call('debug/running_instances')().then((instances)=>{
+          app.instances = []
           instances.map((instance_id) => {
+              if(single_instance && instance_id != single_instance) {
+                  return
+              }
               app.updateStateDump(instance_id)
               app.updateSourceChain(instance_id)
               app.updateHeldAspects(instance_id)
@@ -125,19 +136,19 @@ ipcRenderer.on('conductor-call-set', () => {
                 text: 'Workflow Type',
                 align: 'left',
                 sortable: false,
-                value: 'type',
+                value: 'workflow',
             },
             {
                 text: 'Delay',
                 align: 'left',
                 sortable: false,
-                value: 'content',
+                value: 'timeout',
             },
             {
                 text: 'Dependencies',
                 align: 'left',
                 sortable: false,
-                value: 'content',
+                value: 'dependencies',
             },
           ],
           heldHeaders: [
@@ -164,10 +175,10 @@ ipcRenderer.on('conductor-call-set', () => {
           queueSearch: '',
           heldSearch: '',
           updateStateDump: (instance_id) => {
-              console.log(`Update state dump with: ${instance_id}`)
+              //console.log(`Update state dump with: ${instance_id}`)
               call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_holding_workflows: false})
                 .then((dump) => {
-                    console.log("Got state dump: ", dump)
+                    //console.log("Got state dump: ", dump)
                     Vue.set(app.stateDumps, instance_id, dump)
                 })
                 .catch((error) => {
@@ -175,10 +186,10 @@ ipcRenderer.on('conductor-call-set', () => {
                 })
           },
           updateSourceChain: (instance_id) => {
-            console.log(`Update source chain state dump with: ${instance_id}`)
+            //console.log(`Update source chain state dump with: ${instance_id}`)
             call('debug/state_dump')({instance_id, source_chain: true, held_aspects: false, queued_holding_workflows: false})
               .then((dump) => {
-                  console.log("Got state dump: ", dump)
+                  //console.log("Got state dump: ", dump)
                   Vue.set(app.sourceChains, instance_id, dump.source_chain)
                   //dump.source_chain = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
@@ -188,10 +199,10 @@ ipcRenderer.on('conductor-call-set', () => {
               })
           },
           updateHeldAspects: (instance_id) => {
-            console.log(`Update state dump with: ${instance_id}`)
+            //console.log(`Update state dump with: ${instance_id}`)
             call('debug/state_dump')({instance_id, source_chain: false, held_aspects: true, queued_holding_workflows: false})
               .then((dump) => {
-                  console.log("Got holding map state dump: ", dump)
+                  //console.log("Got holding map state dump: ", dump)
                   Vue.set(app.holdingMaps, instance_id, dump.held_aspects)
                   //dump.held_aspects = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
@@ -201,11 +212,11 @@ ipcRenderer.on('conductor-call-set', () => {
               })
           },
           updateValidationQueues: (instance_id) => {
-            console.log(`Update state dump with: ${instance_id}`)
-            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_caqueued_holding_workflowslls: true})
+            //console.log(`Update state dump with: ${instance_id}`)
+            call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_holding_workflows: true})
               .then((dump) => {
-                  console.log("Got validation queue state dump: ", dump)
-                  Vue.set(app.validationQueues, instance_id, dump.queued_calls)
+                  //console.log("Got validation queue state dump: ", dump)
+                  Vue.set(app.validationQueues, instance_id, dump.queued_holding_workflows)
                   //dump.held_aspects = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
               })
@@ -277,17 +288,19 @@ ipcRenderer.on('conductor-call-set', () => {
 
         switch(signal.action.action_type) {
             case "Commit":
-                app.updateSourceChain(instance_id)
+                _.debounce(app.updateSourceChain(instance_id), 1000, true)
                 break
             case "HoldAspect":
-                app.updateHeldAspects(instance_id)
+                _.debounce(app.updateHeldAspects(instance_id), 1000, true)
                 break
             case "QueueHoldingWorkflow":
             case "RemoveQueuedHoldingWorkflow":
-                app.updateValidationQueues(instance_id)
+                _.debounce(app.updateValidationQueues(instance_id), 1000, true)
+                break
+            case "Prune":
                 break
             default:
-                app.updateStateDump(instance_id)
+                _.debounce(app.updateStateDump(instance_id), 1000, true)
                 break
         }
 
