@@ -3,6 +3,7 @@ import Vue from 'vue'
 import VueChatScroll from 'vue-chat-scroll'
 import Vuetify, {VDataTable, VApp, VContainer, VChip, VToolbarTitle, VSpacer, VTextField} from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
+import _ from 'underscore'
 
 Vue.use(VueChatScroll)
 Vue.use(Vuetify,  {
@@ -277,17 +278,19 @@ ipcRenderer.on('conductor-call-set', () => {
 
         switch(signal.action.action_type) {
             case "Commit":
-                app.updateSourceChain(instance_id)
+                _.debounce(app.updateSourceChain(instance_id), 1000, true)
                 break
             case "HoldAspect":
-                app.updateHeldAspects(instance_id)
+                _.debounce(app.updateHeldAspects(instance_id), 1000, true)
                 break
             case "QueueHoldingWorkflow":
             case "RemoveQueuedHoldingWorkflow":
-                app.updateValidationQueues(instance_id)
+                _.debounce(app.updateValidationQueues(instance_id), 1000, true)
+                break
+            case "Prune":
                 break
             default:
-                app.updateStateDump(instance_id)
+                _.debounce(app.updateStateDump(instance_id), 1000, true)
                 break
         }
 
