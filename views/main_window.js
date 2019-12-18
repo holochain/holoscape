@@ -69,8 +69,8 @@ let app = new Vue({
           happUiController.hideAllHappUis()
           holoscape.showInstallBundleView()
         },
-        showDebugView: () => {
-          ipcRenderer.send('show-debug-view')
+        showDebugView: (instance_id) => {
+          ipcRenderer.send('show-debug-view', instance_id)
         }
     }
 })

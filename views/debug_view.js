@@ -38,6 +38,12 @@ Vue.use(Vuetify,  {
 const vuetifyOptions = { theme: {dark:true}}
 
 let configured = false
+let single_instance = undefined
+
+ipcRenderer.on('set-single-instance', (event, instance_id) => {
+    console.log("single instance:", instance_id)
+    single_instance = instance_id
+})
 
 ipcRenderer.on('conductor-call-set', () => {
     if(configured) return
@@ -49,7 +55,11 @@ ipcRenderer.on('conductor-call-set', () => {
 
     const refresh = () => {
       call('debug/running_instances')().then((instances)=>{
+          app.instances = []
           instances.map((instance_id) => {
+              if(single_instance && instance_id != single_instance) {
+                  return
+              }
               app.updateStateDump(instance_id)
               app.updateSourceChain(instance_id)
               app.updateHeldAspects(instance_id)

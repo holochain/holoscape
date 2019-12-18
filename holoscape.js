@@ -54,8 +54,10 @@ class Holoscape {
       this.createLogWindow()
       this.createConfigWindow()
       this.createUiConfigWindow()
-      ipcMain.on('show-debug-view', () => {
-        this.showDebuggerWindow()
+      this.debuggerWindow = {}
+      ipcMain.on('show-debug-view', (event, instance_id) => {
+        console.log("showing debug window for instance:", instance_id)
+        this.showDebuggerWindow(instance_id)
       })
       
       this.updateTrayMenu()
@@ -293,7 +295,7 @@ class Holoscape {
       this.uiConfigWindow = window
     }
 
-    createDebuggerWindow() {
+    createDebuggerWindow(instance_id) {
       let window = new BrowserWindow({
         width:1200,
         height:800,
@@ -308,6 +310,7 @@ class Holoscape {
 
       window.initialized = new Promise((resolve) => {
         ipcMain.once('debug-window-initialized', ()=>{
+          window.webContents.send('set-single-instance', instance_id)
           if(global.conductor_call) {
             window.webContents.send('conductor-call-set')
           }
@@ -317,10 +320,10 @@ class Holoscape {
 
       let holoscape = this
       window.on('close', (event) => {
-        holoscape.debuggerWindow = undefined
+        holoscape.debuggerWindow[instance_id] = undefined
       })
 
-      this.debuggerWindow = window
+      this.debuggerWindow[instance_id] = window
     }
 
     createInstallBundleView() {
@@ -459,11 +462,11 @@ class Holoscape {
       }
     }
 
-    showDebuggerWindow() {
-      if(!this.debuggerWindow) {
-        this.createDebuggerWindow()
+    showDebuggerWindow(instance_id) {
+      if(!this.debuggerWindow[instance_id]) {
+        this.createDebuggerWindow(instance_id)
       }
-      this.debuggerWindow.show()
+      this.debuggerWindow[instance_id].show()
     }
 
     connectConductor() {
@@ -471,11 +474,16 @@ class Holoscape {
       connect({url:`ws://localhost:${conductor.adminPort()}`}).then(({call, callZome, close, onSignal}) => {
         onSignal((params) => {
           if(this.quitting) return
-          if(this.debuggerWindow) {
-            this.debuggerWindow.webContents.send('hc-signal', params)
+          if(params.instance_id && this.debuggerWindow[params.instance_id]) {
+            this.debuggerWindow[params.instance_id].webContents.send('hc-signal', params)
           }
           if(params.instance_stats) {
             this.mainWindow.webContents.send('instance-stats', params.instance_stats)
+            for(let instance_id in this.debuggerWindow) {
+              let debuggerWindow = this.debuggerWindow[instance_id]
+              if(debuggerWindow)
+                debuggerWindow.webContents.send('hc-signal', params)
+            }
           }
           //console.log(JSON.stringify(params))
           if (params.signal && params.signal.name === 'switch_view') {
@@ -491,7 +499,7 @@ class Holoscape {
         this.splash.hide()
         this.createMainWindow()
 
-        for(let window of [this.configWindow, this.uiConfigWindow, this.debuggerWindow, this.installBundleView]) {
+        for(let window of [this.configWindow, this.uiConfigWindow, this.installBundleView]) {
           window.initialized.then(() => window.webContents.send('conductor-call-set'))
         }
 
