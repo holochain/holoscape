@@ -165,10 +165,10 @@ ipcRenderer.on('conductor-call-set', () => {
           queueSearch: '',
           heldSearch: '',
           updateStateDump: (instance_id) => {
-              console.log(`Update state dump with: ${instance_id}`)
+              //console.log(`Update state dump with: ${instance_id}`)
               call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_holding_workflows: false})
                 .then((dump) => {
-                    console.log("Got state dump: ", dump)
+                    //console.log("Got state dump: ", dump)
                     Vue.set(app.stateDumps, instance_id, dump)
                 })
                 .catch((error) => {
@@ -176,10 +176,10 @@ ipcRenderer.on('conductor-call-set', () => {
                 })
           },
           updateSourceChain: (instance_id) => {
-            console.log(`Update source chain state dump with: ${instance_id}`)
+            //console.log(`Update source chain state dump with: ${instance_id}`)
             call('debug/state_dump')({instance_id, source_chain: true, held_aspects: false, queued_holding_workflows: false})
               .then((dump) => {
-                  console.log("Got state dump: ", dump)
+                  //console.log("Got state dump: ", dump)
                   Vue.set(app.sourceChains, instance_id, dump.source_chain)
                   //dump.source_chain = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
@@ -189,10 +189,10 @@ ipcRenderer.on('conductor-call-set', () => {
               })
           },
           updateHeldAspects: (instance_id) => {
-            console.log(`Update state dump with: ${instance_id}`)
+            //console.log(`Update state dump with: ${instance_id}`)
             call('debug/state_dump')({instance_id, source_chain: false, held_aspects: true, queued_holding_workflows: false})
               .then((dump) => {
-                  console.log("Got holding map state dump: ", dump)
+                  //console.log("Got holding map state dump: ", dump)
                   Vue.set(app.holdingMaps, instance_id, dump.held_aspects)
                   //dump.held_aspects = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
@@ -202,10 +202,10 @@ ipcRenderer.on('conductor-call-set', () => {
               })
           },
           updateValidationQueues: (instance_id) => {
-            console.log(`Update state dump with: ${instance_id}`)
+            //console.log(`Update state dump with: ${instance_id}`)
             call('debug/state_dump')({instance_id, source_chain: false, held_aspects: false, queued_caqueued_holding_workflowslls: true})
               .then((dump) => {
-                  console.log("Got validation queue state dump: ", dump)
+                  //console.log("Got validation queue state dump: ", dump)
                   Vue.set(app.validationQueues, instance_id, dump.queued_calls)
                   //dump.held_aspects = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
