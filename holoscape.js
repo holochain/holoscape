@@ -34,6 +34,7 @@ class Holoscape {
     uiConfigWindow;
     debuggerWindow;
     installBundleView;
+    installFromFileWindow;
 
     activeView;
 
@@ -356,6 +357,33 @@ class Holoscape {
       this.installBundleView = view
     }
 
+    createInstallFromFileView() {
+      let window = new BrowserWindow({
+        width:1200,
+        height:800,
+        webPreferences: {
+          nodeIntegration: true
+        },
+        show: true,
+        icon: systemTrayIconFull(),
+      })
+      window.webContents.loadURL(path.join('file://', __dirname, 'views/legacy_install_bundle_view.html'))
+
+      let holoscape = this
+      window.on('close', (event) => {
+        holoscape.installFromFileWindow = undefined
+      })
+
+      this.installFromFileWindow = window
+    }
+
+    showInstallFromFileWindow() {
+      if(!this.installFromFileWindow) {
+        this.createInstallFromFileView()
+      }
+      this.installFromFileWindow.show()
+    }
+
     showInstallBundleView() {
       this.showView(this.installBundleView)
     }
@@ -394,6 +422,8 @@ class Holoscape {
         { type: 'separator' },
         { label: 'Settings-'+conductor.persona(), type: 'submenu', submenu: settingsMenu },
         { label: 'Conductor Run-Time', type: 'submenu', submenu: conductorMenu },
+        { type: 'separator' },
+        { label: 'Install hApp from file...', click:()=>this.showInstallFromFileWindow() },
         { type: 'separator' },
         { label: 'Quit', click: ()=> this.quit() }
       ])
