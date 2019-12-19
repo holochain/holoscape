@@ -133,12 +133,19 @@
                     <template v-slot:activator="{ on }">
                       <v-chip  color="cyan lighten-4" v-on="on" @click="showDebugView(instance_id)">
                         {{instance_id}}: {{stats.number_held_entries}}[{{stats.number_held_aspects}}]
-                        <v-progress-circular v-if="stats.number_pending_validations > 0"
-                            indeterminate width="1" color="deep-purple"
-                            >{{stats.number_pending_validations}}</v-progress-circular>
+                        <v-progress-circular v-if="!stats.number_delayed_validations && stats.number_pending_validations  > 0" indeterminate width="1" color="deep-purple">
+                            {{stats.number_pending_validations}}
+                        </v-progress-circular>
+                        <v-progress-circular v-if="stats.number_delayed_validations && (stats.number_pending_validations - stats.number_delayed_validations) > 0" indeterminate width="1" color="deep-purple">
+                            {{stats.number_pending_validations - stats.number_delayed_validations}}
+                        </v-progress-circular>
+                        <span v-if="stats.number_delayed_validations > 0" class="brown--text">
+                            /{{stats.number_delayed_validations}}
+                        </span>
                       </v-chip>
+                      
                     </template>
-                    <span>DNA stats: DNA-id: held entries [held aspects] / items in validation queue</span>
+                    <span>DNA-id: held entries [held aspects] / pending validations (/ delayed validations)</span>
                   </v-tooltip>
                 
             </v-footer>
