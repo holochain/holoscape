@@ -38,6 +38,7 @@
     "get-uri": "^2.0.3",
     "jquery": "^3.4.1",
     "menubar": "^6.0.7",
+    "mousetrap": "^1.6.3",
     "mustache": "^3.0.1",
     "ncp": "^2.0.0",
     "popper.js": "^1.16.0",

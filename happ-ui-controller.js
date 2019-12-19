@@ -115,6 +115,14 @@ class HappUiController {
             }
         })
 
+        ipcMain.on('show-developer-tools', (event, uiName) => {
+            console.log("got show dev tools:", uiName)
+            let happView = this.runningUIs[uiName]
+            if(happView) {
+                happView.webContents.openDevTools()
+            }
+        })
+
         console.log('Registering file protocol:', HAPP_SCHEME)
         protocol.registerFileProtocol(HAPP_SCHEME, happProtocolCallback, (error) => {
             if(error) throw error

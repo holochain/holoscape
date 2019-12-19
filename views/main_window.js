@@ -8,6 +8,7 @@ import Vuetify, {
     VIcon, VSpacer, VProgressCircular, VChip,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
+import Mousetrap from 'mousetrap'
 
 Vue.use(Vuetify,  {
     components: {
@@ -71,6 +72,10 @@ let app = new Vue({
         },
         showDebugView: (instance_id) => {
           ipcRenderer.send('show-debug-view', instance_id)
+        },
+        showHappUiDebugTools: () => {
+          let uiName = Object.keys(app.installedUIs)[app.activeUI-1]
+          ipcRenderer.send('show-developer-tools', uiName)
         }
     }
 })
@@ -95,3 +100,7 @@ window.app = app
 window.happUiController = remote.getGlobal('holoscape').happUiController
 
 ipcRenderer.send('main-window-initialized')
+
+Mousetrap.bind('ctrl+shift+i', () => {
+  app.showHappUiDebugTools()
+})
