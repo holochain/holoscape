@@ -246,13 +246,14 @@
                         <v-card-text>
                           <p>
                             Holoscape is a complete Holochain run-time and deployment for end-users.
-                            It includes Holochain binaries and everything needed to quickly get started, automatically setup
-                            a full, local Holochain node and start using Holochain apps.
+                            It includes Holochain binaries and everything needed to get started quickly, automatically setup
+                            a full local Holochain node, and start using Holochain apps.
                           </p>
                           <p>
                             Holoscape is the graphical user interface to your local Holochain node - the Conductor.
                             Typically, Holochain networks, i.e. DNAs, are meant to be small micro-services, and hApps to be
-                            bundles of several DNAs that bridge to each other (= use functionality of each other) with additional GUIs.
+                            bundles of several DNAs that access one another’s functionality
+                            (i.e. <i>bridge</i> to each other) with additional GUIs.
                             This is the reason for a Holochain Conductor that runs several DNAs on the local machine for the same user.
                           </p>
                           <p>
@@ -272,20 +273,26 @@
                         <v-divider></v-divider>
                         <v-card-text>
                           <p>
-                            Please note that both Holochain as well as Holoscape are not yet meant to be used in a production
+                            Please note that both Holochain and Holoscape are not yet meant to be used in a production
                             context!
                           </p>
                           <p>
-                            We want to see some more testing and real-world usage to find and iron-out potential bugs.
-                            In order to help with that the current default network implemenation <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">Sim2h</a>
+                            We want to complete more testing and see additional real-world usage to find and remove bugs. 
+                            In order to help develop and debug our network implementation, <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">Sim2h</a>
                             can be configured to store a centrally held log of all the data that is transmitted between nodes.
                             When needed, this feature will be used to analyse and diagnose potential problems.
                           </p>
+                          <strong>Please confirm both:</strong>
                           <p>
-                            <strong>Please confirm:</strong>
-                            <input type="checkbox" id="checkbox" v-model="disclaimer">
-                            <label for="checkbox">
-                              <i>"I understand this is alpha software and with the default network configuration entry contents might be stored centrally for debugging purposes." </i>
+                            <input type="checkbox" id="alpha-checkbox" v-model="disclaimer">
+                            <label for="alpha-checkbox">
+                              <i>"I understand this is alpha software and the default network configuration might store entry contents centrally for debugging purposes." </i>
+                            </label>
+                          </p>
+                          <p>
+                            <input type="checkbox" id="tc-checkbox" v-model="t_and_c">
+                            <label for="tc-checkbox">
+                              <i>"I have read and accept the <a href="#" v-on:click="openExternal('https://holo.host/wp-content/uploads/Alpha-Test-Terms-and-Conditions.pdf')">Terms and Conditions</a> that apply to the Holo Alpha TestNet" </i>
                             </label>
                           </p>
                         </v-card-text>
@@ -346,7 +353,7 @@
                 <v-btn v-if="intro == 1" color="primary" @click="intro = 2">
                   Ok, got it!
                 </v-btn>
-                <v-btn v-if="intro == 2" color="primary" :disabled="!disclaimer" @click="intro = 3">
+                <v-btn v-if="intro == 2" color="primary" :disabled="!disclaimer || !t_and_c" @click="intro = 3">
                   Continue
                 </v-btn>
                 <v-btn v-if="intro == 3" color="deep-purple" @click="network_config_submit() = false" dark>Finish setup</v-btn>

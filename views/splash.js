@@ -55,6 +55,7 @@ let app = new Vue({
         sim2h_url: 'wss://sim2h.holochain.org:9000',
         dynamo_url: 'http://localhost:8000',
         disclaimer: false,
+        t_and_c: false,
         missing_binaries_modal: false,
         passphrase_modal: false,
         network_modal: false,
