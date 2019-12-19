@@ -93,3 +93,5 @@ ipcRenderer.on('instance-stats', (event, instance_stats) => {
 
 window.app = app
 window.happUiController = remote.getGlobal('holoscape').happUiController
+
+ipcRenderer.send('main-window-initialized')

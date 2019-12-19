@@ -102,11 +102,16 @@ class Holoscape {
         alwaysOnTop: true,
         frame: false,
         transparent: true,
+        show: false,
         icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/splash.html'))
       //window.webContents.openDevTools()
       this.splash = window
+
+      ipcMain.once('splash-initialized', () => {
+        window.show()
+      })
 
       return new Promise((resolve) => {
         window.webContents.on('did-finish-load', ()=>{
@@ -190,11 +195,15 @@ class Holoscape {
         webPreferences: {
           nodeIntegration: true
         },
-        show: true,
+        show: false,
         icon: systemTrayIconFull(),
       })
       window.loadURL(path.join('file://', __dirname, 'views/main_window.html'))
       setupWindowDevProduction(window)
+
+      ipcMain.once('main-window-initialized', () => {
+        window.show()
+      })
 
       let holoscape = this
       window.on('close', (event) => {

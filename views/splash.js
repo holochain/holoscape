@@ -156,3 +156,5 @@ $('#passphrase').on('keyup', (event) => {
         cancel()
     }
 })
+
+ipcRenderer.send('splash-initialized')
