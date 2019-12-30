@@ -313,7 +313,6 @@
                 installed_instances: [],
                 installed_dnas: [],
                 installed_bridges: [],
-                used_ports: [],
                 happ_index: [],
                 selected_happ: undefined,
             },
@@ -631,15 +630,17 @@
             console.log('Bridge added')
         }
 
-        const nextMinPort = () => {
-            if(app.used_ports.length > 0) {
-                app.used_ports.sort()
-                return app.used_ports[app.used_ports.length -1] + 1
+        const nextMinPort = async () => {
+            const interfaces = await call('admin/interface/list')()
+            if (Array.isArray(interfaces) && interfaces.length > 0) {
+                const ports = []
+                interfaces.forEach(interface => ports.push(interface.driver.port))
+                return Math.max(...ports) + 1
             } else {
                 return 10000
             }
         }
-
+        
         const installUi = async (ui) => {
             console.log(JSON.stringify(ui))
             let extractedPath = temp.path()
@@ -658,8 +659,8 @@
             let id = `${ui.name}-interface`
             let type = 'websocket'
             let admin = app.installAsAdmin
-            let port = await getPort({port: getPort.makeRange(nextMinPort(), 31000)})
-            app.used_ports.push(port)
+            let minPort = await nextMinPort()
+            let port = await getPort({port: getPort.makeRange(minPort, 31000)})
             await call('admin/interface/add')({id,admin,type,port})
 
             for(ref of ui.instance_references) {
