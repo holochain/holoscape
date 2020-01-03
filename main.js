@@ -7,7 +7,7 @@ const { loadUIinfo, sanitizeUINameForScheme, HAPP_SCHEME } = require('./happ-ui-
 const TOML = require('@iarna/toml')
 
 const mb = menubar({
-  showDockIcon: true, 
+  showDockIcon: true,
   browserWindow: {icon: systemTrayIconFull()},
   icon: systemTrayIconFull(),
   tooltip: 'Holoscape - The Holochain run-time'
@@ -81,7 +81,7 @@ mb.on('ready', async () => {
           break
       case "sim2h":
           config = {
-              sim2h_url: config.sim2h_url || "wss://localhost:9000"
+              sim2h_url: config.sim2h_url || "ws://localhost:9000"
           }
           break
       case "lib3h":

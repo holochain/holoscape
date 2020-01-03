@@ -18,7 +18,7 @@ import { Ripple } from 'vuetify/lib/directives'
 Vue.use(Vuetify,  {
     components: {
         VApp, VContainer,
-        VRow, VCol, VCard, VCardTitle, VCardSubtitle, 
+        VRow, VCol, VCard, VCardTitle, VCardSubtitle,
         VAvatar, VIcon, VBtn, VImg, VSpacer, VSimpleTable,
         VChip, VProgressCircular,
         VDialog, VForm, VTextField,
@@ -52,7 +52,7 @@ let app = new Vue({
         status: "Initializing...",
         logs: require('electron').remote.getGlobal('holoscape').logMessages,
         network_type: "sim2h",
-        sim2h_url: 'wss://sim2h.holochain.org:9000',
+        sim2h_url: 'ws://public.sim2h.net:9000',
         dynamo_url: 'http://localhost:8000',
         disclaimer: false,
         t_and_c: false,

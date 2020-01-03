@@ -146,10 +146,10 @@
         <v-content id="background">
           <div id="title">
             <img class="logo" src="../images/Holoscape_title.png"></img>
-            <h3 class="version">Version 0.0.5-alpha</h3>
+            <h3 class="version">Version 0.0.6-alpha</h3>
           </div>
           <div class="status">{{status}}</div>
-        
+
           <v-dialog v-model="missing_binaries_modal" persistent max-width="590">
             <v-card>
               <v-card-title class="headline">Holoscape Error - Missing Binaries</v-card-title>
@@ -158,7 +158,7 @@
                 <v-container>
                 <p>Holoscape needs both binaries out of the <a href="#" v-on:click="openExternal('https://github.com/holochain/holochain-rust')">holochain-rust</a> repository: <span class='code'>hc</span> and <span class='code'>holochain</span>.</p>
                 <p>Depending on the OS, it expects to find either <span class='code'>hc-linux</span> and <span class='code'>holochain-linux</span> or <span class='code'>hc-darwin</span> and <span class='code'>holochain-darwin</span> in the application directory (the root of the repository during development).</p>
-                <p>For development you can either build those yourself or get them through Holonix like this:</p>              
+                <p>For development you can either build those yourself or get them through Holonix like this:</p>
     <pre>$ nix-shell https://holochain.love
     $ cp `which holochain` holochain-linux
     $ cp `which hc` hc-linux</pre>
@@ -179,7 +179,7 @@
               <v-card-title class="headline">Passphrase needed to unlock keystore</v-card-title>
               <v-divider></v-divider>
               <v-card-text>
-              
+
                 <v-text-field
                   v-model="passphrase"
                   :append-icon="show_passphrase ? 'mdi-eye' : 'mdi-eye-off'"
@@ -190,7 +190,7 @@
                   solo
                   @click:append="show_passphrase = !show_passphrase"
                 ></v-text-field>
-              
+
               </v-card-text>
               <v-divider></v-divider>
               <v-card-actions>
@@ -205,7 +205,7 @@
             <v-card>
               <v-card-title class="headline">Welcome to Holoscape and Holochain</v-card-title>
               <v-card-text>
-                
+
                 <v-stepper v-model="intro">
                   <v-stepper-header>
                     <v-stepper-step
@@ -277,7 +277,7 @@
                             context!
                           </p>
                           <p>
-                            We want to complete more testing and see additional real-world usage to find and remove bugs. 
+                            We want to complete more testing and see additional real-world usage to find and remove bugs.
                             In order to help develop and debug our network implementation, <a href="#" v-on:click="openExternal('https://blog.holochain.org/p/30079b6f-7733-40a6-9135-ac5b9d861b96')">Sim2h</a>
                             can be configured to store a centrally held log of all the data that is transmitted between nodes.
                             When needed, this feature will be used to analyse and diagnose potential problems.
@@ -298,14 +298,14 @@
                         </v-card-text>
                       </v-card>
                     </v-stepper-content>
-                  
-                    
+
+
                     <v-stepper-content
                       key="2-step"
                       step="3"
                     >
                     <v-card class="scroll" height="260px" flat>
-                      
+
                       <v-card-text>
                         <p>
                           This is it! You can go ahead and click <i>Finish setup</i> below.
@@ -325,9 +325,9 @@
                           </div>
                           <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
                             <label for="sim2h-url">Sim2h Switch-Board URL</label>
-                            <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="wss://sim2h.holochain.org:9000" value="wss://sim2h.holochain.org:9000" v-model="sim2h_url">
-                            <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='wss://sim2h.holochain.org:9000'">
-                              The default URL wss://sim2h.holochain.org points to a public pre-alpha test instance of the sim2h switch-board.
+                            <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="ws://public.sim2h.net:9000" value="ws://public.sim2h.net:9000" v-model="sim2h_url">
+                            <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='ws://public.sim2h.net:9000'">
+                              The default URL ws://public.sim2h.net points to a public pre-alpha test instance of the sim2h switch-board.
                             </small>
                           </div>
                           <div class="form-group" id="network-config-lib3h" v-if="network_type==='lib3h'">
@@ -342,7 +342,7 @@
                           </div>
                         </div>
                       </v-card-text>
-                    </v-card>  
+                    </v-card>
                     </v-stepper-content>
                   </v-stepper-items>
                 </v-stepper>
@@ -361,7 +361,7 @@
             </v-card>
           </v-dialog>
         </v-content>
-      </v-app>    
+      </v-app>
     </div>
   </div>
 
