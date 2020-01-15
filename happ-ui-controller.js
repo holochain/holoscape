@@ -1,4 +1,4 @@
-const { BrowserView, dialog, protocol, session, ipcMain } = require('electron')
+const { BrowserView, dialog, protocol, session, ipcMain, shell } = require('electron')
 const { ncp } = require('ncp')
 const fs = require('fs')
 const path = require('path')
@@ -271,6 +271,13 @@ class HappUiController {
         console.log('Created view. Loading', windowURL)
 
         view.webContents.loadURL(windowURL)
+
+        // Open <a href='' target='_blank'> with default system browser
+        view.webContents.on("new-window", function (event, url) {
+            event.preventDefault()
+            shell.openExternal(url)
+        })
+                
         //setupWindowDevProduction(view)
         let holoscape = this.holoscape
         view.on('close', (event) => {
