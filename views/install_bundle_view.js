@@ -89,7 +89,6 @@ ipcRenderer.on('conductor-call-set', () => {
           installed_instances: [],
           installed_dnas: [],
           installed_bridges: [],
-          used_ports: [],
           happ_index: [],
           selected_happ: undefined,
           expanded_happs: {},
@@ -509,10 +508,12 @@ ipcRenderer.on('conductor-call-set', () => {
         console.log('Bridge added')
     }
 
-    const nextMinPort = () => {
-        if(app.used_ports.length > 0) {
-            app.used_ports.sort()
-            return app.used_ports[app.used_ports.length -1] + 1
+    const nextMinPort = async () => {
+        const interfaces = await call('admin/interface/list')()
+        if (Array.isArray(interfaces) && interfaces.length > 0) {
+            const ports = []
+            interfaces.forEach(i => ports.push(i.driver.port))
+            return Math.max(...ports) + 1
         } else {
             return 10000
         }
@@ -531,8 +532,8 @@ ipcRenderer.on('conductor-call-set', () => {
         console.log(`Creating interface for ${ui.name}`)
         let id = `${ui.name}-interface`
         let type = 'websocket'
-        let port = await getPort({port: getPort.makeRange(nextMinPort(), 31000)})
-        app.used_ports.push(port)
+        let minPort = await nextMinPort()
+        let port = await getPort({port: getPort.makeRange(minPort, 31000)})
         await call('admin/interface/add')({id,admin,type,port})
 
         for(let ref of ui.instance_references) {
