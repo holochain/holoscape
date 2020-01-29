@@ -28,7 +28,11 @@ As a hApp developer:
 * You share the hApp bundle with your users
 
 But there is more...
-During development of your hApp and DNAiew_screenshot.png)
+During development of your hApp and DNAs, it would be nice to see what actually is going on in your DNA's source chain and which entries are held in the DHT.	During development of your hApp and DNAiew_screenshot.png)
+
+Holoscape as a debug view that shows state dumps and all Holochain core redux actions:	
+![](images/Debug_view_screenshot.png)
+
 (*so it doubles as a holoscope...*)
 
 ## Setup for development
