@@ -15,8 +15,8 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "deepmerge": "^4.2.2",
-    "electron": "^6.0.0",
-    "electron-packager": "^14.0.4",
+    "electron": "^8.1.1",
+    "electron-packager": "^14.2.1",
     "electron-webpack": "^2.7.4",
     "fibers": "^4.0.2",
     "sass": "^1.23.7",
