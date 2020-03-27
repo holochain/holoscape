@@ -325,8 +325,8 @@
                           </div>
                           <div class="form-group" id="network-config-sim2h" v-if="network_type==='sim2h'">
                             <label for="sim2h-url">Sim2h Switch-Board URL</label>
-                            <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" placeholder="ws://public.sim2h.net:9000" value="ws://public.sim2h.net:9000" v-model="sim2h_url">
-                            <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url=='ws://public.sim2h.net:9000'">
+                            <input type="input" class="form-control" id="sim2h-url" aria-describedby="sim2h-url-help" v-placeholder="sim2h_url_default" v-value="sim2h_url_default" v-model="sim2h_url">
+                            <small id="sim2h-url-help" class="form-text text-muted clearfix" v-if="sim2h_url==sim2h_url_default">
                               The default URL ws://public.sim2h.net points to a public pre-alpha test instance of the sim2h switch-board.
                             </small>
                           </div>
