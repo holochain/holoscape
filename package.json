@@ -1,6 +1,6 @@
 {
   "name": "holoscape",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A complete end-user deployment of a Holochain conductor with UI for administration and a run-time for hApp UIs.",
   "main": "main.js",
   "scripts": {
