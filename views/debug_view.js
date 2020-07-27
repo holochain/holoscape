@@ -117,12 +117,12 @@ ipcRenderer.on('conductor-call-set', () => {
                 text: 'Type',
                 align: 'left',
                 sortable: false,
-                value: 'entry_type',
+                value: 'header.entry_type',
             },
-            { text: 'Address', value: 'entry_address' },
+            { text: 'Address', value: 'header.entry_address' },
             { text: '', value: 'data-table-expand' },
-            { text: 'Timestamp', value: 'timestamp' },
-            { text: 'Provenances', value: 'provenances' },
+            { text: 'Timestamp', value: 'header.timestamp' },
+            { text: 'Provenances', value: 'header.provenances' },
           ],
           queueHeaders: [
             {
@@ -190,7 +190,7 @@ ipcRenderer.on('conductor-call-set', () => {
             call('debug/state_dump')({instance_id, source_chain: true, held_aspects: false, queued_holding_workflows: false})
               .then((dump) => {
                   //console.log("Got state dump: ", dump)
-                  Vue.set(app.sourceChains, instance_id, dump.source_chain)
+                  Vue.set(app.sourceChains, instance_id, dump.source_chain.map( i => i[0]))
                   //dump.source_chain = undefined
                   //Vue.set(app.stateDumps, instance_id, dump)
               })
