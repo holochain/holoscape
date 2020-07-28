@@ -56,12 +56,15 @@ let app = new Vue({
     methods: {
         showHappUi: (uiName) => {
             if(app.activeUI == uiName) {
-              return 
+              return
             }
             app.activeUI = uiName
             holoscape.hideViews()
             happUiController.showHappUi(uiName)
         },
+      showHappInstall: () => {
+        holoscape.showInstallFromFileWindow()
+      },
         showHappStore: () => {
           if(app.activeUI == "happ-store") {
             return 

@@ -59,7 +59,8 @@ module.exports = {
       }
 
       if (process.platform === "win32") {
-        run = spawn(path.join(__dirname, "./holochain.exe"), ["-c", "./conductor-config.toml"], {env:{...process.env, RUST_BACKTRACE: 1}})
+        // TODO: dont hardcode conductor-config
+        run = spawn(process.env.comspec, ["/c", "wsl", "holochain-linux", "-c", "/mnt/c/github/conductor-config.toml"], {env:{...process.env, RUST_BACKTRACE: 1}})
       } else if (process.platform === "darwin") {
         run = spawn(path.join(__dirname, "./holochain-darwin"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
       } else if (process.platform === "linux") {
@@ -71,7 +72,7 @@ module.exports = {
         {
           run = spawn(path.join(__dirname, "./holochain-linux"), ["-c", configPath], {env:{...process.env, RUST_BACKTRACE: 'full'}})
         }
-        
+
       }
       else {
         log('error', "unsupported platform: "+process.platform)
@@ -99,8 +100,10 @@ module.exports = {
     let holochain, hc
 
     if (process.platform === "win32") {
-      holochain = "./holochain.exe"
-      hc = "./hc.exe"
+      // holochain = "./holochain.exe"
+      // hc = "./hc.exe"
+      // TODO: check binaries on windows
+      return true;
     } else if (process.platform === "darwin") {
       holochain = "./holochain-darwin"
       hc = "./hc-darwin"

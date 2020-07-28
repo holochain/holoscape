@@ -7,8 +7,9 @@ const rootConfigPath = global.rootConfigPath
 function executablePath() {
     let executable;
     if (process.platform === "win32") {
-        executable = "./hc.exe"
-    } else if (process.platform === "darwin") {
+        return process.env.comspec;
+    } 
+    if (process.platform === "darwin") {
         executable = "./hc-darwin"
     } else if (process.platform === "linux") {
         executable = "./hc-linux"
@@ -20,10 +21,36 @@ function executablePath() {
     return path.join(__dirname, executable)
 }
 
+function win32Path(filePath) {
+    let fp = filePath.replace(/\\/g, "\\\\");
+    let wslparams = ["/c", "wsl", "wslpath", "-a", fp]
+    let { stdout, stderr, error } = spawnSync(
+      process.env.comspec,
+      wslparams,
+      {cwd: __dirname}
+    )
+    stderr = stderr? stderr.toString() : "";
+    stdout = stdout? stdout.toString() : "";
+    console.log("CLI wslpath: got results:")
+    console.log("stdout:", stdout)
+    console.log("stderr:", stderr)
+    fp = stdout.substring(0, stdout.length - 1); // remove 'return' char
+    return fp
+}
+
 module.exports = {
+    win32Path: (filePath) => {
+        return win32Path(filePath)
+    },
     hash: (filePath, properties) => {
         console.log("CLI: hashing file", filePath)
+        if (process.platform === "win32") {
+            filePath = win32Path(filePath)
+        }
         let params = ["hash", "--path", filePath]
+        if (process.platform === "win32") {
+            params.unshift("/c", "wsl", "hc-linux")
+        }
         if(properties) {
             for(let name in properties) {
                 params.push("--property")
@@ -31,12 +58,12 @@ module.exports = {
             }
         }
         let { stdout, stderr, error } = spawnSync(
-            executablePath(), 
+          executablePath(),
             params,
             {cwd: __dirname}
         )
-        stderr = stderr.toString()
-        stdout = stdout.toString()
+        stderr = stderr? stderr.toString() : "";
+        stdout = stdout? stdout.toString() : "";
         console.log("CLI: got results:")
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
@@ -47,13 +74,13 @@ module.exports = {
             console.log('Error executing hc:', error)
             return {error}
         }
-        
+
         if(stderr.length > 0) {
             error = stderr
-            console.log('Error executing hc:', error)
+            console.log('Error executing hc (stderr):', error)
             return {error}
         }
-        
+
         console.log(`hc stdout: ${JSON.stringify(stdout)}`)
         let lines = stdout.split('\n')
         let hash
