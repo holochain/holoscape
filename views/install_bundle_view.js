@@ -16,6 +16,7 @@ import Vuetify, {
     VProgressCircular,
 } from 'vuetify/lib'
 import { Ripple } from 'vuetify/lib/directives'
+import {win32Path} from './../cli'
 
 Vue.use(Vuetify,  {
     components: {
@@ -464,10 +465,14 @@ ipcRenderer.on('conductor-call-set', () => {
         }
 
         const dna_id = `${instance.name}-dna`
-        const path = instance.tempPath
-        console.log('Installing DNA', dna_id)
+        let path = instance.tempPath;
+        if (process.platform === 'win32') {
+          path = win32Path(instance.tempPath)
+        }
+        console.log('Installing DNA :' + dna_id)
         let properties = undefined
         console.log('PROPERTIES:', instance.dna_properties)
+      console.log('PATH:', path)
         if(instance.dna_properties) {
             let variables = {agent_id: agent_address}
             properties = interpolateProperties(instance.dna_properties, variables)
